@@ -1,101 +1,123 @@
-import Image from "next/image";
+import Link from 'next/link'
+import { Search, User } from 'lucide-react'
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+      <div className="min-h-screen bg-white">
+        <header className="bg-[#C4333B] text-white p-4">
+          <div className="container mx-auto flex justify-between items-center">
+            <Link href="/" className="text-2xl font-bold">Target</Link>
+            <nav>
+              <ul className="flex space-x-4">
+                <li><Link href="/categories">Categorie</Link></li>
+                <li><Link href="/sell">Vendi</Link></li>
+                <li><Link href="/about">Chi Siamo</Link></li>
+              </ul>
+            </nav>
+            <div className="flex space-x-4">
+              <Link href="/search"><Search /></Link>
+              <Link href="/account"><User /></Link>
+            </div>
+          </div>
+        </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+        <main>
+          <section className="bg-[#41978F] text-white py-20">
+            <div className="container mx-auto text-center">
+              <h1 className="text-4xl font-bold mb-4">Trova Tutto Ciò di Cui Hai Bisogno</h1>
+              <p className="mb-8">Scopri prodotti di qualità a prezzi convenienti</p>
+              <div className="max-w-2xl mx-auto relative">
+                <input
+                    type="text"
+                    placeholder="Cerca articoli..."
+                    className="w-full p-4 rounded-full text-black"
+                />
+                <button className="absolute right-2 top-2 bg-[#C4333B] text-white p-2 rounded-full">
+                  <Search />
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section className="py-16">
+            <div className="container mx-auto">
+              <h2 className="text-3xl font-bold mb-8 text-center text-[#C4333B]">Categorie in Evidenza</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                {['Arredamento', 'Elettronica', 'Abbigliamento', 'Libri'].map((category) => (
+                    <div key={category} className="bg-[#41978F] text-white p-6 rounded-lg text-center">
+                      <h3 className="text-xl font-semibold">{category}</h3>
+                    </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="py-16 bg-gray-100">
+            <div className="container mx-auto">
+              <h2 className="text-3xl font-bold mb-8 text-center text-[#C4333B]">Articoli Popolari</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {[1, 2, 3].map((item) => (
+                    <div key={item} className="bg-white p-6 rounded-lg shadow-md">
+                      <div className="bg-gray-300 h-48 mb-4 rounded"></div>
+                      <h3 className="text-xl font-semibold mb-2">Articolo Vintage {item}</h3>
+                      <p className="text-gray-600 mb-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[#C4333B] font-bold">€29,99</span>
+                        <button className="bg-[#41978F] text-white px-4 py-2 rounded">Visualizza</button>
+                      </div>
+                    </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="py-16 bg-[#C4333B] text-white">
+            <div className="container mx-auto text-center">
+              <h2 className="text-3xl font-bold mb-4">Acquista Ora!</h2>
+              <p className="mb-8">Esplora la nostra vasta gamma di prodotti. Qualità e valore in ogni acquisto.</p>
+              <button className="bg-white text-[#C4333B] px-8 py-3 rounded-full font-bold text-lg">Inizia lo Shopping</button>
+            </div>
+          </section>
+        </main>
+
+        <footer className="bg-gray-800 text-white py-8">
+          <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <h3 className="text-xl font-bold mb-4">Target</h3>
+              <p>Il tuo negozio per prodotti di qualità.</p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Link Rapidi</h4>
+              <ul className="space-y-2">
+                <li><Link href="/about">Chi Siamo</Link></li>
+                <li><Link href="/contact">Contatti</Link></li>
+                <li><Link href="/faq">FAQ</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Categorie</h4>
+              <ul className="space-y-2">
+                <li><Link href="/category/furniture">Arredamento</Link></li>
+                <li><Link href="/category/electronics">Elettronica</Link></li>
+                <li><Link href="/category/clothing">Abbigliamento</Link></li>
+                <li><Link href="/category/books">Libri</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Seguici</h4>
+              <div className="flex space-x-4">
+                <a href="#" className="hover:text-[#41978F]">Facebook</a>
+                <a href="#" className="hover:text-[#41978F]">Twitter</a>
+                <a href="#" className="hover:text-[#41978F]">Instagram</a>
+              </div>
+            </div>
+          </div>
+          <div className="container mx-auto mt-8 pt-8 border-t border-gray-700 text-center">
+            <p>&copy; 2023 Target. Tutti i diritti riservati.</p>
+          </div>
+        </footer>
+      </div>
+  )
 }
+
+
