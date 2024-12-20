@@ -12,11 +12,12 @@ export default function Home() {
                 <li><Link href="/categories">Categorie</Link></li>
                 <li><Link href="/sell">Vendi</Link></li>
                 <li><Link href="/about">Chi Siamo</Link></li>
+
               </ul>
             </nav>
             <div className="flex space-x-4">
               <Link href="/search"><Search /></Link>
-              <Link href="/account"><User /></Link>
+              <Link href="/login"><User /></Link>
             </div>
           </div>
         </header>
@@ -92,6 +93,7 @@ export default function Home() {
                 <li><Link href="/about">Chi Siamo</Link></li>
                 <li><Link href="/contact">Contatti</Link></li>
                 <li><Link href="/faq">FAQ</Link></li>
+                <li><Link href="/login">Login</Link></li>
               </ul>
             </div>
             <div>
@@ -119,5 +121,3 @@ export default function Home() {
       </div>
   )
 }
-
-
