@@ -1,0 +1,194 @@
+[debug] [2024-12-23T09:30:27.359Z] ----------------------------------------------------------------------
+[debug] [2024-12-23T09:30:27.362Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\renato\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start
+[debug] [2024-12-23T09:30:27.362Z] CLI Version:   13.29.1
+[debug] [2024-12-23T09:30:27.362Z] Platform:      win32
+[debug] [2024-12-23T09:30:27.362Z] Node Version:  v22.12.0
+[debug] [2024-12-23T09:30:27.363Z] Time:          Mon Dec 23 2024 10:30:27 GMT+0100 (Ora standard dell’Europa centrale)
+[debug] [2024-12-23T09:30:27.363Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-12-23T09:30:27.468Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-12-23T09:30:27.469Z] > authorizing via signed-in user (mancinorenato381@gmail.com)
+[info] i  emulators: Starting emulators: auth {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth"}}
+[debug] [2024-12-23T09:30:27.479Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2024-12-23T09:30:27.479Z] [auth] Authentication Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2024-12-23T09:30:27.479Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2024-12-23T09:30:27.483Z] [hub] writing locator at C:\Users\renato\AppData\Local\Temp\hub-target-8b44c.json
+[info] i  ui: downloading ui-v1.14.0.zip... {"metadata":{"emulator":{"name":"ui"},"message":"downloading ui-v1.14.0.zip..."}}
+[debug] [2024-12-23T09:30:32.548Z] >>> [apiv2][query] GET https://storage.googleapis.com/firebase-preview-drop/emulator/ui-v1.14.0.zip 
+[debug] [2024-12-23T09:30:32.766Z] <<< [apiv2][status] GET https://storage.googleapis.com/firebase-preview-drop/emulator/ui-v1.14.0.zip 200
+[debug] [2024-12-23T09:30:32.767Z] <<< [apiv2][body] GET https://storage.googleapis.com/firebase-preview-drop/emulator/ui-v1.14.0.zip [stream]
+[debug] [2024-12-23T09:30:33.478Z] Data is 3615311
+[debug] [2024-12-23T09:30:33.478Z] [unzip] Entry: client/ (compressed_size=0 bytes, uncompressed_size=0 bytes)
+[debug] [2024-12-23T09:30:33.478Z] [unzip] Processing entry: client\
+[debug] [2024-12-23T09:30:33.478Z] [unzip] mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\
+[debug] [2024-12-23T09:30:33.479Z] [unzip] Entry: client/favicon-16x16.png (compressed_size=293 bytes, uncompressed_size=293 bytes)
+[debug] [2024-12-23T09:30:33.479Z] [unzip] Processing entry: client\favicon-16x16.png
+[debug] [2024-12-23T09:30:33.479Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client
+[debug] [2024-12-23T09:30:33.480Z] [unzip] Writing file: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\favicon-16x16.png
+[debug] [2024-12-23T09:30:33.480Z] [unzip] Entry: client/safari-pinned-tab.svg (compressed_size=1433 bytes, uncompressed_size=2611 bytes)
+[debug] [2024-12-23T09:30:33.481Z] [unzip] Processing entry: client\safari-pinned-tab.svg
+[debug] [2024-12-23T09:30:33.481Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client
+[debug] [2024-12-23T09:30:33.481Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\safari-pinned-tab.svg
+[debug] [2024-12-23T09:30:33.484Z] [unzip] Entry: client/favicon.ico (compressed_size=2933 bytes, uncompressed_size=13294 bytes)
+[debug] [2024-12-23T09:30:33.484Z] [unzip] Processing entry: client\favicon.ico
+[debug] [2024-12-23T09:30:33.484Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client
+[debug] [2024-12-23T09:30:33.485Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\favicon.ico
+[debug] [2024-12-23T09:30:33.487Z] [unzip] Entry: client/index.html (compressed_size=1363 bytes, uncompressed_size=3071 bytes)
+[debug] [2024-12-23T09:30:33.487Z] [unzip] Processing entry: client\index.html
+[debug] [2024-12-23T09:30:33.487Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client
+[debug] [2024-12-23T09:30:33.487Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\index.html
+[debug] [2024-12-23T09:30:33.488Z] [unzip] Entry: client/android-chrome-192x192.png (compressed_size=2684 bytes, uncompressed_size=2684 bytes)
+[debug] [2024-12-23T09:30:33.488Z] [unzip] Processing entry: client\android-chrome-192x192.png
+[debug] [2024-12-23T09:30:33.488Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client
+[debug] [2024-12-23T09:30:33.489Z] [unzip] Writing file: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\android-chrome-192x192.png
+[debug] [2024-12-23T09:30:33.489Z] [unzip] Entry: client/apple-touch-icon.png (compressed_size=2123 bytes, uncompressed_size=2152 bytes)
+[debug] [2024-12-23T09:30:33.489Z] [unzip] Processing entry: client\apple-touch-icon.png
+[debug] [2024-12-23T09:30:33.489Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client
+[debug] [2024-12-23T09:30:33.490Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\apple-touch-icon.png
+[debug] [2024-12-23T09:30:33.490Z] [unzip] Entry: client/android-chrome-512x512.png (compressed_size=5369 bytes, uncompressed_size=5411 bytes)
+[debug] [2024-12-23T09:30:33.490Z] [unzip] Processing entry: client\android-chrome-512x512.png
+[debug] [2024-12-23T09:30:33.490Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client
+[debug] [2024-12-23T09:30:33.490Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\android-chrome-512x512.png
+[debug] [2024-12-23T09:30:33.491Z] [unzip] Entry: client/manifest.json (compressed_size=245 bytes, uncompressed_size=551 bytes)
+[debug] [2024-12-23T09:30:33.491Z] [unzip] Processing entry: client\manifest.json
+[debug] [2024-12-23T09:30:33.491Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client
+[debug] [2024-12-23T09:30:33.492Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\manifest.json
+[debug] [2024-12-23T09:30:33.492Z] [unzip] Entry: client/robots.txt (compressed_size=26 bytes, uncompressed_size=26 bytes)
+[debug] [2024-12-23T09:30:33.492Z] [unzip] Processing entry: client\robots.txt
+[debug] [2024-12-23T09:30:33.492Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client
+[debug] [2024-12-23T09:30:33.493Z] [unzip] Writing file: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\robots.txt
+[debug] [2024-12-23T09:30:33.493Z] [unzip] Entry: client/mstile-150x150.png (compressed_size=2034 bytes, uncompressed_size=2034 bytes)
+[debug] [2024-12-23T09:30:33.493Z] [unzip] Processing entry: client\mstile-150x150.png
+[debug] [2024-12-23T09:30:33.493Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client
+[debug] [2024-12-23T09:30:33.494Z] [unzip] Writing file: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\mstile-150x150.png
+[debug] [2024-12-23T09:30:33.494Z] [unzip] Entry: client/assets/ (compressed_size=0 bytes, uncompressed_size=0 bytes)
+[debug] [2024-12-23T09:30:33.494Z] [unzip] Processing entry: client\assets\
+[debug] [2024-12-23T09:30:33.494Z] [unzip] mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\
+[debug] [2024-12-23T09:30:33.494Z] [unzip] Entry: client/assets/index-ClZTY_JS.js.map (compressed_size=2328270 bytes, uncompressed_size=9947004 bytes)
+[debug] [2024-12-23T09:30:33.494Z] [unzip] Processing entry: client\assets\index-ClZTY_JS.js.map
+[debug] [2024-12-23T09:30:33.494Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets
+[debug] [2024-12-23T09:30:33.495Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\index-ClZTY_JS.js.map
+[debug] [2024-12-23T09:30:33.530Z] [unzip] Entry: client/assets/index-ClZTY_JS.js (compressed_size=567195 bytes, uncompressed_size=2035940 bytes)
+[debug] [2024-12-23T09:30:33.530Z] [unzip] Processing entry: client\assets\index-ClZTY_JS.js
+[debug] [2024-12-23T09:30:33.530Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets
+[debug] [2024-12-23T09:30:33.530Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\index-ClZTY_JS.js
+[debug] [2024-12-23T09:30:33.539Z] [unzip] Entry: client/assets/index-BdgySamB.css (compressed_size=35979 bytes, uncompressed_size=298654 bytes)
+[debug] [2024-12-23T09:30:33.539Z] [unzip] Processing entry: client\assets\index-BdgySamB.css
+[debug] [2024-12-23T09:30:33.539Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets
+[debug] [2024-12-23T09:30:33.539Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\index-BdgySamB.css
+[debug] [2024-12-23T09:30:33.541Z] [unzip] Entry: client/assets/extensions/ (compressed_size=0 bytes, uncompressed_size=0 bytes)
+[debug] [2024-12-23T09:30:33.541Z] [unzip] Processing entry: client\assets\extensions\
+[debug] [2024-12-23T09:30:33.541Z] [unzip] mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\extensions\
+[debug] [2024-12-23T09:30:33.541Z] [unzip] Entry: client/assets/extensions/default-extension.png (compressed_size=1646 bytes, uncompressed_size=1657 bytes)
+[debug] [2024-12-23T09:30:33.541Z] [unzip] Processing entry: client\assets\extensions\default-extension.png
+[debug] [2024-12-23T09:30:33.541Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\extensions
+[debug] [2024-12-23T09:30:33.542Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\extensions\default-extension.png
+[debug] [2024-12-23T09:30:33.542Z] [unzip] Entry: client/assets/img/ (compressed_size=0 bytes, uncompressed_size=0 bytes)
+[debug] [2024-12-23T09:30:33.542Z] [unzip] Processing entry: client\assets\img\
+[debug] [2024-12-23T09:30:33.542Z] [unzip] mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\img\
+[debug] [2024-12-23T09:30:33.543Z] [unzip] Entry: client/assets/img/database.png (compressed_size=29449 bytes, uncompressed_size=29988 bytes)
+[debug] [2024-12-23T09:30:33.543Z] [unzip] Processing entry: client\assets\img\database.png
+[debug] [2024-12-23T09:30:33.543Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\img
+[debug] [2024-12-23T09:30:33.543Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\img\database.png
+[debug] [2024-12-23T09:30:33.544Z] [unzip] Entry: client/assets/provider-icons/ (compressed_size=0 bytes, uncompressed_size=0 bytes)
+[debug] [2024-12-23T09:30:33.544Z] [unzip] Processing entry: client\assets\provider-icons\
+[debug] [2024-12-23T09:30:33.544Z] [unzip] mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons\
+[debug] [2024-12-23T09:30:33.544Z] [unzip] Entry: client/assets/provider-icons/auth_service_saml.svg (compressed_size=575 bytes, uncompressed_size=1226 bytes)
+[debug] [2024-12-23T09:30:33.544Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_saml.svg
+[debug] [2024-12-23T09:30:33.544Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons
+[debug] [2024-12-23T09:30:33.545Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons\auth_service_saml.svg
+[debug] [2024-12-23T09:30:33.545Z] [unzip] Entry: client/assets/provider-icons/auth_service_phone.svg (compressed_size=261 bytes, uncompressed_size=414 bytes)
+[debug] [2024-12-23T09:30:33.545Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_phone.svg
+[debug] [2024-12-23T09:30:33.545Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons
+[debug] [2024-12-23T09:30:33.546Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons\auth_service_phone.svg
+[debug] [2024-12-23T09:30:33.546Z] [unzip] Entry: client/assets/provider-icons/auth_service_facebook.svg (compressed_size=289 bytes, uncompressed_size=457 bytes)
+[debug] [2024-12-23T09:30:33.546Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_facebook.svg
+[debug] [2024-12-23T09:30:33.546Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons
+[debug] [2024-12-23T09:30:33.547Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons\auth_service_facebook.svg
+[debug] [2024-12-23T09:30:33.547Z] [unzip] Entry: client/assets/provider-icons/auth_service_game_center.svg (compressed_size=991 bytes, uncompressed_size=3921 bytes)
+[debug] [2024-12-23T09:30:33.547Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_game_center.svg
+[debug] [2024-12-23T09:30:33.547Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons
+[debug] [2024-12-23T09:30:33.548Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons\auth_service_game_center.svg
+[debug] [2024-12-23T09:30:33.548Z] [unzip] Entry: client/assets/provider-icons/auth_service_apple.svg (compressed_size=230 bytes, uncompressed_size=334 bytes)
+[debug] [2024-12-23T09:30:33.548Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_apple.svg
+[debug] [2024-12-23T09:30:33.548Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons
+[debug] [2024-12-23T09:30:33.549Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons\auth_service_apple.svg
+[debug] [2024-12-23T09:30:33.549Z] [unzip] Entry: client/assets/provider-icons/auth_service_github.svg (compressed_size=466 bytes, uncompressed_size=838 bytes)
+[debug] [2024-12-23T09:30:33.549Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_github.svg
+[debug] [2024-12-23T09:30:33.549Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons
+[debug] [2024-12-23T09:30:33.550Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons\auth_service_github.svg
+[debug] [2024-12-23T09:30:33.550Z] [unzip] Entry: client/assets/provider-icons/auth_service_mslive.svg (compressed_size=203 bytes, uncompressed_size=378 bytes)
+[debug] [2024-12-23T09:30:33.550Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_mslive.svg
+[debug] [2024-12-23T09:30:33.550Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons
+[debug] [2024-12-23T09:30:33.551Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons\auth_service_mslive.svg
+[debug] [2024-12-23T09:30:33.551Z] [unzip] Entry: client/assets/provider-icons/auth_service_yahoo.svg (compressed_size=577 bytes, uncompressed_size=1182 bytes)
+[debug] [2024-12-23T09:30:33.551Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_yahoo.svg
+[debug] [2024-12-23T09:30:33.551Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons
+[debug] [2024-12-23T09:30:33.552Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons\auth_service_yahoo.svg
+[debug] [2024-12-23T09:30:33.552Z] [unzip] Entry: client/assets/provider-icons/auth_service_twitter.svg (compressed_size=444 bytes, uncompressed_size=751 bytes)
+[debug] [2024-12-23T09:30:33.552Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_twitter.svg
+[debug] [2024-12-23T09:30:33.552Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons
+[debug] [2024-12-23T09:30:33.552Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons\auth_service_twitter.svg
+[debug] [2024-12-23T09:30:33.553Z] [unzip] Entry: client/assets/provider-icons/auth_service_play_games.svg (compressed_size=565 bytes, uncompressed_size=1173 bytes)
+[debug] [2024-12-23T09:30:33.553Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_play_games.svg
+[debug] [2024-12-23T09:30:33.553Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons
+[debug] [2024-12-23T09:30:33.553Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons\auth_service_play_games.svg
+[debug] [2024-12-23T09:30:33.554Z] [unzip] Entry: client/assets/provider-icons/auth_service_email.svg (compressed_size=228 bytes, uncompressed_size=326 bytes)
+[debug] [2024-12-23T09:30:33.554Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_email.svg
+[debug] [2024-12-23T09:30:33.554Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons
+[debug] [2024-12-23T09:30:33.555Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons\auth_service_email.svg
+[debug] [2024-12-23T09:30:33.555Z] [unzip] Entry: client/assets/provider-icons/auth_service_google.svg (compressed_size=409 bytes, uncompressed_size=720 bytes)
+[debug] [2024-12-23T09:30:33.555Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_google.svg
+[debug] [2024-12-23T09:30:33.555Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons
+[debug] [2024-12-23T09:30:33.556Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons\auth_service_google.svg
+[debug] [2024-12-23T09:30:33.556Z] [unzip] Entry: client/assets/provider-icons/auth_service_oidc.svg (compressed_size=414 bytes, uncompressed_size=858 bytes)
+[debug] [2024-12-23T09:30:33.556Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_oidc.svg
+[debug] [2024-12-23T09:30:33.556Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons
+[debug] [2024-12-23T09:30:33.557Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\assets\provider-icons\auth_service_oidc.svg
+[debug] [2024-12-23T09:30:33.557Z] [unzip] Entry: client/browserconfig.xml (compressed_size=491 bytes, uncompressed_size=822 bytes)
+[debug] [2024-12-23T09:30:33.557Z] [unzip] Processing entry: client\browserconfig.xml
+[debug] [2024-12-23T09:30:33.557Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client
+[debug] [2024-12-23T09:30:33.557Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\browserconfig.xml
+[debug] [2024-12-23T09:30:33.558Z] [unzip] Entry: client/favicon-32x32.png (compressed_size=475 bytes, uncompressed_size=475 bytes)
+[debug] [2024-12-23T09:30:33.558Z] [unzip] Processing entry: client\favicon-32x32.png
+[debug] [2024-12-23T09:30:33.558Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client
+[debug] [2024-12-23T09:30:33.558Z] [unzip] Writing file: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\client\favicon-32x32.png
+[debug] [2024-12-23T09:30:33.559Z] [unzip] Entry: server/ (compressed_size=0 bytes, uncompressed_size=0 bytes)
+[debug] [2024-12-23T09:30:33.559Z] [unzip] Processing entry: server\
+[debug] [2024-12-23T09:30:33.559Z] [unzip] mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\server\
+[debug] [2024-12-23T09:30:33.559Z] [unzip] Entry: server/server.mjs.map (compressed_size=296496 bytes, uncompressed_size=1355667 bytes)
+[debug] [2024-12-23T09:30:33.559Z] [unzip] Processing entry: server\server.mjs.map
+[debug] [2024-12-23T09:30:33.559Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\server
+[debug] [2024-12-23T09:30:33.560Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\server\server.mjs.map
+[debug] [2024-12-23T09:30:33.566Z] [unzip] Entry: server/server.mjs (compressed_size=315701 bytes, uncompressed_size=1172682 bytes)
+[debug] [2024-12-23T09:30:33.566Z] [unzip] Processing entry: server\server.mjs
+[debug] [2024-12-23T09:30:33.566Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\server
+[debug] [2024-12-23T09:30:33.566Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\server\server.mjs
+[debug] [2024-12-23T09:30:33.570Z] [unzip] Entry: server/assets/ (compressed_size=0 bytes, uncompressed_size=0 bytes)
+[debug] [2024-12-23T09:30:33.570Z] [unzip] Processing entry: server\assets\
+[debug] [2024-12-23T09:30:33.570Z] [unzip] mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\server\assets\
+[debug] [2024-12-23T09:30:33.571Z] [unzip] Entry: server/assets/multipart-parser-DGCUZdXu.mjs.map (compressed_size=4791 bytes, uncompressed_size=17918 bytes)
+[debug] [2024-12-23T09:30:33.571Z] [unzip] Processing entry: server\assets\multipart-parser-DGCUZdXu.mjs.map
+[debug] [2024-12-23T09:30:33.571Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\server\assets
+[debug] [2024-12-23T09:30:33.571Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\server\assets\multipart-parser-DGCUZdXu.mjs.map
+[debug] [2024-12-23T09:30:33.572Z] [unzip] Entry: server/assets/multipart-parser-DGCUZdXu.mjs (compressed_size=2621 bytes, uncompressed_size=10390 bytes)
+[debug] [2024-12-23T09:30:33.572Z] [unzip] Processing entry: server\assets\multipart-parser-DGCUZdXu.mjs
+[debug] [2024-12-23T09:30:33.572Z] [unzip] else mkdir: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\server\assets
+[debug] [2024-12-23T09:30:33.572Z] [unzip] deflating: C:\Users\renato\.cache\firebase\emulators\ui-v1.14.0\server\assets\multipart-parser-DGCUZdXu.mjs
+[debug] [2024-12-23T09:30:33.578Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: connect ECONNREFUSED ::1:40001. If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://127.0.0.1:4000/               │
+└─────────────────────────────────────────────────────────────┘
+
+┌────────────────┬────────────────┬────────────────────────────┐
+│ Emulator       │ Host:Port      │ View in Emulator UI        │
+├────────────────┼────────────────┼────────────────────────────┤
+│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth │
+└────────────────┴────────────────┴────────────────────────────┘
+  Emulator Hub running at 127.0.0.1:4400
+  Other reserved ports: 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 

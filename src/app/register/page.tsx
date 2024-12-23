@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { auth } from '@/lib/firebase'
 import PasswordStrengthMeter from '../components/PasswordStrengthMeter'
 
 export default function RegisterPage() {
@@ -64,9 +66,14 @@ export default function RegisterPage() {
         e.preventDefault()
         if (validateForm()) {
             setIsSubmitting(true)
-            await new Promise(resolve => setTimeout(resolve, 1500))
-            console.log('Modulo inviato:', formData)
-            router.push('/login')
+            try {
+                await createUserWithEmailAndPassword(auth, formData.email, formData.password)
+                alert("Registration successful!")
+                router.push('/login')
+            } catch (error) {
+                console.error("Registration Error:", error)
+                alert("Error during registration. Please try again.")
+            }
         }
     }
 
@@ -140,34 +147,19 @@ export default function RegisterPage() {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#C4333B] hover:bg-[#A12D34] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#C4333B] transition duration-150 ease-in-out ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#C4333B] hover:bg-[#A12D34] focus:outline-none focus:ring-2 focus:ring-[#C4333B] focus:ring-offset-2 transition-all duration-200`}
                             >
                                 {isSubmitting ? 'Registrazione in corso...' : 'Registrati'}
                             </button>
                         </div>
                     </form>
 
-                    <div className="mt-6">
-                        <div className="relative">
-                            <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-gray-300" />
-                            </div>
-                            <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
-                  Hai già un account?
-                </span>
-                            </div>
-                        </div>
-
-                        <div className="mt-6">
-                            <Link
-                                href="/login"
-                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-[#41978F] bg-gray-50 hover:bg-gray-100 transition duration-150 ease-in-out"
-                            >
-                                Accedi
-                            </Link>
-                        </div>
-                    </div>
+                    <p className="mt-2 text-center text-sm text-gray-600">
+                        Hai già un account?{' '}
+                        <Link href="/login" className="font-medium text-[#41978F] hover:text-[#357f78]">
+                            Accedi
+                        </Link>
+                    </p>
                 </div>
             </motion.div>
         </div>

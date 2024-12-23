@@ -3,20 +3,37 @@
 import { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { useFormValidation } from '@/hooks/use-form-validation'
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import { auth } from "@/lib/firebase";
 
 export default function LoginForm() {
     const [showPassword, setShowPassword] = useState(false)
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
 
     const emailError = useFormValidation(email, { required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ })
     const passwordError = useFormValidation(password, { required: true, minLength: 8 })
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+
+        if (!emailError && !passwordError) {
+            try {
+                await signInWithEmailAndPassword(auth, email, password)
+                alert("Login successful!")
+                // Redirect to a protected page or dashboard here
+            } catch (error) {
+                console.error("Login Error:", error)
+                alert("Error during login. Please try again.")
+            }
+        }
+    }
 
     return (
         <div className="bg-white rounded-lg shadow-2xl overflow-hidden">
             <div className="px-6 py-8">
                 <h2 className="text-3xl font-bold text-center text-[#C4333B] mb-6">Target</h2>
-                <form className="space-y-6">
+                <form className="space-y-6" onSubmit={handleSubmit}>
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                             Email Address
