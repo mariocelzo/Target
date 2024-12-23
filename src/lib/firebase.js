@@ -1,9 +1,10 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
-import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import { getFirestore, connectFirestoreEmulator, enableIndexedDbPersistence } from "firebase/firestore";
 import { getStorage, connectStorageEmulator, ref, uploadBytes, getDownloadURL, uploadBytesResumable, deleteObject } from "firebase/storage";
 import { getAnalytics } from "firebase/analytics";
 import { collection, addDoc } from "firebase/firestore";
+import dynamic from "next/dynamic";
 
 // Configurazione Firebase
 const firebaseConfig = {
@@ -20,20 +21,32 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Inizializza Analytics (solo lato client)
-if (typeof window !== 'undefined') {
-    getAnalytics(app);
+const isClient = typeof window !== "undefined";
+if (isClient) {
+    const getAnalyticsDynamic = dynamic(() => Promise.resolve(getAnalytics(app)), { ssr: false });
+    getAnalyticsDynamic();
 }
 
-// Inizializza i servizi di Firebase
+// Inizializza i servizi Firebase
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// Emulatori per sviluppo locale
-if (process.env.NODE_ENV === 'development') {
-    connectAuthEmulator(auth, 'http://localhost:9099');
-    connectFirestoreEmulator(db, 'localhost', 8080);
-    connectStorageEmulator(storage, 'localhost', 9199);
+// Configura gli emulatori per sviluppo locale
+if (process.env.NODE_ENV === "development") {
+    console.log("Connettendo agli emulatori Firebase...");
+    connectAuthEmulator(auth, "http://localhost:9099");
+    connectFirestoreEmulator(db, "localhost", 9150); // Usa la porta corretta qui
+    connectStorageEmulator(storage, "localhost", 9199);
+
+    // Abilita persistenza offline per Firestore
+    enableIndexedDbPersistence(db).catch((error) => {
+        if (error.code === "failed-precondition") {
+            console.error("Persistenza offline non abilitata: più schede aperte.");
+        } else if (error.code === "unimplemented") {
+            console.error("Il browser non supporta la persistenza offline.");
+        }
+    });
 }
 
 // Funzione per caricare immagini su Firebase Storage
@@ -43,16 +56,14 @@ export const uploadImage = async (file, userId) => {
             throw new Error("Nessun file selezionato.");
         }
 
-        // Verifica che il file sia un'immagine (opzionale)
-        const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        const validTypes = ["image/jpeg", "image/png", "image/gif"];
         if (!validTypes.includes(file.type)) {
             throw new Error("Formato file non supportato. Usa JPG, PNG o GIF.");
         }
 
-        // Crea un riferimento all'immagine in Storage
         const storageRef = ref(storage, `images/${userId}/${Date.now()}_${file.name}`);
-        await uploadBytes(storageRef, file); // Carica l'immagine
-        const url = await getDownloadURL(storageRef); // Ottieni l'URL pubblico
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
         return url;
     } catch (error) {
         console.error("Errore durante il caricamento dell'immagine:", error);
@@ -60,7 +71,7 @@ export const uploadImage = async (file, userId) => {
     }
 };
 
-// Funzione per caricare un'immagine con stato di avanzamento (opzionale)
+// Funzione per caricare un'immagine con stato di avanzamento
 export const uploadImageWithProgress = async (file, userId) => {
     try {
         if (!file) {
@@ -70,18 +81,18 @@ export const uploadImageWithProgress = async (file, userId) => {
         const storageRef = ref(storage, `images/${userId}/${Date.now()}_${file.name}`);
         const uploadTask = uploadBytesResumable(storageRef, file);
 
-        // Gestione della progressione
-        uploadTask.on('state_changed',
+        uploadTask.on(
+            "state_changed",
             (snapshot) => {
                 const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log('Progress: ' + progress + '%');
+                console.log(`Caricamento: ${progress.toFixed(2)}%`);
             },
             (error) => {
                 console.error("Errore durante il caricamento:", error);
             },
             () => {
                 getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                    console.log('File disponibile a:', downloadURL);
+                    console.log("File disponibile a:", downloadURL);
                 });
             }
         );
@@ -91,26 +102,26 @@ export const uploadImageWithProgress = async (file, userId) => {
     }
 };
 
-// Funzione per salvare un articolo nel database Firestore
+// Funzione per salvare un articolo in Firestore
 export const addArticle = async (articleData) => {
     try {
         const docRef = await addDoc(collection(db, "marketplace"), articleData);
-        return docRef.id; // Restituisce l'ID del documento appena creato
+        return docRef.id;
     } catch (error) {
         console.error("Errore durante il salvataggio dell'articolo:", error);
         throw new Error("Impossibile salvare l'articolo. Riprova.");
     }
 };
 
-// Funzione per ottenere l'utente attualmente autenticato
+// Funzione per ottenere l'utente autenticato
 export const getCurrentUser = () => {
-    return auth.currentUser; // Restituisce l'utente autenticato o null
+    return auth.currentUser || null;
 };
 
 // Funzione per eliminare un'immagine da Firebase Storage
-export const deleteImage = async (imageUrl) => {
+export const deleteImage = async (imagePath) => {
     try {
-        const imageRef = ref(storage, imageUrl); // Ottieni il riferimento all'immagine
+        const imageRef = ref(storage, imagePath);
         await deleteObject(imageRef);
         console.log("Immagine eliminata con successo.");
     } catch (error) {

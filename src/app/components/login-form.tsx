@@ -4,9 +4,11 @@ import { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { useFormValidation } from '@/hooks/use-form-validation'
 import { signInWithEmailAndPassword } from 'firebase/auth'
-import { auth } from "@/lib/firebase";
+import { auth } from "@/lib/firebase"
+import { useRouter } from "next/navigation" // Usa il router di Next.js (anziché window.location.href)
 
 export default function LoginForm() {
+    const router = useRouter(); // Inizializza il router
     const [showPassword, setShowPassword] = useState(false)
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -21,7 +23,7 @@ export default function LoginForm() {
             try {
                 await signInWithEmailAndPassword(auth, email, password)
                 alert("Login successful!")
-                // Redirect to a protected page or dashboard here
+                router.push('/user-area') // Usa il router per il reindirizzamento
             } catch (error) {
                 console.error("Login Error:", error)
                 alert("Error during login. Please try again.")

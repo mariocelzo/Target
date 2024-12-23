@@ -1,0 +1,15 @@
+17:11:36.006 [NamespaceSystem-akka.actor.default-dispatcher-4] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
+17:11:36.094 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9000
+17:11:39.360 [NamespaceSystem-akka.actor.default-dispatcher-4] INFO com.firebase.core.namespace.NamespaceActor - target-b0acb-default-rtdb successfully activated FBKV (SurveyIdle(0)) wait: 69ms, init: 0ms
+17:11:39.391 [NamespaceSystem-blocking-namespace-operation-dispatcher-6] INFO com.firebase.core.namespace.StateManager - Namespace target-b0acb-default-rtdb status Active to Active
+17:15:43.993 [FirebaseWorkerPool-1-1] WARN com.firebase.core.persistence.backend.dummy.EmulatorMetadataPersistence - Multiple projectIds are not recommended in single project mode. Requested 
+namespace target-b0acb, but the emulator is configured for target-b0acb-default-rtdb. To 
+opt-out of single project mode add/set the singleProjectMode: false property in 
+the firebase.json emulators config. 
+17:15:44.006 [NamespaceSystem-akka.actor.default-dispatcher-8] INFO com.firebase.core.namespace.NamespaceActor - target-b0acb successfully activated FBKV (SurveyIdle(0)) wait: 2ms, init: 0ms
+18:04:23.920 [NamespaceSystem-blocking-namespace-operation-dispatcher-30] INFO com.firebase.core.namespace.StateManager - Namespace target-b0acb-default-rtdb status Active to Active
+19:28:47.122 [Thread-0] INFO com.firebase.server.forge.App$ - Attempting graceful shutdown.
+19:28:47.135 [NamespaceSystem-akka.actor.default-dispatcher-43] INFO com.firebase.core.namespace.Terminator$Terminator - 2 actors left to terminate: target-b0acb, target-b0acb-default-rtdb
+19:28:47.145 [NamespaceSystem-akka.actor.default-dispatcher-48] INFO com.firebase.core.namespace.NamespaceActor - stopped namespace actor for target-b0acb-default-rtdb
+19:28:47.146 [NamespaceSystem-akka.actor.default-dispatcher-43] INFO com.firebase.core.namespace.NamespaceActor - stopped namespace actor for target-b0acb
+19:28:47.148 [Thread-0] INFO com.firebase.server.forge.App$ - Graceful shutdown complete.
