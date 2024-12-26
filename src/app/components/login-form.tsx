@@ -24,8 +24,12 @@ export default function LoginForm() {
         try {
             await signInWithEmailAndPassword(auth, email, password)
             router.push('/user-area') // Reindirizza alla pagina dell'utente dopo il login
-        } catch (err: any) {
-            setError('Credenziali non valide. Riprova.')
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message) // Usa il messaggio dell'errore
+            } else {
+                setError('Credenziali non valide. Riprova.')
+            }
         }
     }
 

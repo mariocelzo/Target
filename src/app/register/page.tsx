@@ -82,9 +82,13 @@ export default function RegisterPage() {
             })
 
             router.push('/login') // Reindirizza alla pagina di login
-        } catch (error: any) {
-            console.error('Errore durante la registrazione:', error.message)
-            setErrors(prev => ({ ...prev, general: 'Errore durante la registrazione. Riprova più tardi.' }))
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error('Errore durante la registrazione:', error.message)
+                setErrors(prev => ({ ...prev, general: 'Errore durante la registrazione. Riprova più tardi.' }))
+            } else {
+                setErrors(prev => ({ ...prev, general: 'Errore durante la registrazione. Riprova più tardi.' }))
+            }
         } finally {
             setIsSubmitting(false)
         }
@@ -141,4 +145,3 @@ export default function RegisterPage() {
         </div>
     )
 }
-

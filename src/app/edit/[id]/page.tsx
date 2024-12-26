@@ -6,13 +6,20 @@ import { useEffect, useState } from 'react'
 import { db } from '@/lib/firebase'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 
+// Definiamo un tipo per l'annuncio
+interface Ad {
+    title: string
+    description: string
+    price: string
+    category: string
+}
+
 export default function EditAd() {
     const router = useRouter()
     const pathname = usePathname()
     const [id, setId] = useState<string | null>(null)
-    const [ad, setAd] = useState<Record<string, any> | null>(null)
     const [loading, setLoading] = useState(true)
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<Ad>({
         title: '',
         description: '',
         price: '',
@@ -34,14 +41,8 @@ export default function EditAd() {
                 const adRef = doc(db, 'products', id)
                 const adDoc = await getDoc(adRef)
                 if (adDoc.exists()) {
-                    const adData = adDoc.data() as Record<string, any>
-                    setAd(adData)
-                    setFormData({
-                        title: adData.title || '',
-                        description: adData.description || '',
-                        price: adData.price || '',
-                        category: adData.category || ''
-                    })
+                    const adData = adDoc.data() as Ad  // Utilizzo del tipo Ad per i dati
+                    setFormData(adData)  // Imposta formData con i dati dell'annuncio
                 } else {
                     console.error('Annuncio non trovato')
                 }
@@ -66,7 +67,8 @@ export default function EditAd() {
 
         try {
             const adRef = doc(db, 'products', id as string)
-            await updateDoc(adRef, formData)
+            // Firestore requires a plain object, so we spread formData here
+            await updateDoc(adRef, { ...formData })  // Ensure the data passed matches expected format
 
             // Reindirizza alla pagina dell'annuncio aggiornato
             router.push('/user-active-ads')
@@ -148,5 +150,3 @@ export default function EditAd() {
         </div>
     )
 }
-
-

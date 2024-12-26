@@ -1,5 +1,3 @@
-// /pages/user/active-ads/page.tsx
-
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -8,9 +6,17 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import Link from 'next/link'
 
+// Definiamo il tipo per un annuncio
+interface Ad {
+    id: string
+    title: string
+    price: string
+    imageUrl: string
+}
+
 export default function UserActiveAds() {
     const [user, setUser] = useState<import('firebase/auth').User | null>(null)
-    const [activeAds, setActiveAds] = useState<any[]>([]) // Stato per gli annunci attivi
+    const [activeAds, setActiveAds] = useState<Ad[]>([]) // Tipo corretto per gli annunci
     const [loading, setLoading] = useState<boolean>(true)
 
     useEffect(() => {
@@ -21,10 +27,10 @@ export default function UserActiveAds() {
                 const adsRef = collection(db, 'products')
                 const q = query(adsRef, where('userId', '==', user.uid)) // Filtro per l'ID utente
                 const querySnapshot = await getDocs(q)
-                const ads = querySnapshot.docs.map(doc => ({
+                const ads: Ad[] = querySnapshot.docs.map(doc => ({
                     id: doc.id,
-                    ...doc.data()
-                }))
+                    ...doc.data(),
+                }) as Ad) // Assicurati che i dati siano conformi al tipo Ad
                 setActiveAds(ads) // Imposta gli annunci attivi
                 setLoading(false)
             } else {

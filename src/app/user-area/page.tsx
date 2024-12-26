@@ -1,18 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { User, Mail, Phone, MapPin, Building2, MapPinned, Camera, Edit2, MessageSquare } from 'lucide-react'
 
 export default function UserProfile() {
     const [userData, setUserData] = useState({
@@ -27,9 +23,8 @@ export default function UserProfile() {
         bio: '',
         createdAt: null
     })
-    const [isEditing, setIsEditing] = useState(false)
-    const router = useRouter()
 
+    // Fetch user data from Firestore
     const fetchUserData = async () => {
         try {
             const user = auth.currentUser
@@ -49,8 +44,8 @@ export default function UserProfile() {
                         phoneNumber: data.phoneNumber || '',
                         bio: data.bio || '',
                         createdAt: (data.createdAt && typeof data.createdAt.toDate === 'function'
-                            ? data.createdAt.toDate()
-                            : new Date(data.createdAt)
+                                ? data.createdAt.toDate()
+                                : new Date(data.createdAt)
                         ).toLocaleDateString('it-IT', {
                             year: 'numeric',
                             month: 'long',
@@ -70,11 +65,13 @@ export default function UserProfile() {
         fetchUserData()
     }, [])
 
+    // Handle form input changes
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target
         setUserData(prev => ({ ...prev, [name]: value }))
     }
 
+    // Handle form submission
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         try {
@@ -84,7 +81,6 @@ export default function UserProfile() {
                 await updateDoc(userRef, {
                     ...userData
                 })
-                setIsEditing(false)
             }
         } catch (error) {
             console.error('Errore nell aggiornamento dei dati:', error)
