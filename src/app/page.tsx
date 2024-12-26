@@ -1,121 +1,198 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { auth, db } from '@/lib/firebase'  // Assicurati di configurare Firebase correttamente
+import { onAuthStateChanged, signOut } from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore'
 import Link from 'next/link'
-import { Search, User } from 'lucide-react'
+import { Search, User, ChevronDown } from 'lucide-react'
 
 export default function Home() {
-  return (
-      <div className="min-h-screen bg-white">
-        <header className="bg-[#C4333B] text-white p-4">
-          <div className="container mx-auto flex justify-between items-center">
-            <Link href="/" className="text-2xl font-bold">Target</Link>
-            <nav>
-              <ul className="flex space-x-4">
-                <li><Link href="/categories">Categorie</Link></li>
-                <li><Link href="/sell">Vendi</Link></li>
-                <li><Link href="/about">Chi Siamo</Link></li>
+  const [user, setUser] = useState<import('firebase/auth').User | null>(null)
+  const [fullName, setFullName] = useState<string>('') // Stato per il full name
+  const [menuOpen, setMenuOpen] = useState(false)
 
+  useEffect(() => {
+    // Controlla se l'utente è loggato
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUser(user) // Imposta l'utente se loggato
+        // Recupera il nome completo da Firestore
+        const userRef = doc(db, 'users', user.uid)
+        const docSnap = await getDoc(userRef)
+        if (docSnap.exists()) {
+          setFullName(docSnap.data().fullName) // Imposta il full name recuperato
+        }
+      } else {
+        setUser(null) // Rimuovi l'utente se non è loggato
+        setFullName('') // Resetta il nome completo
+      }
+    })
+
+    // Pulisce l'ascoltatore quando il componente viene smontato
+    return () => unsubscribe()
+  }, [])
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth)
+      setUser(null) // Reset dell'utente dopo il logout
+      setFullName('')
+    } catch (error) {
+      console.error("Errore durante il logout", error)
+    }
+  }
+
+  const toggleMenu = () => {
+    setMenuOpen(prevState => !prevState)
+  }
+
+  return (
+      <div className="min-h-screen bg-gray-100">
+        {/* Navbar */}
+        <header className="bg-[#C4333B] text-white py-4 shadow-md">
+          <div className="container mx-auto flex justify-between items-center">
+            <Link href="/" className="text-3xl font-extrabold">
+              Target Marketplace
+            </Link>
+            <nav>
+              <ul className="flex space-x-6 text-lg">
+                <li><Link href="/" className="hover:text-gray-200">Home</Link></li>
+                <li><Link href="/categories" className="hover:text-gray-200">Categorie</Link></li>
+                <li><Link href="/sell" className="hover:text-gray-200">Vendi</Link></li>
+                <li><Link href="/about" className="hover:text-gray-200">Chi Siamo</Link></li>
               </ul>
             </nav>
             <div className="flex space-x-4">
-              <Link href="/search"><Search /></Link>
-              <Link href="/login"><User /></Link>
+              <Link href="/search" className="text-white hover:text-gray-200">
+                <Search size={24} />
+              </Link>
+              {!user ? (
+                  <Link href="/login" className="text-white hover:text-gray-200">
+                    <User size={24} />
+                  </Link>
+              ) : (
+                  <div className="relative text-white">
+                <span
+                    className="mr-4 cursor-pointer flex items-center space-x-1"
+                    onClick={toggleMenu}
+                >
+                  <span>{fullName || user?.displayName || user?.email}</span>
+                  <ChevronDown size={16} />
+                </span>
+                    {menuOpen && (
+                        <div className="absolute right-0 bg-white text-black shadow-lg rounded-lg w-48 mt-2">
+                          <ul className="py-2">
+                            <li>
+                              <Link href="/user-area" className="block px-4 py-2 hover:bg-gray-200">
+                                Area Personale
+                              </Link>
+                            </li>
+                            <li>
+                              <button
+                                  onClick={handleLogout}
+                                  className="w-full text-left px-4 py-2 hover:bg-gray-200"
+                              >
+                                Logout
+                              </button>
+                            </li>
+                          </ul>
+                        </div>
+                    )}
+                  </div>
+              )}
             </div>
           </div>
         </header>
 
-        <main>
-          <section className="bg-[#41978F] text-white py-20">
-            <div className="container mx-auto text-center">
-              <h1 className="text-4xl font-bold mb-4">Trova Tutto Ciò di Cui Hai Bisogno</h1>
-              <p className="mb-8">Scopri prodotti di qualità a prezzi convenienti</p>
-              <div className="max-w-2xl mx-auto relative">
-                <input
-                    type="text"
-                    placeholder="Cerca articoli..."
-                    className="w-full p-4 rounded-full text-black"
-                />
-                <button className="absolute right-2 top-2 bg-[#C4333B] text-white p-2 rounded-full">
-                  <Search />
-                </button>
+        {/* Hero Section */}
+        <section className="bg-[#41978F] text-white py-20">
+          <div className="container mx-auto text-center">
+            <h1 className="text-5xl font-extrabold mb-6">Trova e Vendi con Facilità!</h1>
+            <p className="text-lg mb-8">Scopri articoli di seconda mano a ottimi prezzi o vendi ciò di cui non hai più bisogno!</p>
+
+            {/* Search Bar */}
+            <div className="relative max-w-2xl mx-auto">
+              <input
+                  type="text"
+                  placeholder="Cerca articoli..."
+                  className="w-full p-4 rounded-full text-black shadow-lg focus:outline-none"
+              />
+              <button className="absolute right-2 top-2 bg-[#C4333B] text-white p-2 rounded-full">
+                <Search size={20} />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* Featured Categories Section */}
+        <section className="py-16">
+          <div className="container mx-auto text-center">
+            <h2 className="text-3xl font-semibold mb-6">Categorie in Evidenza</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+              <div className="bg-white shadow-md rounded-lg p-6">
+                <h3 className="text-xl font-bold mb-4">Elettronica</h3>
+                <Link href="/categories/electronics">
+                  <img src="/images/electronics.jpg" alt="Elettronica" className="w-full h-48 object-cover rounded-lg" />
+                </Link>
               </div>
-            </div>
-          </section>
-
-          <section className="py-16">
-            <div className="container mx-auto">
-              <h2 className="text-3xl font-bold mb-8 text-center text-[#C4333B]">Categorie in Evidenza</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                {['Arredamento', 'Elettronica', 'Abbigliamento', 'Libri'].map((category) => (
-                    <div key={category} className="bg-[#41978F] text-white p-6 rounded-lg text-center">
-                      <h3 className="text-xl font-semibold">{category}</h3>
-                    </div>
-                ))}
+              <div className="bg-white shadow-md rounded-lg p-6">
+                <h3 className="text-xl font-bold mb-4">Moda</h3>
+                <Link href="/categories/fashion">
+                  <img src="/images/fashion.jpg" alt="Moda" className="w-full h-48 object-cover rounded-lg" />
+                </Link>
               </div>
-            </div>
-          </section>
-
-          <section className="py-16 bg-gray-100">
-            <div className="container mx-auto">
-              <h2 className="text-3xl font-bold mb-8 text-center text-[#C4333B]">Articoli Popolari</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[1, 2, 3].map((item) => (
-                    <div key={item} className="bg-white p-6 rounded-lg shadow-md">
-                      <div className="bg-gray-300 h-48 mb-4 rounded"></div>
-                      <h3 className="text-xl font-semibold mb-2">Articolo Vintage {item}</h3>
-                      <p className="text-gray-600 mb-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                      <div className="flex justify-between items-center">
-                        <span className="text-[#C4333B] font-bold">€29,99</span>
-                        <button className="bg-[#41978F] text-white px-4 py-2 rounded">Visualizza</button>
-                      </div>
-                    </div>
-                ))}
+              <div className="bg-white shadow-md rounded-lg p-6">
+                <h3 className="text-xl font-bold mb-4">Arredamento</h3>
+                <Link href="/categories/furniture">
+                  <img src="/images/furniture.jpg" alt="Arredamento" className="w-full h-48 object-cover rounded-lg" />
+                </Link>
               </div>
-            </div>
-          </section>
-
-          <section className="py-16 bg-[#C4333B] text-white">
-            <div className="container mx-auto text-center">
-              <h2 className="text-3xl font-bold mb-4">Acquista Ora!</h2>
-              <p className="mb-8">Esplora la nostra vasta gamma di prodotti. Qualità e valore in ogni acquisto.</p>
-              <button className="bg-white text-[#C4333B] px-8 py-3 rounded-full font-bold text-lg">Inizia lo Shopping</button>
-            </div>
-          </section>
-        </main>
-
-        <footer className="bg-gray-800 text-white py-8">
-          <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-xl font-bold mb-4">Target</h3>
-              <p>Il tuo negozio per prodotti di qualità.</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Link Rapidi</h4>
-              <ul className="space-y-2">
-                <li><Link href="/about">Chi Siamo</Link></li>
-                <li><Link href="/contact">Contatti</Link></li>
-                <li><Link href="/faq">FAQ</Link></li>
-                <li><Link href="/login">Login</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Categorie</h4>
-              <ul className="space-y-2">
-                <li><Link href="/category/furniture">Arredamento</Link></li>
-                <li><Link href="/category/electronics">Elettronica</Link></li>
-                <li><Link href="/category/clothing">Abbigliamento</Link></li>
-                <li><Link href="/category/books">Libri</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Seguici</h4>
-              <div className="flex space-x-4">
-                <a href="#" className="hover:text-[#41978F]">Facebook</a>
-                <a href="#" className="hover:text-[#41978F]">Twitter</a>
-                <a href="#" className="hover:text-[#41978F]">Instagram</a>
+              <div className="bg-white shadow-md rounded-lg p-6">
+                <h3 className="text-xl font-bold mb-4">Giocattoli</h3>
+                <Link href="/categories/toys">
+                  <img src="/images/toys.jpg" alt="Giocattoli" className="w-full h-48 object-cover rounded-lg" />
+                </Link>
               </div>
             </div>
           </div>
-          <div className="container mx-auto mt-8 pt-8 border-t border-gray-700 text-center">
-            <p>&copy; 2023 Target. Tutti i diritti riservati.</p>
+        </section>
+
+        {/* How it Works Section */}
+        <section className="bg-gray-200 py-16">
+          <div className="container mx-auto text-center">
+            <h2 className="text-3xl font-semibold mb-6">Come Funziona</h2>
+            <p className="text-lg mb-8">Ecco come è semplice iniziare con Target Marketplace.</p>
+            <div className="flex flex-col sm:flex-row justify-center items-center space-y-8 sm:space-x-12 sm:space-y-0">
+              <div className="bg-white shadow-md rounded-lg p-6 text-center">
+                <h3 className="text-xl font-bold mb-4">1. Registrati</h3>
+                <p className="mb-4">Crea un account per iniziare a vendere e acquistare facilmente.</p>
+                <Link href="/register" className="text-[#41978F] hover:text-[#C4333B]">Registrati ora</Link>
+              </div>
+              <div className="bg-white shadow-md rounded-lg p-6 text-center">
+                <h3 className="text-xl font-bold mb-4">2. Cerca o Vendi</h3>
+                <p className="mb-4">Esplora le categorie o carica il tuo annuncio per vendere.</p>
+                <Link href="/sell" className="text-[#41978F] hover:text-[#C4333B]">Vendi subito</Link>
+              </div>
+              <div className="bg-white shadow-md rounded-lg p-6 text-center">
+                <h3 className="text-xl font-bold mb-4">3. Concludi l'Affare</h3>
+                <p className="mb-4">Concludi l'acquisto o la vendita con facilità e sicurezza.</p>
+                <Link href="/about" className="text-[#41978F] hover:text-[#C4333B]">Scopri di più</Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="bg-[#41978F] text-white py-8">
+          <div className="container mx-auto text-center">
+            <p className="text-lg">&copy; 2024 Target Marketplace. Tutti i diritti riservati.</p>
+            <div className="mt-4">
+              <ul className="flex justify-center space-x-6">
+                <li><Link href="/privacy-policy" className="hover:text-gray-200">Privacy Policy</Link></li>
+                <li><Link href="/terms-of-service" className="hover:text-gray-200">Termini di Servizio</Link></li>
+              </ul>
+            </div>
           </div>
         </footer>
       </div>

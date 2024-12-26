@@ -48,7 +48,10 @@ export default function UserProfile() {
                         zipCode: data.zipCode || '',
                         phoneNumber: data.phoneNumber || '',
                         bio: data.bio || '',
-                        createdAt: data.createdAt?.toDate().toLocaleDateString('it-IT', {
+                        createdAt: (data.createdAt && typeof data.createdAt.toDate === 'function'
+                            ? data.createdAt.toDate()
+                            : new Date(data.createdAt)
+                        ).toLocaleDateString('it-IT', {
                             year: 'numeric',
                             month: 'long',
                             day: 'numeric',

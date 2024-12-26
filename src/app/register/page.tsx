@@ -2,12 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { motion } from 'framer-motion'
-import PasswordStrengthMeter from '../components/PasswordStrengthMeter'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
-// Import auth and db from Firebase configuration
 import { auth, db } from '@/lib/firebase'
 
 export default function RegisterPage() {
@@ -55,8 +52,6 @@ export default function RegisterPage() {
             if (age < 18) newErrors.dateOfBirth = 'Devi avere almeno 18 anni per registrarti'
         }
         if (!formData.province.trim()) newErrors.province = 'La provincia è obbligatoria'
-console.log('Checking Firebase initialization: auth:', auth, 'db:', db)
-
         if (!formData.address.trim()) newErrors.address = 'L\'indirizzo è obbligatorio'
         if (!formData.zipCode.trim()) newErrors.zipCode = 'Il CAP è obbligatorio'
         if (!formData.phoneNumber.trim()) newErrors.phoneNumber = 'Il numero di telefono è obbligatorio'
@@ -71,11 +66,9 @@ console.log('Checking Firebase initialization: auth:', auth, 'db:', db)
 
         setIsSubmitting(true)
         try {
-            // Registrazione utente su Firebase Authentication
             const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password)
             const user = userCredential.user
 
- console.log('Attempting user registration:', formData)
             await setDoc(doc(db, 'users', user.uid), {
                 fullName: formData.fullName,
                 email: formData.email,

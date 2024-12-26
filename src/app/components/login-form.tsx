@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { useFormValidation } from '@/hooks/use-form-validation'
 import { signInWithEmailAndPassword } from 'firebase/auth'
-import { auth, db } from '@/lib/firebase'
+import { auth } from '@/lib/firebase'
 import { useRouter } from 'next/navigation'
 
 export default function LoginForm() {
@@ -23,7 +23,7 @@ export default function LoginForm() {
 
         try {
             await signInWithEmailAndPassword(auth, email, password)
-            router.push('/user-area') // Reindirizza alla pagina user-area dopo il login
+            router.push('/user-area') // Reindirizza alla pagina dell'utente dopo il login
         } catch (err: any) {
             setError('Credenziali non valide. Riprova.')
         }
