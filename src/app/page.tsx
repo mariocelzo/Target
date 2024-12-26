@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { auth, db } from '@/lib/firebase'  // Assicurati di configurare Firebase correttamente
+import { auth, db } from '@/lib/firebase'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 import Link from 'next/link'
@@ -73,19 +73,24 @@ export default function Home() {
                   </Link>
               ) : (
                   <div className="relative text-white">
-                <span
-                    className="mr-4 cursor-pointer flex items-center space-x-1"
-                    onClick={toggleMenu}
-                >
-                  <span>{fullName || user?.displayName || user?.email}</span>
-                  <ChevronDown size={16} />
-                </span>
+                    <span
+                        className="mr-4 cursor-pointer flex items-center space-x-1"
+                        onClick={toggleMenu}
+                    >
+                      <span>{fullName || user?.displayName || user?.email}</span>
+                      <ChevronDown size={16} />
+                    </span>
                     {menuOpen && (
                         <div className="absolute right-0 bg-white text-black shadow-lg rounded-lg w-48 mt-2">
                           <ul className="py-2">
                             <li>
                               <Link href="/user-area" className="block px-4 py-2 hover:bg-gray-200">
                                 Area Personale
+                              </Link>
+                            </li>
+                            <li>
+                              <Link href="/user-active-ads" className="block px-4 py-2 hover:bg-gray-200">
+                                Annunci Attivi
                               </Link>
                             </li>
                             <li>
@@ -153,31 +158,6 @@ export default function Home() {
                 <Link href="/categories/toys">
                   <img src="/images/toys.jpg" alt="Giocattoli" className="w-full h-48 object-cover rounded-lg" />
                 </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* How it Works Section */}
-        <section className="bg-gray-200 py-16">
-          <div className="container mx-auto text-center">
-            <h2 className="text-3xl font-semibold mb-6">Come Funziona</h2>
-            <p className="text-lg mb-8">Ecco come è semplice iniziare con Target Marketplace.</p>
-            <div className="flex flex-col sm:flex-row justify-center items-center space-y-8 sm:space-x-12 sm:space-y-0">
-              <div className="bg-white shadow-md rounded-lg p-6 text-center">
-                <h3 className="text-xl font-bold mb-4">1. Registrati</h3>
-                <p className="mb-4">Crea un account per iniziare a vendere e acquistare facilmente.</p>
-                <Link href="/register" className="text-[#41978F] hover:text-[#C4333B]">Registrati ora</Link>
-              </div>
-              <div className="bg-white shadow-md rounded-lg p-6 text-center">
-                <h3 className="text-xl font-bold mb-4">2. Cerca o Vendi</h3>
-                <p className="mb-4">Esplora le categorie o carica il tuo annuncio per vendere.</p>
-                <Link href="/sell" className="text-[#41978F] hover:text-[#C4333B]">Vendi subito</Link>
-              </div>
-              <div className="bg-white shadow-md rounded-lg p-6 text-center">
-                <h3 className="text-xl font-bold mb-4">3. Concludi l'Affare</h3>
-                <p className="mb-4">Concludi l'acquisto o la vendita con facilità e sicurezza.</p>
-                <Link href="/about" className="text-[#41978F] hover:text-[#C4333B]">Scopri di più</Link>
               </div>
             </div>
           </div>
