@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Home } from 'lucide-react' // Aggiunta dell'icona Home
+import { useRouter } from 'next/navigation'
 
 export default function UserProfile() {
     const [userData, setUserData] = useState({
@@ -23,6 +25,7 @@ export default function UserProfile() {
         bio: '',
         createdAt: null
     })
+    const router = useRouter()
 
     // Fetch user data from Firestore
     const fetchUserData = async () => {
@@ -91,7 +94,15 @@ export default function UserProfile() {
         <div className="min-h-screen bg-gradient-to-br from-[#41978F] to-[#2c6964] text-white p-8">
             <Card className="max-w-2xl mx-auto overflow-hidden">
                 <CardHeader className="bg-[#C4333B] text-white">
-                    <h1 className="text-3xl font-bold">Profilo Utente</h1>
+                    <div className="flex justify-between items-center">
+                        <h1 className="text-3xl font-bold">Profilo Utente</h1>
+                        <button
+                            onClick={() => router.push('/')} // Naviga alla home page
+                            className="text-white p-2 hover:bg-gray-600 rounded-full"
+                        >
+                            <Home className="w-6 h-6" /> {/* Icona Home */}
+                        </button>
+                    </div>
                     <p className="text-sm opacity-75">Modifica e visualizza le tue informazioni personali</p>
                 </CardHeader>
                 <CardContent className="p-6">

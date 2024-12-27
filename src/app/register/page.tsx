@@ -6,6 +6,8 @@ import { motion } from 'framer-motion'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
+import Header from '../components/Header' // Importa il componente Header
+import Footer from '../components/Footer' // Importa il componente Footer
 
 export default function RegisterPage() {
     const [formData, setFormData] = useState({
@@ -115,13 +117,16 @@ export default function RegisterPage() {
     ]
 
     return (
-        <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gradient-to-br from-[#41978F] to-[#C4333B]">
-            <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#41978F] to-[#C4333B]">
+            {/* Header */}
+            <Header />
+
+            <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="sm:mx-auto sm:w-full sm:max-w-md mt-24">
                 <h2 className="mt-6 text-center text-3xl font-extrabold text-white">Unisciti a Target Marketplace</h2>
                 <p className="mt-2 text-center text-sm text-gray-200">Scopri offerte incredibili su articoli di seconda mano</p>
             </motion.div>
 
-            <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+            <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="mt-8 sm:mx-auto sm:w-full sm:max-w-md flex-grow pb-8">
                 <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
                     <form className="space-y-6" onSubmit={handleSubmit}>
                         {formFields.map((field) => (
@@ -142,6 +147,9 @@ export default function RegisterPage() {
                     </form>
                 </div>
             </motion.div>
+
+            {/* Footer */}
+            <Footer />
         </div>
     )
 }

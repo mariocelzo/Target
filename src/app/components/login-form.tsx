@@ -23,7 +23,7 @@ export default function LoginForm() {
 
         try {
             await signInWithEmailAndPassword(auth, email, password)
-            router.push('/user-area') // Reindirizza alla pagina dell'utente dopo il login
+            router.push('/') // Reindirizza alla home page dopo il login
         } catch (err: unknown) {
             if (err instanceof Error) {
                 setError(err.message) // Usa il messaggio dell'errore
