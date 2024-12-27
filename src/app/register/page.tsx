@@ -6,8 +6,9 @@ import { motion } from 'framer-motion'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
-import Header from '../components/Header' // Importa il componente Header
-import Footer from '../components/Footer' // Importa il componente Footer
+import PasswordStrengthMeter from '../components/PasswordStrengthMeter' // Importa PasswordStrengthMeter
+import Header from '../components/Header'; // Aggiungi l'import dell'header
+import Footer from '../components/Footer'; // Aggiungi l'import del footer
 
 export default function RegisterPage() {
     const [formData, setFormData] = useState({
@@ -24,6 +25,7 @@ export default function RegisterPage() {
     })
     const [errors, setErrors] = useState<Record<string, string>>({})
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null) // Stato per l'alert
     const router = useRouter()
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,14 +85,11 @@ export default function RegisterPage() {
                 createdAt: serverTimestamp(),
             })
 
-            router.push('/login') // Reindirizza alla pagina di login
+            setAlert({ type: 'success', message: 'Registrazione completata con successo!' }) // Mostra l'alert di successo
+            setTimeout(() => router.push('/login'), 3000) // Reindirizza dopo 3 secondi
         } catch (error: unknown) {
-            if (error instanceof Error) {
-                console.error('Errore durante la registrazione:', error.message)
-                setErrors(prev => ({ ...prev, general: 'Errore durante la registrazione. Riprova più tardi.' }))
-            } else {
-                setErrors(prev => ({ ...prev, general: 'Errore durante la registrazione. Riprova più tardi.' }))
-            }
+            console.error('Errore durante la registrazione:', error)
+            setAlert({ type: 'error', message: 'Errore durante la registrazione. Riprova più tardi.' }) // Mostra l'alert di errore
         } finally {
             setIsSubmitting(false)
         }
@@ -117,36 +116,54 @@ export default function RegisterPage() {
     ]
 
     return (
-        <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#41978F] to-[#C4333B]">
+        <div className="flex flex-col min-h-screen">
             {/* Header */}
             <Header />
 
-            <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="sm:mx-auto sm:w-full sm:max-w-md mt-24">
-                <h2 className="mt-6 text-center text-3xl font-extrabold text-white">Unisciti a Target Marketplace</h2>
-                <p className="mt-2 text-center text-sm text-gray-200">Scopri offerte incredibili su articoli di seconda mano</p>
-            </motion.div>
+            {/* Contenuto centrale */}
+            <div className="flex flex-col items-center justify-center flex-grow bg-gradient-to-br from-[#41978F] to-[#C4333B]">
+                <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="sm:mx-auto sm:w-full sm:max-w-md">
+                    <h2 className="mt-6 text-center text-3xl font-extrabold text-white">Unisciti a Target Marketplace</h2>
+                    <p className="mt-2 text-center text-sm text-gray-200">Scopri offerte incredibili su articoli di seconda mano</p>
+                </motion.div>
 
-            <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="mt-8 sm:mx-auto sm:w-full sm:max-w-md flex-grow pb-8">
-                <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                    <form className="space-y-6" onSubmit={handleSubmit}>
-                        {formFields.map((field) => (
-                            <div key={field.name}>
-                                <label htmlFor={field.name} className="block text-sm font-medium text-gray-700">{field.label}</label>
-                                <input
-                                    id={field.name}
-                                    name={field.name}
-                                    type={field.type}
-                                    value={formData[field.name as keyof typeof formData]}
-                                    onChange={handleChange}
-                                    className="w-full border px-3 py-2 rounded-md"
-                                />
-                                {errors[field.name] && <p className="text-red-500 text-sm">{errors[field.name]}</p>}
+                <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+                    <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                        {/* Alert dinamico */}
+                        {alert && (
+                            <div
+                                className={`mb-4 p-3 rounded-md text-sm ${
+                                    alert.type === 'success'
+                                        ? 'text-green-700 bg-green-100 border border-green-400'
+                                        : 'text-red-700 bg-red-100 border border-red-400'
+                                }`}
+                            >
+                                {alert.message}
                             </div>
-                        ))}
-                        <button type="submit" className="bg-[#C4333B] text-white py-2 px-4 w-full rounded-md">{isSubmitting ? 'Registrazione...' : 'Registrati'}</button>
-                    </form>
-                </div>
-            </motion.div>
+                        )}
+
+                        <form className="space-y-6" onSubmit={handleSubmit}>
+                            {formFields.map((field) => (
+                                <div key={field.name}>
+                                    <label htmlFor={field.name} className="block text-sm font-medium text-gray-700">{field.label}</label>
+                                    <input
+                                        id={field.name}
+                                        name={field.name}
+                                        type={field.type}
+                                        value={formData[field.name as keyof typeof formData]}
+                                        onChange={handleChange}
+                                        className="w-full border px-3 py-2 rounded-md"
+                                    />
+                                    {errors[field.name] && <p className="text-red-500 text-sm">{errors[field.name]}</p>}
+                                    {/* Aggiungi PasswordStrengthMeter sotto il campo "password" */}
+                                    {field.name === 'password' && <PasswordStrengthMeter password={formData.password} />}
+                                </div>
+                            ))}
+                            <button type="submit" className="bg-[#C4333B] text-white py-2 px-4 w-full rounded-md">{isSubmitting ? 'Registrazione...' : 'Registrati'}</button>
+                        </form>
+                    </div>
+                </motion.div>
+            </div>
 
             {/* Footer */}
             <Footer />
