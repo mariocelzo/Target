@@ -138,7 +138,10 @@ export default function Home() {
                       <div className="absolute right-0 bg-white text-black mt-2 shadow-md rounded-lg w-48">
                         <ul>
                           <li className="px-4 py-2 hover:bg-gray-100">
-                            <Link href="/profile">Profilo</Link>
+                            <Link href="/user-area">Profilo</Link>
+                          </li>
+                          <li className="px-4 py-2 hover:bg-gray-100">
+                            <Link href="/user-area">I miei ordini</Link>
                           </li>
                           <li className="px-4 py-2 hover:bg-gray-100" onClick={handleLogout}>
                             <LogOut size={16}/> Esci
