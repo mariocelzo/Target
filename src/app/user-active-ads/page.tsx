@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react'
 import { auth, db } from '@/lib/firebase'
 import { onAuthStateChanged } from 'firebase/auth'
-import { collection, query, where, getDocs } from 'firebase/firestore'
+import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore'
 import Link from 'next/link'
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/solid'
+// Import icons
 
 // Definiamo il tipo per un annuncio
 interface Ad {
@@ -42,6 +44,17 @@ export default function UserActiveAds() {
 
         return () => unsubscribe()
     }, [])
+
+    const handleDelete = async (adId: string) => {
+        try {
+            await deleteDoc(doc(db, 'products', adId))
+            setActiveAds(activeAds.filter(ad => ad.id !== adId)) // Rimuovi l'annuncio dalla UI
+            alert('Annuncio eliminato con successo.')
+        } catch (error) {
+            console.error('Errore durante l\'eliminazione dell\'annuncio:', error)
+            alert('C\'è stato un errore nell\'eliminazione dell\'annuncio.')
+        }
+    }
 
     if (loading) {
         return <div>Caricamento...</div>
@@ -86,10 +99,19 @@ export default function UserActiveAds() {
                                         <h3 className="text-xl font-bold mb-2">{ad.title}</h3>
                                         <p className="text-gray-500">{ad.price} €</p>
                                     </Link>
-                                    {/* Aggiungi il link per la modifica */}
-                                    <Link href={`/edit/${ad.id}`} className="mt-4 inline-block px-4 py-2 bg-blue-500 text-white rounded-lg">
-                                        Modifica
-                                    </Link>
+                                    <div className="mt-4 flex justify-between items-center">
+                                        {/* Aggiungi il link per la modifica con un'icona */}
+                                        <Link href={`/edit/${ad.id}`} className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-500 text-white hover:bg-blue-600">
+                                            <PencilIcon className="w-6 h-6" />
+                                        </Link>
+                                        {/* Bottone di eliminazione con un'icona */}
+                                        <button
+                                            onClick={() => handleDelete(ad.id)}
+                                            className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-red-500 text-white hover:bg-red-600"
+                                        >
+                                            <TrashIcon className="w-6 h-6" />
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
