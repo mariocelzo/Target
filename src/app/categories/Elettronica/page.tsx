@@ -71,7 +71,7 @@ export default function ElectronicsPage() {
                                     <h3 className="text-lg font-bold mb-2">{product.title}</h3>
                                     <p className="text-sm text-gray-600 mb-4 truncate">{product.description}</p>
                                     <Link
-                                        href={`/products/${product.id}`}
+                                        href={`/products/${product.id}`}  // This will navigate to /products/[id]
                                         className="text-white bg-[#C4333B] hover:bg-[#A12229] px-4 py-2 rounded-md text-sm font-medium"
                                     >
                                         Visualizza Dettagli
