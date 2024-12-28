@@ -1,189 +1,301 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp, updateDoc, onSnapshot } from 'firebase/firestore';
+import { useEffect, useState, useRef } from 'react';
+import { doc, setDoc, getDoc, collection, getDocs, addDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { useAuthState } from 'react-firebase-hooks/auth';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { useAuthState } from 'react-firebase-hooks/auth';
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
-import { useParams } from 'next/navigation';
 
-interface Message {
-    senderId: string;
-    text: string;
-    timestamp: number;
-    read: boolean;
+interface User {
+    id: string;
+    fullName: string;
+    imageUrl: string;  // Cambiato 'avatar' con 'imageUrl'
 }
 
 interface Chat {
     id: string;
-    productId: string;
     buyerId: string;
     sellerId: string;
-    messages: Message[];
+    messages: any[];
     createdAt: number;
+    partnerName: string;
+    partnerAvatar: string;
 }
 
 export default function ChatPage() {
-    const router = useRouter();
-    const { chatId } = useParams();
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [newMessage, setNewMessage] = useState('');
-    const [user] = useAuthState(auth);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
+    const [user, loadingUser] = useAuthState(auth);
+    const [users, setUsers] = useState<User[]>([]);
     const [chat, setChat] = useState<Chat | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [message, setMessage] = useState('');
+    const [sending, setSending] = useState(false);
+    const [leftPanelWidth, setLeftPanelWidth] = useState('300px'); // Imposta la larghezza iniziale del lato utenti
 
+    const leftPanelRef = useRef<HTMLDivElement>(null);
+    const resizeHandleRef = useRef<HTMLDivElement>(null);
+
+    // Funzione per mantenere lo stato di login anche dopo un refresh
     useEffect(() => {
-        if (!chatId) return;
+        const fetchUsers = async () => {
+            if (!user) {
+                setError('Utente non loggato');
+                setLoading(false);
+                return;
+            }
 
-        const fetchChat = async () => {
-            setLoading(true);
             try {
-                const chatRef = doc(db, 'chats', String(chatId));
-                const chatSnap = await getDoc(chatRef);
+                setLoading(true);
 
-                if (chatSnap.exists()) {
-                    const chatData = chatSnap.data();
-                    const fetchedChat: Chat = {
-                        id: chatSnap.id,
-                        productId: chatData.productId,
-                        buyerId: chatData.buyerId,
-                        sellerId: chatData.sellerId,
-                        messages: chatData.messages || [],
-                        createdAt: chatData.createdAt,
-                    };
-                    setChat(fetchedChat);
-                    setMessages(fetchedChat.messages);
+                // Ottieni tutti gli utenti dalla collezione 'users'
+                const usersSnapshot = await getDocs(collection(db, 'users'));
+                const usersList: User[] = [];
 
-                    // Ascolta i cambiamenti in tempo reale dei messaggi
-                    onSnapshot(chatRef, (snapshot) => {
-                        if (snapshot.exists()) {
-                            setMessages(snapshot.data()?.messages || []);
-                        }
-                    });
-                }
+                usersSnapshot.forEach((docSnap) => {
+                    const userData = docSnap.data();
+                    if (userData.id !== user.uid) {
+                        usersList.push({
+                            id: docSnap.id,
+                            fullName: userData.fullName || 'Nome Sconosciuto',
+                            imageUrl: userData.imageUrl || '/default-avatar.png',  // Cambiato avatar con imageUrl
+                        });
+                    }
+                });
+
+                setUsers(usersList);
             } catch (err) {
-                setError('Errore nel recupero della chat.');
+                console.error('Errore durante il recupero degli utenti:', err);
+                setError('Errore durante il recupero degli utenti.');
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchChat();
-    }, [chatId]);
+        if (user) {
+            fetchUsers();
+        }
+    }, [user]);
 
-    const handleSendMessage = async () => {
-        if (!newMessage.trim() || !user) return;
-
-        const message: Message = {
-            senderId: user.uid,
-            text: newMessage,
-            timestamp: Date.now(),
-            read: false, // Imposta il messaggio come non letto
-        };
-
-        setLoading(true); // Imposta lo stato di caricamento mentre il messaggio viene inviato
+    // Funzione per creare o recuperare una chat
+    const startChat = async (partnerId: string, partnerName: string, partnerImageUrl: string) => {
+        if (!user) return;
 
         try {
-            const chatRef = doc(db, 'chats', String(chatId));
-            await updateDoc(chatRef, {
-                messages: [...messages, message],
+            // Controlla se esiste già una chat con il partner
+            const chatRef = collection(db, 'chats');
+            const chatSnapshot = await getDocs(chatRef);
+            let existingChat = null;
+
+            chatSnapshot.forEach((docSnap) => {
+                const chatData = docSnap.data();
+                if (
+                    (chatData.buyerId === user.uid && chatData.sellerId === partnerId) ||
+                    (chatData.buyerId === partnerId && chatData.sellerId === user.uid)
+                ) {
+                    existingChat = { id: docSnap.id, ...chatData };
+                }
             });
 
-            // Aggiungi il messaggio localmente
-            setMessages((prevMessages) => [...prevMessages, message]);
-            setNewMessage('');
+            if (existingChat) {
+                // Se esiste, carica la chat esistente
+                setChat(existingChat);
+            } else {
+                // Se non esiste, crea una nuova chat
+                const newChatRef = await addDoc(collection(db, 'chats'), {
+                    buyerId: user.uid,
+                    sellerId: partnerId,
+                    messages: [],
+                    createdAt: Date.now(),
+                });
+
+                setChat({
+                    id: newChatRef.id,
+                    buyerId: user.uid,
+                    sellerId: partnerId,
+                    messages: [],
+                    createdAt: Date.now(),
+                    partnerName,
+                    partnerAvatar: partnerImageUrl,
+                });
+            }
         } catch (err) {
-            setError('Errore nell\'invio del messaggio.');
-        } finally {
-            setLoading(false); // Disabilita lo stato di caricamento dopo l'invio
+            console.error('Errore durante la creazione della chat:', err);
+            setError('Errore durante la creazione della chat.');
         }
     };
 
-    const handleMarkAsRead = async (messageId: string) => {
-        // Aggiorna il campo "read" per il messaggio specifico
-        const updatedMessages = messages.map((message) => {
-            if (message.senderId !== user?.uid && !message.read) {
-                message.read = true;
-            }
-            return message;
-        });
+    // Funzione per inviare un messaggio
+    const sendMessage = async () => {
+        if (!message.trim()) {
+            return; // Non inviare messaggio vuoto
+        }
 
-        const chatRef = doc(db, 'chats', String(chatId));
-        await updateDoc(chatRef, {
-            messages: updatedMessages,
-        });
-        setMessages(updatedMessages);
+        if (!chat) {
+            setError('Seleziona un utente per avviare la chat.');
+            return;
+        }
+
+        setSending(true);
+        try {
+            // Aggiungi il messaggio alla chat
+            await updateDoc(doc(db, 'chats', chat.id), {
+                messages: [...chat.messages, { senderId: user?.uid, text: message, timestamp: Date.now() }],
+            });
+            // Aggiorna la chat
+            setChat({
+                ...chat,
+                messages: [...chat.messages, { senderId: user?.uid, text: message, timestamp: Date.now() }],
+            });
+            setMessage('');
+        } catch (err) {
+            console.error('Errore durante l\'invio del messaggio:', err);
+            setError('Errore durante l\'invio del messaggio.');
+        } finally {
+            setSending(false);
+        }
     };
 
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <p className="text-xl text-gray-600">Caricamento chat...</p>
-            </div>
-        );
+    // Funzione per monitorare lo stato dell'utente (Autenticazione persistente)
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
+            if (user) {
+                // Se l'utente è loggato, aggiorna lo stato
+                setError(null); // Reset errore
+            } else {
+                // Se l'utente non è loggato, reindirizza o gestisce l'errore
+                setError('Utente non loggato');
+            }
+        });
+
+        // Pulizia al momento dello smontaggio del componente
+        return () => unsubscribe();
+    }, []);
+
+    // Listener in tempo reale per aggiornare la chat con i nuovi messaggi
+    useEffect(() => {
+        if (chat) {
+            const unsubscribe = onSnapshot(doc(db, 'chats', chat.id), (docSnap) => {
+                const updatedChat = docSnap.data();
+                if (updatedChat) {
+                    setChat({
+                        id: chat.id,
+                        buyerId: updatedChat.buyerId,
+                        sellerId: updatedChat.sellerId,
+                        messages: updatedChat.messages,
+                        createdAt: updatedChat.createdAt,
+                        partnerName: chat.partnerName,
+                        partnerAvatar: chat.partnerAvatar,
+                    });
+                }
+            });
+
+            return () => unsubscribe();
+        }
+    }, [chat]);
+
+    // Gestione resize pannello utenti
+    const handleResize = (e: React.MouseEvent) => {
+        if (leftPanelRef.current) {
+            const deltaX = e.clientX - leftPanelRef.current.getBoundingClientRect().left;
+            setLeftPanelWidth(`${deltaX}px`);
+        }
+    };
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+        document.addEventListener('mousemove', handleResize);
+        document.addEventListener('mouseup', () => {
+            document.removeEventListener('mousemove', handleResize);
+        });
+    };
+
+    if (loadingUser) {
+        return <div className="text-center">Caricamento...</div>;
     }
 
     if (error) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <p className="text-xl text-red-600">{error}</p>
-            </div>
-        );
+        return <div className="text-center text-red-500">{error}</div>;
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="flex flex-col min-h-screen">
+            {/* Header */}
             <Header />
 
-            <section className="container mx-auto py-8 px-4">
-                <div className="bg-white border border-gray-200 rounded-lg shadow-md max-w-2xl mx-auto">
-                    <div className="p-4">
-                        <h3 className="text-lg font-bold mb-4">Messaggi</h3>
-                        <div className="space-y-4">
-                            {messages.map((message, index) => (
-                                <div
-                                    key={index}
-                                    className={`flex ${message.senderId === user?.uid ? 'justify-end' : 'justify-start'}`}
-                                    onClick={() => handleMarkAsRead(message.senderId)}
-                                >
-                                    <div
-                                        className={`bg-gray-200 p-3 rounded-lg max-w-xs ${
-                                            message.senderId === user?.uid ? 'bg-blue-500 text-white' : 'bg-gray-300'
-                                        }`}
-                                    >
-                                        <p>{message.text}</p>
-                                        <span className="text-xs text-gray-500">
-                                            {message.read ? 'Letto' : 'Non letto'}
-                                        </span>
-                                    </div>
-                                </div>
-                            ))}
+            <div className="flex-grow flex flex-col lg:flex-row">
+                {/* Lista utenti */}
+                <div
+                    ref={leftPanelRef}
+                    className="w-full lg:h-full p-4 bg-gray-50 border-r shadow-md"
+                    style={{ width: leftPanelWidth }}
+                >
+                    <h2 className="text-2xl font-semibold mb-4">Utenti</h2>
+                    <ul>
+                        {users.map((user) => (
+                            <li
+                                key={user.id}
+                                className="flex items-center justify-between p-3 mb-3 rounded-lg bg-white hover:bg-gray-200 cursor-pointer shadow-sm"
+                                onClick={() => startChat(user.id, user.fullName, user.imageUrl)}
+                            >
+                                <img
+                                    src={user.imageUrl || '/default-avatar.png'}
+                                    alt={user.fullName}
+                                    className="w-12 h-12 rounded-full"
+                                />
+                                <p className="ml-4 text-lg font-medium">{user.fullName}</p>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
+                {/* Resize handle */}
+                <div
+                    ref={resizeHandleRef}
+                    className="resize-handle hidden lg:block cursor-ew-resize"
+                    onMouseDown={handleMouseDown}
+                ></div>
+
+                {/* Chat */}
+                {chat && (
+                    <div className="w-full lg:w-[calc(100%-2rem)] p-4 bg-white flex flex-col h-full">
+                        <h2 className="text-3xl font-semibold mb-6">Chat con {chat.partnerName}</h2>
+                        <div className="border p-4 mb-4 flex-grow overflow-y-auto bg-gray-100 rounded-lg h-96">
+                            <ul>
+                                {chat.messages.map((message, index) => (
+                                    <li key={index} className={message.senderId === user?.uid ? 'text-right' : 'text-left'}>
+                                        <div
+                                            className={message.senderId === user?.uid ? 'bg-blue-100 p-3 rounded-lg inline-block' : 'bg-gray-300 p-3 rounded-lg inline-block'}
+                                        >
+                                            <p>{message.text}</p>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
 
-                        <div className="mt-4 flex">
+                        <div className="flex items-center mt-auto">
                             <input
                                 type="text"
-                                className="border border-gray-300 rounded-l-lg p-2 w-full"
-                                value={newMessage}
-                                onChange={(e) => setNewMessage(e.target.value)}
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
                                 placeholder="Scrivi un messaggio..."
+                                className="w-full p-3 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                             <button
-                                onClick={handleSendMessage}
-                                className="bg-blue-500 text-white rounded-r-lg p-2 hover:bg-blue-600"
-                                disabled={loading}
+                                onClick={sendMessage}
+                                disabled={sending}
+                                className={`ml-3 p-3 bg-blue-500 text-white rounded-r-md ${sending ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
-                                {loading ? 'Inviando...' : 'Invia'}
+                                {sending ? 'Invio...' : 'Invia'}
                             </button>
                         </div>
                     </div>
-                </div>
-            </section>
+                )}
+            </div>
 
+            {/* Footer */}
             <Footer />
         </div>
     );
