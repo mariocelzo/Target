@@ -7,11 +7,22 @@ import { useRouter } from 'next/navigation'
 import Link from "next/link"
 import { onAuthStateChanged, User } from 'firebase/auth'
 
+// Funzione per convertire il file immagine in base64
+function convertToBase64(file: File) {
+    return new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
 export default function Sell() {
     const [name, setName] = useState('')
     const [description, setDescription] = useState('')
     const [price, setPrice] = useState('')
     const [category, setCategory] = useState('')
+    const [image, setImage] = useState<File | null>(null)  // Nuovo stato per l'immagine
     const [loading, setLoading] = useState(false)
     const [user, setUser] = useState<User | null>(null)
     const router = useRouter()
@@ -23,10 +34,16 @@ export default function Sell() {
         return () => unsubscribe()
     }, [])
 
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setImage(e.target.files[0]);
+        }
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        if (!name || !description || !price || !category || !user) {
+        if (!name || !description || !price || !category || !user || !image) {
             alert('Tutti i campi sono obbligatori e devi essere loggato')
             return
         }
@@ -34,13 +51,17 @@ export default function Sell() {
         setLoading(true)
 
         try {
-            // Aggiungi il prodotto alla collezione 'products' di Firestore
+            // Converti l'immagine in base64
+            const base64Image = await convertToBase64(image);
+
+            // Aggiungi il prodotto alla collezione 'products' di Firestore, includendo l'immagine in base64
             await addDoc(collection(db, 'products'), {
                 name,
                 description,
                 price,
                 category,
                 userId: user.uid,
+                image: base64Image,  // Salva l'immagine come base64
                 createdAt: new Date(),
             })
 
@@ -144,6 +165,18 @@ export default function Sell() {
                             </select>
                         </div>
 
+                        {/* Nuovo campo per caricare l'immagine */}
+                        <div className="space-y-4">
+                            <label htmlFor="image" className="block text-lg">Immagine dell'oggetto</label>
+                            <input
+                                id="image"
+                                type="file"
+                                onChange={handleImageChange}
+                                className="w-full p-4 rounded-full text-black shadow-lg focus:outline-none"
+                                required
+                            />
+                        </div>
+
                         <button
                             type="submit"
                             className="w-full py-4 bg-[#C4333B] text-white font-bold rounded-full"
@@ -170,4 +203,3 @@ export default function Sell() {
         </div>
     )
 }
-
