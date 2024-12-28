@@ -1,151 +1,198 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import { useRouter, useParams } from 'next/navigation'
-import { doc, getDoc } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
+import Link from "next/link";
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '@/lib/firebase';
 
 interface Product {
-    id: string
-    name: string
-    category: string
-    price: number
-    description: string
-    image?: string
-    userId?: string
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    category: string;
+    createdAt: string;
+    userId: string;
+    image?: string;
 }
 
-interface Seller {
-    fullName: string
-    email?: string
-}
-
-export default function ProductDetailsPage() {
-    const { id } = useParams() as { id: string }
-    const [product, setProduct] = useState<Product | null>(null)
-    const [seller, setSeller] = useState<Seller | null>(null)
-    const [isLoading, setIsLoading] = useState(true)
-    const router = useRouter()
+export default function ProductDetailPage() {
+    const [product, setProduct] = useState<Product | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [redirectToChat, setRedirectToChat] = useState<string | null>(null);
+    const params = useParams();
+    const id = params?.id;
+    const [user, loadingUser] = useAuthState(auth);
+    const router = useRouter();
 
     useEffect(() => {
-        const fetchProductAndSeller = async () => {
-            if (!id) return
+        if (!id) return;
 
+        const fetchProductDetails = async () => {
+            setIsLoading(true);
             try {
-                setIsLoading(true)
+                const docRef = doc(db, 'products', String(id)); // Forza l'id come stringa
+                const docSnap = await getDoc(docRef);
 
-                // Recupera il prodotto
-                const productRef = doc(db, 'products', id)
-                const productSnap = await getDoc(productRef)
-
-                if (productSnap.exists()) {
-                    const productData = { id: productSnap.id, ...productSnap.data() } as Product
-                    setProduct(productData)
-
-                    // Recupera i dati del venditore
-                    if (productData.userId) {
-                        const userRef = doc(db, 'users', productData.userId)
-                        const userSnap = await getDoc(userRef)
-
-                        if (userSnap.exists()) {
-                            setSeller(userSnap.data() as Seller)
-                        } else {
-                            console.warn('Venditore non trovato per userId:', productData.userId)
-                        }
-                    }
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const productData: Product = {
+                        id: docSnap.id,
+                        name: data.name || '',
+                        description: data.description || '',
+                        price: data.price || 0,
+                        category: data.category || '',
+                        createdAt: data.createdAt || '',
+                        userId: data.userId || '',
+                        image: data.image || '',
+                    };
+                    setProduct(productData);
+                    setError(null);
                 } else {
-                    console.error('Prodotto non trovato!')
-                    router.push('/404')
+                    setError('Prodotto non trovato');
                 }
             } catch (error) {
-                console.error('Errore nel recupero dei dettagli:', error)
+                setError('Errore nel recupero dei dettagli del prodotto');
             } finally {
-                setIsLoading(false)
+                setIsLoading(false);
             }
+        };
+
+        fetchProductDetails();
+    }, [id]);
+
+    useEffect(() => {
+        if (redirectToChat) {
+            router.push(redirectToChat);
         }
+    }, [redirectToChat, router]);
 
-        fetchProductAndSeller()
-    }, [id, router])
-
-    // Stato di caricamento
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-100">
-                <p className="text-2xl text-gray-600">Caricamento dettagli prodotto...</p>
+                <p className="text-2xl text-gray-600">Caricamento del prodotto...</p>
             </div>
-        )
+        );
     }
 
-    // Stato prodotto non trovato
-    if (!product) {
+    if (error) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-100">
-                <p className="text-2xl text-red-600">Prodotto non trovato!</p>
+                <p className="text-2xl text-red-600">{error}</p>
             </div>
-        )
+        );
     }
 
-    // Stato principale
+    const handleContactSeller = async () => {
+        if (loadingUser) {
+            alert('Caricamento in corso...');
+            return;
+        }
+
+        if (!user) {
+            alert('Devi essere autenticato per contattare il venditore.');
+            return;
+        }
+
+        if (!product) {
+            alert('Prodotto non disponibile');
+            return;
+        }
+
+        const chatsRef = collection(db, 'chats');
+        const q = query(
+            chatsRef,
+            where('productId', '==', product.id),
+            where('buyerId', '==', user.uid),
+            where('sellerId', '==', product.userId)
+        );
+
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            const chatId = querySnapshot.docs[0].id;
+            setRedirectToChat(`/chat/${chatId}`);
+        } else {
+            const newChat = {
+                productId: product.id,
+                buyerId: user.uid,
+                sellerId: product.userId,
+                messages: [],
+                createdAt: serverTimestamp(),
+            };
+
+            const chatDoc = await addDoc(chatsRef, newChat);
+            setRedirectToChat(`/chat/${chatDoc.id}`);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Hero Section */}
-            <section className="bg-[#41978F] text-white py-12">
+            <Header />
+
+            <section className="bg-[#41978F] text-white py-8">
                 <div className="container mx-auto text-center">
-                    <h1 className="text-4xl font-extrabold mb-2">{product.name}</h1>
-                    <p className="text-lg">Scopri ogni dettaglio su questo prodotto unico</p>
+                    <h1 className="text-3xl font-extrabold mb-3">{product?.name}</h1>
+                    <p className="text-md">{product?.category}</p>
                 </div>
             </section>
 
-            {/* Product Details */}
-            <section className="container mx-auto py-12 px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-                {/* Immagine Prodotto */}
-                <div className="w-full flex justify-center">
-                    {product.image ? (
+            <section className="container mx-auto py-8 px-4">
+                <div className="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden max-w-2xl mx-auto">
+                    <div className="h-64 bg-gray-200 flex items-center justify-center">
                         <img
-                            src={product.image}
-                            alt={product.name}
-                            className="w-full max-w-lg rounded-lg shadow-lg object-cover"
+                            src={product?.image || '/images/placeholder.jpg'}
+                            alt={product?.name}
+                            className="w-full h-full object-cover"
                         />
-                    ) : (
-                        <div className="w-full max-w-lg h-64 bg-gray-200 flex items-center justify-center rounded-lg shadow-md">
-                            <span className="text-gray-400">Immagine non disponibile</span>
-                        </div>
-                    )}
-                </div>
+                    </div>
+                    <div className="p-4">
+                        <h3 className="text-lg font-bold mb-2">Descrizione</h3>
+                        <p className="text-sm text-gray-600 mb-4">{product?.description}</p>
+                        <p className="text-xl text-gray-800 font-bold">€ {product?.price}</p>
 
-                {/* Dettagli Prodotto */}
-                <div className="space-y-6">
-                    <h2 className="text-3xl font-bold text-gray-800">{product.name}</h2>
-                    <p className="text-lg text-gray-600"><strong>Categoria:</strong> {product.category}</p>
-                    <p className="text-2xl font-bold text-[#C4333B]">€{product.price}</p>
-                    <p className="text-gray-700 leading-relaxed">{product.description}</p>
-                    {seller ? (
-                        <div className="mt-4">
-                            <p className="text-lg text-gray-600">
-                                <strong>Venditore:</strong> {seller.fullName || 'Nome non disponibile'}
-                            </p>
+                        <div className="mt-6 flex justify-between space-x-4">
+                            <Link
+                                href={product?.id ? `/order/${product.id}` : '#' }
+                                className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 focus:outline-none"
+                            >
+                                Acquista
+                            </Link>
+
+
+                            <button
+                                className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 focus:outline-none flex items-center space-x-2"
+                                onClick={handleContactSeller}
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="w-5 h-5"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M20 2H4C3.44772 2 3 2.44772 3 3V17C3 17.5523 3.44772 18 4 18H16L20 22V3C20 2.44772 19.5523 2 19 2Z"
+                                    />
+                                </svg>
+                                <span>Contatta il venditore</span>
+                            </button>
                         </div>
-                    ) : (
-                        <p className="text-lg text-gray-600">Caricamento informazioni venditore...</p>
-                    )}
-                    <button
-                        onClick={() => router.push('/')}
-                        className="mt-6 bg-[#C4333B] text-white px-6 py-3 rounded-md font-medium hover:bg-[#A12229] transition duration-300"
-                    >
-                        Torna alla Home
-                    </button>
+                    </div>
                 </div>
             </section>
 
-            {/* Informazioni Extra */}
-            <section className="bg-gray-100 py-8">
-                <div className="container mx-auto text-center">
-                    <h3 className="text-2xl font-semibold text-gray-800 mb-4">Perché scegliere i nostri prodotti?</h3>
-                    <p className="text-gray-600 max-w-2xl mx-auto">
-                        Offriamo solo prodotti di alta qualità, selezionati con cura e garantiti per soddisfare le esigenze dei nostri clienti.
-                    </p>
-                </div>
-            </section>
+            <Footer />
         </div>
-    )
+    );
 }
+

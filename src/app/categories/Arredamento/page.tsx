@@ -57,8 +57,15 @@ export default function ElectronicsPage() {
                         {products.map((product) => (
                             <div
                                 key={product.id}
-                                className="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                                className="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 relative"
                             >
+                                {/* Check if product is sold */}
+                                {product.sold && (
+                                    <div className="absolute top-0 left-0 bg-red-500 text-white text-xs font-bold px-2 py-1 uppercase rounded-br-lg">
+                                        Venduto
+                                    </div>
+                                )}
+
                                 <div className="h-48 bg-gray-200 flex items-center justify-center">
                                     {/* Placeholder per l'immagine del prodotto */}
                                     <img
@@ -70,12 +77,16 @@ export default function ElectronicsPage() {
                                 <div className="p-4">
                                     <h3 className="text-lg font-bold mb-2">{product.title}</h3>
                                     <p className="text-sm text-gray-600 mb-4 truncate">{product.description}</p>
-                                    <Link
-                                        href={`/products/${product.id}`}
-                                        className="text-white bg-[#C4333B] hover:bg-[#A12229] px-4 py-2 rounded-md text-sm font-medium"
-                                    >
-                                        Visualizza Dettagli
-                                    </Link>
+
+                                    {/* Conditionally render "Visualizza Dettagli" link */}
+                                    {!product.sold && (
+                                        <Link
+                                            href={`/products/${product.id}`}
+                                            className="text-white bg-[#C4333B] hover:bg-[#A12229] px-4 py-2 rounded-md text-sm font-medium"
+                                        >
+                                            Visualizza Dettagli
+                                        </Link>
+                                    )}
                                 </div>
                             </div>
                         ))}

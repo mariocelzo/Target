@@ -42,7 +42,7 @@ export default function ElectronicsPage() {
             {/* Hero Section */}
             <section className="bg-[#41978F] text-white py-12">
                 <div className="container mx-auto text-center">
-                    <h1 className="text-4xl font-extrabold mb-4">Prodotti Moda</h1>
+                    <h1 className="text-4xl font-extrabold mb-4">Prodotti Elettronica</h1>
                     <p className="text-lg">Scopri i migliori articoli tecnologici disponibili</p>
                 </div>
             </section>
@@ -51,14 +51,21 @@ export default function ElectronicsPage() {
             <section className="container mx-auto py-12 px-4">
                 <h2 className="text-2xl font-bold mb-6 text-center">Esplora i Prodotti</h2>
                 {products.length === 0 ? (
-                    <p className="text-center text-gray-500">Nessun prodotto trovato nella categoria Moda.</p>
+                    <p className="text-center text-gray-500">Nessun prodotto trovato nella categoria Elettronica.</p>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {products.map((product) => (
                             <div
                                 key={product.id}
-                                className="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                                className="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 relative"
                             >
+                                {/* Check if product is sold */}
+                                {product.sold && (
+                                    <div className="absolute top-0 left-0 bg-red-500 text-white text-xs font-bold px-2 py-1 uppercase rounded-br-lg">
+                                        Venduto
+                                    </div>
+                                )}
+
                                 <div className="h-48 bg-gray-200 flex items-center justify-center">
                                     {/* Placeholder per l'immagine del prodotto */}
                                     <img
@@ -70,12 +77,16 @@ export default function ElectronicsPage() {
                                 <div className="p-4">
                                     <h3 className="text-lg font-bold mb-2">{product.title}</h3>
                                     <p className="text-sm text-gray-600 mb-4 truncate">{product.description}</p>
-                                    <Link
-                                        href={`/products/${product.id}`}  // This will navigate to /products/[id]
-                                        className="text-white bg-[#C4333B] hover:bg-[#A12229] px-4 py-2 rounded-md text-sm font-medium"
-                                    >
-                                        Visualizza Dettagli
-                                    </Link>
+
+                                    {/* Conditionally render "Visualizza Dettagli" link */}
+                                    {!product.sold && (
+                                        <Link
+                                            href={`/products/${product.id}`}
+                                            className="text-white bg-[#C4333B] hover:bg-[#A12229] px-4 py-2 rounded-md text-sm font-medium"
+                                        >
+                                            Visualizza Dettagli
+                                        </Link>
+                                    )}
                                 </div>
                             </div>
                         ))}
