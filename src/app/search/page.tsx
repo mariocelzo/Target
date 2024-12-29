@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 interface Product {
     id: string;
-    title: string;
+    name: string;  // Cambia 'title' con 'name'
     description: string;
     price?: number;
 }
@@ -28,8 +28,8 @@ export default function SearchResults() {
             setIsLoading(true);
             const q = query(
                 collection(db, 'products'),
-                where('title', '>=', searchQuery),
-                where('title', '<=', searchQuery + '\uf8ff')
+                where('name', '>=', searchQuery),
+                where('name', '<=', searchQuery + '\uf8ff')  // Ricerca su 'name' (campo del prodotto)
             );
 
             try {
@@ -66,13 +66,10 @@ export default function SearchResults() {
                                 className="bg-white shadow-md rounded-lg p-4"
                             >
                                 <Link href={`/products/${product.id}`}>
-                                    <h3 className="text-xl font-bold">{product.title}</h3>
+                                    <h3 className="text-xl font-bold">{product.name}</h3> {/* Cambia title con name */}
                                     <p className="text-gray-500">{product.description}</p>
-                                    {product.price && (
-                                        <p className="text-green-600 font-bold">
-                                            €{typeof product.price === 'number' ? product.price.toFixed(2) : '0.00'}
-                                        </p>
-                                    )}
+                                    <p className=  "text-green-600 font-bold">  €{product.price}</p>
+
                                 </Link>
                             </li>
                         ))}

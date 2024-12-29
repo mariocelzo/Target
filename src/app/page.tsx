@@ -10,9 +10,17 @@ import Link from 'next/link';
 
 interface Product {
   id: string;
-  title: string;
+  name: string;
   description: string;
   price?: number;
+  sold?: boolean;
+  userId: string;
+}
+
+interface User {
+  uid: string;
+  displayName: string | null;
+  email: string;
 }
 
 export default function Home() {
@@ -20,7 +28,7 @@ export default function Home() {
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [user, setUser] = useState<any>(null); // Stato per l'utente loggato
+  const [user, setUser] = useState<User | null>(null); // Specify the type here
   const router = useRouter();
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
@@ -28,9 +36,13 @@ export default function Home() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
-        setUser(currentUser); // Imposta l'utente loggato
+        setUser({
+          uid: currentUser.uid,
+          displayName: currentUser.displayName,
+          email: currentUser.email || '',
+        });
       } else {
-        setUser(null); // Nessun utente loggato
+        setUser(null);
       }
     });
 
@@ -79,18 +91,25 @@ export default function Home() {
         if (queryText.trim()) {
           setIsLoading(true);
 
-          const q = query(
-              collection(db, 'products'),
-              where('title', '>=', queryText),
-              where('title', '<=', queryText + '\uf8ff')
-          );
-
           try {
+            // Query per i prodotti per titolo
+            const q = query(
+                collection(db, 'products'),
+                where('name', '>=', queryText),
+                where('name', '<=', queryText + '\uf8ff')
+            );
+
             const querySnapshot = await getDocs(q);
             const results: Product[] = [];
+
+            // Filtraggio client-side per i prodotti dell'utente corrente
             querySnapshot.forEach((doc) => {
-              results.push({ id: doc.id, ...doc.data() } as Product);
+              const product = { id: doc.id, ...doc.data() } as Product;
+              if (product.userId !== user?.uid && (product.sold === false || !product.hasOwnProperty('sold'))) {
+                results.push(product);
+              }
             });
+
             setSearchResults(results);
           } catch (error) {
             console.error('Errore durante la ricerca:', error);
@@ -102,7 +121,7 @@ export default function Home() {
           setIsLoading(false);
         }
       },
-      []
+      [user] // Dipendenza dall'utente
   );
 
   // Gestione del pulsante di ricerca
@@ -125,8 +144,6 @@ export default function Home() {
     }
   };
 
-  // @ts-ignore
-  // @ts-ignore
   return (
       <div className="min-h-screen bg-gray-100">
         {/* Navbar */}
@@ -162,10 +179,7 @@ export default function Home() {
             {/* Sezione Utente */}
             {user ? (
                 <div className="relative">
-                  <button
-                      onClick={toggleDropdown}
-                      className="flex items-center space-x-2 hover:text-gray-200"
-                  >
+                  <button onClick={toggleDropdown} className="flex items-center space-x-2 hover:text-gray-200">
                     <User size={20} />
                     <span>{user.displayName || user.email}</span>
                     <ChevronDown size={16} />
@@ -197,10 +211,7 @@ export default function Home() {
             {/* Icona Chat con contatore di notifiche */}
             {user && (
                 <div className="relative">
-                  <button
-                      onClick={() => router.push(`/chat/${user.uid}`)} // Reindirizzamento alla chat
-                      className="flex items-center space-x-2 hover:text-gray-200"
-                  >
+                  <button onClick={() => router.push(`/chat/${user.uid}`)} className="flex items-center space-x-2 hover:text-gray-200">
                     <MessageCircle size={20} />
                     {unreadMessagesCount > 0 && (
                         <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-2 py-1">
@@ -239,9 +250,7 @@ export default function Home() {
 
               {/* Risultati della ricerca */}
               {searchQuery && (
-                  <div
-                      className="absolute bg-white w-full shadow-lg rounded-lg mt-2 overflow-hidden max-h-60 transition-all duration-300 ease-in-out"
-                  >
+                  <div className="absolute bg-white w-full shadow-lg rounded-lg mt-2 overflow-hidden max-h-60 transition-all duration-300 ease-in-out">
                     {isLoading ? (
                         <div className="p-4 text-center flex justify-center items-center">
                           <div className="animate-spin h-8 w-8 border-4 border-t-4 border-[#C4333B] border-solid rounded-full"></div>
@@ -249,12 +258,9 @@ export default function Home() {
                     ) : searchResults.length > 0 ? (
                         <ul className="max-h-60 overflow-y-auto">
                           {searchResults.map((result) => (
-                              <li
-                                  key={result.id}
-                                  className="px-4 py-2 border-b hover:bg-[#F1F1F1] transition-all duration-200"
-                              >
+                              <li key={result.id} className="px-4 py-2 border-b hover:bg-[#F1F1F1] transition-all duration-200">
                                 <Link href={`/products/${result.id}`} className="flex flex-col">
-                                  <div className="font-bold text-[#333]">{result.title}</div>
+                                  <div className="font-bold text-[#333]">{result.name}</div>
                                   <div className="text-sm text-gray-500">{result.description}</div>
                                 </Link>
                               </li>
@@ -282,43 +288,24 @@ export default function Home() {
               <div className="bg-white shadow-md rounded-lg p-6">
                 <Link href="/categories/Moda">
                   <h3 className="text-xl font-bold mb-4">Moda</h3>
-                  <img
-                      src="/images/fashion.jpg"
-                      alt="Moda"
-                      className="w-full h-48 object-cover rounded-lg"
-                  />
+                  <img src="/images/fashion.jpg" alt="Moda" className="w-full h-40 object-cover rounded-lg"/>
                 </Link>
               </div>
               <div className="bg-white shadow-md rounded-lg p-6">
                 <Link href="/categories/Arredamento">
-                  <h3 className="text-xl font-bold mb-4">Arredamento</h3>
-                  <img
-                      src="/images/furniture.jpg"
-                      alt="Arredamento"
-                      className="w-full h-48 object-cover rounded-lg"
-                  />
+                  <h3 className="text-xl font-bold mb-4">Casa</h3>
+                  <img src="/images/furniture.jpg" alt="Casa" className="w-full h-40 object-cover rounded-lg"/>
                 </Link>
               </div>
               <div className="bg-white shadow-md rounded-lg p-6">
                 <Link href="/categories/Giocattoli">
-                  <h3 className="text-xl font-bold mb-4">Giocattoli</h3>
-                  <img
-                      src="/images/toys.jpg"
-                      alt="Giocattoli"
-                      className="w-full h-48 object-cover rounded-lg"
-                  />
+                  <h3 className="text-xl font-bold mb-4">Auto e Moto</h3>
+                  <img src="/images/car.jpg" alt="Auto e Moto" className="w-full h-40 object-cover rounded-lg"/>
                 </Link>
               </div>
             </div>
           </div>
         </section>
-
-        {/* Footer */}
-        <footer className="bg-[#333] text-white py-8">
-          <div className="container mx-auto text-center">
-            <p>&copy; {new Date().getFullYear()} Target Marketplace. Tutti i diritti riservati.</p>
-          </div>
-        </footer>
       </div>
   );
 }

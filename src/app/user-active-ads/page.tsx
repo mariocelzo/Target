@@ -12,7 +12,7 @@ interface Ad {
     id: string
     title: string
     price: string
-    imageUrl: string
+    image: string
     sold: boolean
 }
 
@@ -20,7 +20,7 @@ export default function UserActiveAds() {
     const [user, setUser] = useState<import('firebase/auth').User | null>(null)
     const [activeAds, setActiveAds] = useState<Ad[]>([])
     const [loading, setLoading] = useState<boolean>(true)
-    const [showTooltip, setShowTooltip] = useState<boolean>(false) // Stato per il tooltip
+    const [showTooltip, setShowTooltip] = useState<boolean>(false) // Tooltip per i dettagli ordine
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -29,10 +29,16 @@ export default function UserActiveAds() {
                 const adsRef = collection(db, 'products')
                 const q = query(adsRef, where('userId', '==', user.uid))
                 const querySnapshot = await getDocs(q)
-                const ads: Ad[] = querySnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data(),
-                }) as Ad)
+                const ads: Ad[] = querySnapshot.docs.map(doc => {
+                    const data = doc.data()
+                    return {
+                        id: doc.id,
+                        title: data.title,
+                        price: data.price,
+                        image: data.image || '/placeholder-image.jpg', // Immagine di fallback
+                        sold: data.sold || false,
+                    }
+                })
                 setActiveAds(ads)
                 setLoading(false)
             } else {
@@ -54,11 +60,6 @@ export default function UserActiveAds() {
             console.error('Errore durante l\'eliminazione dell\'annuncio:', error)
             alert('C\'è stato un errore nell\'eliminazione dell\'annuncio.')
         }
-    }
-
-    const fetchOrderDetails = async (adId: string) => {
-        // Logica per ottenere i dettagli dell'ordine
-        console.log(`Recuperando dettagli dell'ordine per l'annuncio con ID: ${adId}`)
     }
 
     if (loading) {
@@ -100,17 +101,24 @@ export default function UserActiveAds() {
                                     className={`bg-white shadow-md rounded-lg p-6 ${ad.sold ? 'bg-red-500 text-white cursor-not-allowed' : ''}`}
                                 >
                                     {!ad.sold ? (
-                                        <Link
-                                            href={`/edit/${ad.id}`}
-                                            className="w-full"
-                                        >
-                                            <img src={ad.imageUrl} alt={ad.title} className="w-full h-48 object-cover rounded-lg mb-4" />
+                                        <Link href={`/edit/${ad.id}`} className="w-full">
+                                            <img
+                                                src={ad.image}
+                                                alt={ad.title}
+                                                className="w-full h-48 object-cover rounded-lg mb-4"
+                                                onError={(e) => (e.currentTarget.src = '/placeholder-image.jpg')}
+                                            />
                                             <h3 className="text-xl font-bold mb-2 text-black">{ad.title}</h3>
                                             <p className="text-gray-500">{ad.price} €</p>
                                         </Link>
                                     ) : (
                                         <div>
-                                            <img src={ad.imageUrl} alt={ad.title} className="w-full h-48 object-cover rounded-lg mb-4" />
+                                            <img
+                                                src={ad.image}
+                                                alt={ad.title}
+                                                className="w-full h-48 object-cover rounded-lg mb-4"
+                                                onError={(e) => (e.currentTarget.src = '/placeholder-image.jpg')}
+                                            />
                                             <h3 className="text-xl font-bold mb-2 text-black">{ad.title}</h3>
                                             <p className="text-black">{ad.price} €</p>
                                             <p className="text-red-600 mt-2">Questo annuncio è stato venduto.</p>
@@ -136,17 +144,14 @@ export default function UserActiveAds() {
                                         {/* Pulsante con tre puntini per gli annunci venduti */}
                                         {ad.sold && (
                                             <div
-                                                onMouseEnter={() => setShowTooltip(true)}  // Mostra il tooltip
-                                                onMouseLeave={() => setShowTooltip(false)} // Nascondi il tooltip
+                                                onMouseEnter={() => setShowTooltip(true)}
+                                                onMouseLeave={() => setShowTooltip(false)}
                                                 className="relative inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-600 text-white hover:bg-gray-700"
                                             >
                                                 <EllipsisVerticalIcon className="w-6 h-6" />
-
-                                                {/* Tooltip che appare al passaggio del mouse */}
                                                 {showTooltip && (
                                                     <div className="absolute left-0 top-10 w-64 p-4 bg-white shadow-lg rounded-lg text-black">
                                                         <p><strong>Dettagli Ordine</strong></p>
-                                                        {/* Qui puoi inserire i dettagli reali del tuo ordine */}
                                                         <p>ID Prodotto: {ad.id}</p>
                                                         <p>Indirizzo di Spedizione: Piazza Marconi 20, Sarno</p>
                                                         <p>Città: Sarno</p>
@@ -168,12 +173,6 @@ export default function UserActiveAds() {
             <footer className="bg-[#41978F] text-white py-8">
                 <div className="container mx-auto text-center">
                     <p className="text-lg">&copy; 2024 Target Marketplace. Tutti i diritti riservati.</p>
-                    <div className="mt-4">
-                        <ul className="flex justify-center space-x-6">
-                            <li><Link href="/privacy-policy" className="hover:text-gray-200">Privacy Policy</Link></li>
-                            <li><Link href="/terms-of-service" className="hover:text-gray-200">Termini di Servizio</Link></li>
-                        </ul>
-                    </div>
                 </div>
             </footer>
         </div>

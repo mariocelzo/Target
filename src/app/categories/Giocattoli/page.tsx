@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { collection, query, where, getDocs } from 'firebase/firestore'
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import Link from 'next/link'
+import { getAuth } from 'firebase/auth'
 
 export default function ElectronicsPage() {
     const [products, setProducts] = useState<any[]>([])
@@ -12,12 +13,34 @@ export default function ElectronicsPage() {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
+                // Recupera l'utente loggato
+                const auth = getAuth()
+                const user = auth.currentUser
+                if (!user) {
+                    setIsLoading(false)
+                    return
+                }
+
                 const q = query(collection(db, 'products'), where('category', '==', 'Giocattoli'))
                 const querySnapshot = await getDocs(q)
                 const productList: any[] = []
-                querySnapshot.forEach((doc) => {
-                    productList.push({ id: doc.id, ...doc.data() })
-                })
+
+                // Fetch products and their sellers' information
+                for (const docSnap of querySnapshot.docs) {
+                    const productData = docSnap.data()
+                    const productId = docSnap.id
+
+                    // Verifica che il prodotto non sia stato pubblicato dall'utente loggato
+                    if (productData.userId !== user.uid) {
+                        // Get the user who posted the product (assuming 'userId' is a field in the product)
+                        const userDocRef = doc(db, 'users', productData.userId)
+                        const userDoc = await getDoc(userDocRef)
+                        const userData = userDoc.exists() ? userDoc.data() : null
+
+                        productList.push({ id: productId, ...productData, user: userData })
+                    }
+                }
+
                 setProducts(productList)
                 setIsLoading(false)
             } catch (error) {
@@ -42,7 +65,7 @@ export default function ElectronicsPage() {
             {/* Hero Section */}
             <section className="bg-[#41978F] text-white py-12">
                 <div className="container mx-auto text-center">
-                    <h1 className="text-4xl font-extrabold mb-4">Prodotti Elettronica</h1>
+                    <h1 className="text-4xl font-extrabold mb-4">Prodotti Giocattoli</h1>
                     <p className="text-lg">Scopri i migliori articoli tecnologici disponibili</p>
                 </div>
             </section>
@@ -51,7 +74,7 @@ export default function ElectronicsPage() {
             <section className="container mx-auto py-12 px-4">
                 <h2 className="text-2xl font-bold mb-6 text-center">Esplora i Prodotti</h2>
                 {products.length === 0 ? (
-                    <p className="text-center text-gray-500">Nessun prodotto trovato nella categoria Elettronica.</p>
+                    <p className="text-center text-gray-500">Nessun prodotto trovato nella categoria Giocattoli.</p>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {products.map((product) => (
@@ -77,6 +100,7 @@ export default function ElectronicsPage() {
                                 <div className="p-4">
                                     <h3 className="text-lg font-bold mb-2">{product.title}</h3>
                                     <p className="text-sm text-gray-600 mb-4 truncate">{product.description}</p>
+
 
                                     {/* Conditionally render "Visualizza Dettagli" link */}
                                     {!product.sold && (

@@ -6,9 +6,9 @@ import { motion } from 'framer-motion'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
-import PasswordStrengthMeter from '../components/PasswordStrengthMeter' // Importa PasswordStrengthMeter
-import Header from '../components/Header'; // Aggiungi l'import dell'header
-import Footer from '../components/Footer'; // Aggiungi l'import del footer
+import PasswordStrengthMeter from '../components/PasswordStrengthMeter'
+import Header from '../components/Header'
+import Footer from '../components/Footer'
 
 export default function RegisterPage() {
     const [formData, setFormData] = useState({
@@ -25,9 +25,10 @@ export default function RegisterPage() {
     })
     const [errors, setErrors] = useState<Record<string, string>>({})
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null) // Stato per l'alert
+    const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
     const router = useRouter()
 
+    // 📝 Gestione dei cambiamenti nei campi
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         setFormData(prev => ({ ...prev, [name]: value }))
@@ -36,6 +37,7 @@ export default function RegisterPage() {
         }
     }
 
+    // ✅ Validazione Form
     const validateForm = () => {
         const newErrors: Record<string, string> = {}
         if (!formData.fullName.trim()) newErrors.fullName = 'Il nome completo è obbligatorio'
@@ -64,15 +66,22 @@ export default function RegisterPage() {
         return Object.keys(newErrors).length === 0
     }
 
+    // 🚀 Gestione Submit
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!validateForm()) return
 
         setIsSubmitting(true)
         try {
+            // ✅ Crea l'utente su Firebase Auth
             const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password)
             const user = userCredential.user
 
+            if (!user?.uid) {
+                throw new Error('ID utente non valido. Registrazione fallita.')
+            }
+
+            // ✅ Salva i dettagli utente in Firestore
             await setDoc(doc(db, 'users', user.uid), {
                 fullName: formData.fullName,
                 email: formData.email,
@@ -85,11 +94,11 @@ export default function RegisterPage() {
                 createdAt: serverTimestamp(),
             })
 
-            setAlert({ type: 'success', message: 'Registrazione completata con successo!' }) // Mostra l'alert di successo
-            setTimeout(() => router.push('/login'), 3000) // Reindirizza dopo 3 secondi
-        } catch (error: unknown) {
-            console.error('Errore durante la registrazione:', error)
-            setAlert({ type: 'error', message: 'Errore durante la registrazione. Riprova più tardi.' }) // Mostra l'alert di errore
+            setAlert({ type: 'success', message: 'Registrazione completata con successo!' })
+            setTimeout(() => router.push('/login'), 3000)
+        } catch (error: any) {
+            console.error('Errore durante la registrazione:', error.message || error)
+            setAlert({ type: 'error', message: error.message || 'Errore durante la registrazione. Riprova più tardi.' })
         } finally {
             setIsSubmitting(false)
         }
@@ -102,19 +111,6 @@ export default function RegisterPage() {
         }
     }, [])
 
-    const formFields = [
-        { name: 'fullName', label: 'Nome Completo', type: 'text' },
-        { name: 'email', label: 'Email', type: 'email' },
-        { name: 'password', label: 'Password', type: 'password' },
-        { name: 'confirmPassword', label: 'Conferma Password', type: 'password' },
-        { name: 'dateOfBirth', label: 'Data di Nascita', type: 'date' },
-        { name: 'province', label: 'Provincia', type: 'text' },
-        { name: 'city', label: 'Città', type: 'text' },
-        { name: 'address', label: 'Indirizzo', type: 'text' },
-        { name: 'zipCode', label: 'CAP', type: 'text' },
-        { name: 'phoneNumber', label: 'Numero di Telefono', type: 'tel' },
-    ]
-
     return (
         <div className="flex flex-col min-h-screen">
             {/* Header */}
@@ -122,43 +118,32 @@ export default function RegisterPage() {
 
             {/* Contenuto centrale */}
             <div className="flex flex-col items-center justify-center flex-grow bg-gradient-to-br from-[#41978F] to-[#C4333B]">
-                <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="sm:mx-auto sm:w-full sm:max-w-md">
+                <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-white">Unisciti a Target Marketplace</h2>
-                    <p className="mt-2 text-center text-sm text-gray-200">Scopri offerte incredibili su articoli di seconda mano</p>
+                    <p className="text-center text-sm text-gray-200">Scopri offerte incredibili su articoli di seconda mano</p>
                 </motion.div>
 
-                {/* Registration form with margin-bottom */}
-                <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="mt-8 sm:mx-auto sm:w-full sm:max-w-md mb-6">
+                {/* Form */}
+                <div className="mt-8 mb-6 sm:mx-auto sm:w-full sm:max-w-md">
                     <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                        {/* Alert dinamico */}
                         {alert && (
-                            <div
-                                className={`mb-4 p-3 rounded-md text-sm ${alert.type === 'success' ? 'text-green-700 bg-green-100 border border-green-400' : 'text-red-700 bg-red-100 border border-red-400'}`}
-                            >
+                            <div className={`mb-4 p-3 rounded-md text-sm ${alert.type === 'success' ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'}`}>
                                 {alert.message}
                             </div>
                         )}
 
-                        <form className="space-y-6" onSubmit={handleSubmit}>
-                            {formFields.map((field) => (
-                                <div key={field.name}>
-                                    <label htmlFor={field.name} className="block text-sm font-medium text-gray-700">{field.label}</label>
-                                    <input
-                                        id={field.name}
-                                        name={field.name}
-                                        type={field.type}
-                                        value={formData[field.name as keyof typeof formData]}
-                                        onChange={handleChange}
-                                        className="w-full border px-3 py-2 rounded-md"
-                                    />
-                                    {errors[field.name] && <p className="text-red-500 text-sm">{errors[field.name]}</p>}
-                                    {field.name === 'password' && <PasswordStrengthMeter password={formData.password} />}
+                        <form onSubmit={handleSubmit}>
+                            {Object.keys(formData).map((field) => (
+                                <div key={field}>
+                                    <label className="block text-sm font-medium text-gray-700">{field}</label>
+                                    <input name={field} value={formData[field as keyof typeof formData]} onChange={handleChange} className="w-full border px-3 py-2 rounded-md" />
+                                    {errors[field] && <p className="text-red-500 text-sm">{errors[field]}</p>}
                                 </div>
                             ))}
                             <button type="submit" className="bg-[#C4333B] text-white py-2 px-4 w-full rounded-md">{isSubmitting ? 'Registrazione...' : 'Registrati'}</button>
                         </form>
                     </div>
-                </motion.div>
+                </div>
             </div>
 
             {/* Footer */}

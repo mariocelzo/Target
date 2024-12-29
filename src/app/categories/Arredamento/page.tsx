@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { collection, query, where, getDocs } from 'firebase/firestore'
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import Link from 'next/link'
+import { getAuth } from 'firebase/auth'
 
 export default function ElectronicsPage() {
     const [products, setProducts] = useState<any[]>([])
@@ -12,12 +13,34 @@ export default function ElectronicsPage() {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
+                // Recupera l'utente loggato
+                const auth = getAuth()
+                const user = auth.currentUser
+                if (!user) {
+                    setIsLoading(false)
+                    return
+                }
+
                 const q = query(collection(db, 'products'), where('category', '==', 'Arredamento'))
                 const querySnapshot = await getDocs(q)
                 const productList: any[] = []
-                querySnapshot.forEach((doc) => {
-                    productList.push({ id: doc.id, ...doc.data() })
-                })
+
+                // Fetch products and their sellers' information
+                for (const docSnap of querySnapshot.docs) {
+                    const productData = docSnap.data()
+                    const productId = docSnap.id
+
+                    // Verifica che il prodotto non sia stato pubblicato dall'utente loggato
+                    if (productData.userId !== user.uid) {
+                        // Get the user who posted the product (assuming 'userId' is a field in the product)
+                        const userDocRef = doc(db, 'users', productData.userId)
+                        const userDoc = await getDoc(userDocRef)
+                        const userData = userDoc.exists() ? userDoc.data() : null
+
+                        productList.push({ id: productId, ...productData, user: userData })
+                    }
+                }
+
                 setProducts(productList)
                 setIsLoading(false)
             } catch (error) {
@@ -77,6 +100,7 @@ export default function ElectronicsPage() {
                                 <div className="p-4">
                                     <h3 className="text-lg font-bold mb-2">{product.title}</h3>
                                     <p className="text-sm text-gray-600 mb-4 truncate">{product.description}</p>
+
 
                                     {/* Conditionally render "Visualizza Dettagli" link */}
                                     {!product.sold && (

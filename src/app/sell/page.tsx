@@ -63,6 +63,7 @@ export default function Sell() {
                 userId: user.uid,
                 image: base64Image,  // Salva l'immagine come base64
                 createdAt: new Date(),
+                sold: false,  // Inizializza 'sold' a false
             })
 
             alert('Oggetto inserito con successo!')
