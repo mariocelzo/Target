@@ -5,9 +5,11 @@ const Header = () => {
         <header className="w-full bg-[#C4333B] text-white p-4 shadow-md">
             <div className="container mx-auto flex items-center justify-between">
                 {/* Logo on the left */}
-                <Link href="/" className="text-2xl font-bold">
-                    Logo
-                </Link>
+                <img
+                    src="/logoNosfondo.png" // Inserisci qui il Base64 del logo
+                    alt="Logo"
+                    className="h-10 w-auto" // Adatta altezza e larghezza
+                />
 
                 {/* Navigation links centered */}
                 <nav className="flex-grow text-center">

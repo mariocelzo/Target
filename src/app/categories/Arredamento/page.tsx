@@ -5,6 +5,10 @@ import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firesto
 import { db } from '@/lib/firebase'
 import Link from 'next/link'
 import { getAuth } from 'firebase/auth'
+import Header from "@/app/components/Header";
+import Footer from "@/app/components/Footer";
+
+
 
 export default function ElectronicsPage() {
     const [products, setProducts] = useState<any[]>([])
@@ -62,6 +66,9 @@ export default function ElectronicsPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
+            {/* Aggiungi l'Header */}
+            <Header />
+
             {/* Hero Section */}
             <section className="bg-[#41978F] text-white py-12">
                 <div className="container mx-auto text-center">
@@ -101,7 +108,6 @@ export default function ElectronicsPage() {
                                     <h3 className="text-lg font-bold mb-2">{product.title}</h3>
                                     <p className="text-sm text-gray-600 mb-4 truncate">{product.description}</p>
 
-
                                     {/* Conditionally render "Visualizza Dettagli" link */}
                                     {!product.sold && (
                                         <Link
@@ -117,6 +123,9 @@ export default function ElectronicsPage() {
                     </div>
                 )}
             </section>
+
+            {/* Aggiungi il Footer */}
+            <Footer />
         </div>
     )
 }

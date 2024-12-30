@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { useFormValidation } from '@/hooks/use-form-validation'
-import { signInWithEmailAndPassword } from 'firebase/auth'
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 import { useRouter } from 'next/navigation'
 
@@ -16,6 +16,22 @@ export default function LoginForm() {
 
     const emailError = useFormValidation(email, { required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ })
     const passwordError = useFormValidation(password, { required: true, minLength: 8 })
+
+    // Gestione login con Google
+    const handleGoogleSignIn = async () => {
+        const provider = new GoogleAuthProvider()
+
+        try {
+            const userCredential = await signInWithPopup(auth, provider)
+            router.push('/') // Reindirizza alla home page dopo il login
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message) // Usa il messaggio dell'errore
+            } else {
+                setError('Errore nel login con Google. Riprova.')
+            }
+        }
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -88,6 +104,21 @@ export default function LoginForm() {
                         </button>
                     </div>
                 </form>
+
+                {/* Google Login Button */}
+                <div className="mt-6 text-center">
+                    <button
+                        onClick={handleGoogleSignIn}
+                        className="flex items-center justify-center w-full py-2 px-4 border border-transparent rounded-md text-gray-700 bg-white hover:bg-gray-50 shadow-sm"
+                    >
+                        <img
+                            src="/google.png"
+                            alt="Google logo"
+                            className="w-5 h-5 mr-3"
+                        />
+                        <span>Accedi con Google</span>
+                    </button>
+                </div>
             </div>
         </div>
     )

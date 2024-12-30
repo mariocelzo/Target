@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Search, User, ChevronDown, LogOut, MessageCircle } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
+import Footer from "@/app/components/Footer";
 
 interface Product {
   id: string;
@@ -180,9 +181,9 @@ export default function Home() {
             {user ? (
                 <div className="relative">
                   <button onClick={toggleDropdown} className="flex items-center space-x-2 hover:text-gray-200">
-                    <User size={20} />
+                    <User size={20}/>
                     <span>{user.displayName || user.email}</span>
-                    <ChevronDown size={16} />
+                    <ChevronDown size={16}/>
                   </button>
                   {dropdownOpen && (
                       <div className="absolute right-0 bg-white text-black mt-2 shadow-md rounded-lg w-48">
@@ -197,7 +198,7 @@ export default function Home() {
                             <Link href="/user-active-ads">I miei annunci</Link>
                           </li>
                           <li className="px-4 py-2 hover:bg-gray-100" onClick={handleLogout}>
-                            <LogOut size={16} /> Esci
+                            <LogOut size={16}/> Esci
                           </li>
                         </ul>
                       </div>
@@ -211,8 +212,9 @@ export default function Home() {
             {/* Icona Chat con contatore di notifiche */}
             {user && (
                 <div className="relative">
-                  <button onClick={() => router.push(`/chat/${user.uid}`)} className="flex items-center space-x-2 hover:text-gray-200">
-                    <MessageCircle size={20} />
+                  <button onClick={() => router.push(`/chat/${user.uid}`)}
+                          className="flex items-center space-x-2 hover:text-gray-200">
+                    <MessageCircle size={20}/>
                     {unreadMessagesCount > 0 && (
                         <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-2 py-1">
                     {unreadMessagesCount}
@@ -245,20 +247,23 @@ export default function Home() {
                   onClick={handleSearch}
                   className="absolute right-2 top-2 bg-[#C4333B] text-white p-2 rounded-full transition-all duration-300 ease-in-out transform hover:scale-110"
               >
-                <Search size={20} />
+                <Search size={20}/>
               </button>
 
               {/* Risultati della ricerca */}
               {searchQuery && (
-                  <div className="absolute bg-white w-full shadow-lg rounded-lg mt-2 overflow-hidden max-h-60 transition-all duration-300 ease-in-out">
+                  <div
+                      className="absolute bg-white w-full shadow-lg rounded-lg mt-2 overflow-hidden max-h-60 transition-all duration-300 ease-in-out">
                     {isLoading ? (
                         <div className="p-4 text-center flex justify-center items-center">
-                          <div className="animate-spin h-8 w-8 border-4 border-t-4 border-[#C4333B] border-solid rounded-full"></div>
+                          <div
+                              className="animate-spin h-8 w-8 border-4 border-t-4 border-[#C4333B] border-solid rounded-full"></div>
                         </div>
                     ) : searchResults.length > 0 ? (
                         <ul className="max-h-60 overflow-y-auto">
                           {searchResults.map((result) => (
-                              <li key={result.id} className="px-4 py-2 border-b hover:bg-[#F1F1F1] transition-all duration-200">
+                              <li key={result.id}
+                                  className="px-4 py-2 border-b hover:bg-[#F1F1F1] transition-all duration-200">
                                 <Link href={`/products/${result.id}`} className="flex flex-col">
                                   <div className="font-bold text-[#333]">{result.name}</div>
                                   <div className="text-sm text-gray-500">{result.description}</div>
@@ -276,36 +281,82 @@ export default function Home() {
         </section>
 
         {/* Featured Categories Section */}
-        <section className="py-16">
+        <section className="py-16 bg-gray-50">
           <div className="container mx-auto text-center">
-            <h2 className="text-3xl font-semibold mb-6">Categorie in Evidenza</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-              <div className="bg-white shadow-md rounded-lg p-6">
+            <h2 className="text-4xl font-semibold mb-8 text-gray-800">Categorie in Evidenza</h2>
+            <div
+                className="flex gap-8 pb-4 animate-scroll hover:animate-none"> {/* Ferma lo scroll al passaggio del mouse */}
+              {/* Categoria Elettronica */}
+              <div
+                  className="flex-shrink-0 w-80 h-56 bg-white shadow-lg rounded-lg p-6 transition-all duration-500 ease-in-out hover:scale-105 hover:shadow-xl hover:bg-teal-600 hover:text-white transform hover:-translate-y-2"
+                  style={{
+                    backgroundImage: 'url(/elettronica.png)',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.15)', // Ombra aggiunta al div
+                  }}
+              >
                 <Link href="/categories/Elettronica">
-                  <h3 className="text-xl font-bold mb-4">Elettronica</h3>
+                  <h3 className="text-2xl font-bold mb-4 text-red-600 hover:text-white transition-all duration-300 ease-in-out">
+                    Elettronica
+                  </h3>
                 </Link>
               </div>
-              <div className="bg-white shadow-md rounded-lg p-6">
+
+              {/* Categoria Moda */}
+              <div
+                  className="flex-shrink-0 w-80 h-56 bg-white shadow-lg rounded-lg p-6 transition-all duration-500 ease-in-out hover:scale-105 hover:shadow-xl hover:bg-teal-600 hover:text-white transform hover:-translate-y-2"
+                  style={{
+                    backgroundImage: 'url(/moda.png)',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.15)', // Ombra aggiunta al div
+                  }}
+              >
                 <Link href="/categories/Moda">
-                  <h3 className="text-xl font-bold mb-4">Moda</h3>
-                  <img src="/images/fashion.jpg" alt="Moda" className="w-full h-40 object-cover rounded-lg"/>
+                  <h3 className="text-2xl font-bold mb-4 text-red-600 hover:text-white transition-all duration-300 ease-in-out">
+                    Moda
+                  </h3>
                 </Link>
               </div>
-              <div className="bg-white shadow-md rounded-lg p-6">
+
+              {/* Categoria Arredamento */}
+              <div
+                  className="flex-shrink-0 w-80 h-56 bg-white shadow-lg rounded-lg p-6 transition-all duration-500 ease-in-out hover:scale-105 hover:shadow-xl hover:bg-teal-600 hover:text-white transform hover:-translate-y-2"
+                  style={{
+                    backgroundImage: 'url(/arredamento.png)',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.15)', // Ombra aggiunta al div
+                  }}
+              >
                 <Link href="/categories/Arredamento">
-                  <h3 className="text-xl font-bold mb-4">Casa</h3>
-                  <img src="/images/furniture.jpg" alt="Casa" className="w-full h-40 object-cover rounded-lg"/>
+                  <h3 className="text-2xl font-bold mb-4 text-red-600 hover:text-white transition-all duration-300 ease-in-out">
+                    Arredamento
+                  </h3>
                 </Link>
               </div>
-              <div className="bg-white shadow-md rounded-lg p-6">
+
+              {/* Categoria Auto e Moto */}
+              <div
+                  className="flex-shrink-0 w-80 h-56 bg-white shadow-lg rounded-lg p-6 transition-all duration-500 ease-in-out hover:scale-105 hover:shadow-xl hover:bg-teal-600 hover:text-white transform hover:-translate-y-2"
+                  style={{
+                    backgroundImage: 'url(/auto.png)',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.15)', // Ombra aggiunta al div
+                  }}
+              >
                 <Link href="/categories/Giocattoli">
-                  <h3 className="text-xl font-bold mb-4">Auto e Moto</h3>
-                  <img src="/images/car.jpg" alt="Auto e Moto" className="w-full h-40 object-cover rounded-lg"/>
+                  <h3 className="text-2xl font-bold mb-4 text-red-600 hover:text-white transition-all duration-300 ease-in-out">
+                    Auto e Moto
+                  </h3>
                 </Link>
               </div>
             </div>
           </div>
         </section>
+        <Footer/>
       </div>
   );
 }

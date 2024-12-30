@@ -31,6 +31,7 @@ export default function OrderPage() {
         address: '',
         phone: '',
     });
+    const [googlePayReady, setGooglePayReady] = useState(false); // Stato per sapere se Google Pay è pronto
 
     useEffect(() => {
         if (!id) return;
@@ -107,11 +108,7 @@ export default function OrderPage() {
             phone: formData.phone,
             fullName: formData.fullName,
             createdAt: serverTimestamp(),
-
         };
-
-        // Log per verificare cosa stiamo cercando di salvare
-        console.log('Dati ordine da salvare:', orderDetails);
 
         try {
             const ordersRef = collection(db, 'orders');
@@ -129,6 +126,99 @@ export default function OrderPage() {
             alert('Si è verificato un errore durante l\'ordine.');
         }
     };
+
+    const loadGooglePay = () => {
+        const script = document.createElement('script');
+        script.src = "https://pay.google.com/gp/p/js/pay.js";
+        script.async = true;
+        script.onload = () => {
+            const paymentsClient = new google.payments.api.PaymentsClient({
+                environment: 'TEST', // Cambia in 'PRODUCTION' per la produzione
+            });
+
+            const paymentRequest = {
+                apiVersion: 2,
+                apiVersionMinor: 0,
+                allowedPaymentMethods: [{
+                    type: 'CARD',
+                    parameters: {
+                        allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
+                        allowedCardNetworks: ['MASTERCARD', 'VISA'],
+                    },
+                    tokenizationSpecification: {
+                        type: 'PAYMENT_GATEWAY',
+                        parameters: {
+                            'gateway': 'example',
+                            'gatewayMerchantId': 'exampleMerchantId',
+                        },
+                    },
+                }],
+                transactionInfo: {
+                    totalPriceStatus: 'FINAL',
+                    totalPrice: product?.price.toString() || '0',
+                    currencyCode: 'EUR',
+                },
+                merchantInfo: {
+                    merchantName: 'E-commerce Store',
+                    merchantId: '0123456789',
+                },
+            };
+
+            paymentsClient.isReadyToPay(paymentRequest).then((response) => {
+                if (response.result) {
+                    setGooglePayReady(true); // Imposta Google Pay come pronto
+                }
+            });
+        };
+        document.body.appendChild(script);
+    };
+
+    const handleGooglePayClick = () => {
+        const paymentsClient = new google.payments.api.PaymentsClient({
+            environment: 'TEST',
+        });
+
+        const paymentRequest = {
+            apiVersion: 2,
+            apiVersionMinor: 0,
+            allowedPaymentMethods: [{
+                type: 'CARD',
+                parameters: {
+                    allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
+                    allowedCardNetworks: ['MASTERCARD', 'VISA'],
+                },
+                tokenizationSpecification: {
+                    type: 'PAYMENT_GATEWAY',
+                    parameters: {
+                        'gateway': 'example',
+                        'gatewayMerchantId': 'exampleMerchantId',
+                    },
+                },
+            }],
+            transactionInfo: {
+                totalPriceStatus: 'FINAL',
+                totalPrice: product?.price.toString() || '0',
+                currencyCode: 'EUR',
+            },
+            merchantInfo: {
+                merchantName: 'E-commerce Store',
+                merchantId: '0123456789',
+            },
+        };
+
+        paymentsClient.loadPaymentData(paymentRequest).then((paymentData) => {
+            // Gestisci il pagamento qui
+            alert('Pagamento completato');
+            handleOrderSubmit(new Event('submit')); // Completa l'ordine nel database
+        }).catch((error) => {
+            console.error('Errore nel pagamento Google Pay:', error);
+            alert('Si è verificato un errore durante il pagamento.');
+        });
+    };
+
+    useEffect(() => {
+        loadGooglePay();
+    }, [product]);
 
     if (isLoading) {
         return (
@@ -157,8 +247,8 @@ export default function OrderPage() {
                 </div>
             </section>
 
-            <section className="container mx-auto py-8 px-4">
-                <div className="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden max-w-2xl mx-auto">
+            <section className="container mx-auto py-8 px-4 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">
                     <div className="h-64 bg-gray-200 flex items-center justify-center">
                         <img
                             src={product?.image || '/images/placeholder.jpg'}
@@ -166,59 +256,81 @@ export default function OrderPage() {
                             className="w-full h-full object-cover"
                         />
                     </div>
-                    <div className="p-4">
-                        <h3 className="text-lg font-bold mb-2">Descrizione</h3>
-                        <p className="text-sm text-gray-600 mb-4">{product?.description}</p>
-                        <p className="text-xl text-gray-800 font-bold">€ {product?.price}</p>
+                </div>
 
-                        <form onSubmit={handleOrderSubmit} className="mt-6">
-                            <div className="mb-4">
-                                <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
-                                    Nome Completo
-                                </label>
-                                <input
-                                    type="text"
-                                    name="fullName"
-                                    id="fullName"
-                                    value={formData.fullName}
-                                    onChange={handleChange}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                />
-                            </div>
-                            <div className="mb-4">
-                                <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                                    Indirizzo di Spedizione
-                                </label>
-                                <input
-                                    type="text"
-                                    name="address"
-                                    id="address"
-                                    value={formData.address}
-                                    onChange={handleChange}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                />
-                            </div>
-                            <div className="mb-4">
-                                <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                                    Numero di Telefono
-                                </label>
-                                <input
-                                    type="text"
-                                    name="phone"
-                                    id="phone"
-                                    value={formData.phone}
-                                    onChange={handleChange}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                />
-                            </div>
+                <div className="bg-white border border-gray-200 rounded-lg shadow-md p-6">
+                    <h3 className="text-lg font-bold mb-2">Descrizione</h3>
+                    <p className="text-sm text-gray-600 mb-4">{product?.description}</p>
+                    <p className="text-xl text-gray-800 font-bold">€ {product?.price}</p>
+
+                    <form onSubmit={handleOrderSubmit} className="mt-6">
+                        <div className="mb-4">
+                            <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
+                                Nome Completo
+                            </label>
+                            <input
+                                type="text"
+                                name="fullName"
+                                id="fullName"
+                                value={formData.fullName}
+                                onChange={handleChange}
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            />
+                        </div>
+
+                        <div className="mb-4">
+                            <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+                                Indirizzo di Spedizione
+                            </label>
+                            <input
+                                type="text"
+                                name="address"
+                                id="address"
+                                value={formData.address}
+                                onChange={handleChange}
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            />
+                        </div>
+
+                        <div className="mb-4">
+                            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                                Numero di Telefono
+                            </label>
+                            <input
+                                type="text"
+                                name="phone"
+                                id="phone"
+                                value={formData.phone}
+                                onChange={handleChange}
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            />
+                        </div>
+
+                        {/* Bottone per Google Pay con logo */}
+                        {/* Bottone per Google Pay con logo */}
+                        {googlePayReady && (
                             <button
-                                type="submit"
-                                className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 focus:outline-none"
+                                type="button"
+                                onClick={handleGooglePayClick}
+                                className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 w-full flex items-center justify-center space-x-2"
                             >
-                                Completa l'acquisto
+                                <img
+                                    src="/google.png"
+                                    alt="Google Pay Logo"
+                                    className="w-6 h-6"
+                                />
+                                <span>Paga con Google Pay</span>
                             </button>
-                        </form>
-                    </div>
+                        )}
+
+                        {/* Bottone Completa l'acquisto */}
+                        <button
+                            type="submit"
+                            className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 w-full mt-4"
+                        >
+                            Completa l'acquisto
+                        </button>
+                    </form>
                 </div>
             </section>
 
