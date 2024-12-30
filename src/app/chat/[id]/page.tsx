@@ -34,6 +34,7 @@ export default function ChatPage() {
     const [message, setMessage] = useState('');
     const [sending, setSending] = useState(false);
     const [leftPanelWidth, setLeftPanelWidth] = useState('300px'); // Imposta la larghezza iniziale del lato utenti
+    const [searchTerm, setSearchTerm] = useState(''); // Stato per il filtro della ricerca
 
     const leftPanelRef = useRef<HTMLDivElement>(null);
     const resizeHandleRef = useRef<HTMLDivElement>(null);
@@ -196,6 +197,11 @@ export default function ChatPage() {
         }
     }, [chat]);
 
+    // Funzione di ricerca degli utenti
+    const filteredUsers = users.filter((user) =>
+        user.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     // Gestione resize pannello utenti
     const handleResize = (e: React.MouseEvent) => {
         if (leftPanelRef.current) {
@@ -232,8 +238,18 @@ export default function ChatPage() {
                     style={{ width: leftPanelWidth }}
                 >
                     <h2 className="text-2xl font-semibold mb-4">Utenti</h2>
+
+                    {/* Barra di ricerca */}
+                    <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Cerca utenti..."
+                        className="w-full p-3 border rounded-lg mb-4"
+                    />
+
                     <ul>
-                        {users.map((user) => (
+                        {filteredUsers.map((user) => (
                             <li
                                 key={user.id}
                                 className="flex items-center justify-between p-3 mb-3 rounded-lg bg-white hover:bg-gray-200 cursor-pointer shadow-sm"
