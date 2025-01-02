@@ -36,6 +36,7 @@ export default function ChatPage() {
     const [leftPanelWidth, setLeftPanelWidth] = useState('300px'); // Imposta la larghezza iniziale del lato utenti
     const [searchTerm, setSearchTerm] = useState(''); // Stato per il filtro della ricerca
 
+
     const leftPanelRef = useRef<HTMLDivElement>(null);
     const resizeHandleRef = useRef<HTMLDivElement>(null);
 

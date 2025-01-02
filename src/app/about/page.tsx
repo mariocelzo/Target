@@ -1,27 +1,14 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Search, User } from 'lucide-react'; // Usa icone già integrate nella home
+import { Search, User } from 'lucide-react';
+import Footer from "@/app/components/Footer";
+import Header from "@/app/components/Header"; // Usa icone già integrate nella home
 
 export default function About() {
     return (
         <div className="min-h-screen bg-white">
             {/* Header */}
-            <header className="bg-[#C4333B] text-white p-4">
-                <div className="container mx-auto flex justify-between items-center">
-                    <Link href="/" className="text-2xl font-bold">Target</Link>
-                    <nav>
-                        <ul className="flex space-x-4">
-                            <li><Link href="/categories">Categorie</Link></li>
-                            <li><Link href="/sell">Vendi</Link></li>
-                            <li><Link href="/about">Chi Siamo</Link></li>
-                        </ul>
-                    </nav>
-                    <div className="flex space-x-4">
-                        <Link href="/search"><Search /></Link>
-                        <Link href="/login"><User /></Link>
-                    </div>
-                </div>
-            </header>
+         <Header/>
 
             {/* Main Section */}
             <main className="py-16">
@@ -85,11 +72,7 @@ export default function About() {
             </main>
 
             {/* Footer */}
-            <footer className="bg-gray-800 text-white py-8">
-                <div className="container mx-auto text-center">
-                    <p>&copy; 2023 Target. Tutti i diritti riservati.</p>
-                </div>
-            </footer>
+            <Footer/>
         </div>
     );
 }

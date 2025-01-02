@@ -8,6 +8,7 @@ import { Search, User, ChevronDown, LogOut, MessageCircle } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
 import Footer from "@/app/components/Footer";
+import { doc, getDoc } from 'firebase/firestore';
 
 interface Product {
   id: string;
@@ -30,6 +31,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null); // Specify the type here
+  const [userImage, setUserImage] = useState<string | null>(null); // Stato per la foto profilo
   const router = useRouter();
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
@@ -42,12 +44,14 @@ export default function Home() {
           displayName: currentUser.displayName,
           email: currentUser.email || '',
         });
+        fetchUserImage(currentUser.uid); // Recupera la foto dell'utente appena autenticato
       } else {
         setUser(null);
+        setUserImage(null); // Reset della foto se l'utente esce
       }
     });
 
-    return () => unsubscribe(); // Pulizia dell'event listener
+    return () => unsubscribe();
   }, []);
 
   // Funzione per recuperare il conteggio dei messaggi non letti
@@ -144,88 +148,143 @@ export default function Home() {
       console.error('Errore durante il logout:', error);
     }
   };
+  const fetchUserImage = async (userId: string) => {
+    const userRef = doc(db, 'users', userId);
+    const userDoc = await getDoc(userRef);
+
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      setUserImage(userData?.imageUrl || null); // Imposta la foto o null se non trovata
+    }
+  };
 
   return (
       <div className="min-h-screen bg-gray-100">
         {/* Navbar */}
         <header className="bg-[#C4333B] text-white py-4 shadow-md">
           <div className="container mx-auto flex justify-between items-center">
+            {/* Logo e nome Marketplace a sinistra */}
             <Link href="/" className="text-3xl font-extrabold">
               Target Marketplace
             </Link>
-            <nav className="flex-1 flex justify-center space-x-6 text-lg">
+
+            {/* Navbar centrata */}
+            <nav className="flex justify-center flex-1 space-x-6 text-lg">
               <ul className="flex space-x-6">
-                <li>
-                  <Link href="/" className="hover:text-gray-200">
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/categories" className="hover:text-gray-200">
+                <li className="relative group">
+                  {/* Link principale per "Categorie" */}
+                  <button
+                      className="hover:text-teal-500 hover:scale-105 transition-all duration-200 ease-in-out focus:outline-none">
                     Categorie
-                  </Link>
+                  </button>
+
+                  {/* Dropdown menu */}
+                  <div
+                      className="absolute left-0 mt-2 hidden w-48 bg-white text-black shadow-lg rounded-lg group-hover:block">
+                    <ul className="py-2">
+                      <li>
+                        <Link href="/categories/Elettronica" className="block px-4 py-2 hover:bg-gray-100">
+                          Elettronica
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/categories/Arredamento" className="block px-4 py-2 hover:bg-gray-100">
+                          Arredamento
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/categories/Moda" className="block px-4 py-2 hover:bg-gray-100">
+                          Moda
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/categories/Giocattoli" className="block px-4 py-2 hover:bg-gray-100">
+                          Auto e Moto
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
                 </li>
                 <li>
-                  <Link href="/sell" className="hover:text-gray-200">
+                  <Link
+                      href="/sell"
+                      className="hover:text-teal-500 hover:scale-105 transition-all duration-200 ease-in-out">
                     Vendi
                   </Link>
                 </li>
                 <li>
-                  <Link href="/about" className="hover:text-gray-200">
+                  <Link
+                      href="/about"
+                      className="hover:text-teal-500 hover:scale-105 transition-all duration-200 ease-in-out">
                     Chi Siamo
                   </Link>
                 </li>
               </ul>
             </nav>
-            {/* Sezione Utente */}
-            {user ? (
-                <div className="relative">
-                  <button onClick={toggleDropdown} className="flex items-center space-x-2 hover:text-gray-200">
-                    <User size={20}/>
-                    <span>{user.displayName || user.email}</span>
-                    <ChevronDown size={16}/>
-                  </button>
-                  {dropdownOpen && (
-                      <div className="absolute right-0 bg-white text-black mt-2 shadow-md rounded-lg w-48">
-                        <ul>
-                          <li className="px-4 py-2 hover:bg-gray-100">
-                            <Link href="/user-area">Profilo</Link>
-                          </li>
-                          <li className="px-4 py-2 hover:bg-gray-100">
-                            <Link href="/ordereffettuati">I miei ordini</Link>
-                          </li>
-                          <li className="px-4 py-2 hover:bg-gray-100">
-                            <Link href="/user-active-ads">I miei annunci</Link>
-                          </li>
-                          <li className="px-4 py-2 hover:bg-gray-100" onClick={handleLogout}>
-                            <LogOut size={16}/> Esci
-                          </li>
-                        </ul>
-                      </div>
-                  )}
-                </div>
-            ) : (
-                <Link href="/login" className="hover:text-gray-200">
-                  Login
-                </Link>
-            )}
-            {/* Icona Chat con contatore di notifiche */}
-            {user && (
-                <div className="relative">
-                  <button onClick={() => router.push(`/chat/${user.uid}`)}
-                          className="flex items-center space-x-2 hover:text-gray-200">
-                    <MessageCircle size={20}/>
-                    {unreadMessagesCount > 0 && (
-                        <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-2 py-1">
-                    {unreadMessagesCount}
-                  </span>
+
+            {/* Sezione Utente e Chat */}
+            <div className="flex items-center space-x-6">
+              {/* Sezione Utente */}
+              {user ? (
+                  <div className="relative">
+                    <button
+                        onClick={toggleDropdown}
+                        className="flex items-center space-x-2 hover:text-gray-200">
+                      {userImage ? (
+                          <img
+                              src={userImage}
+                              alt="Profilo"
+                              className="w-8 h-8 rounded-full"
+                          />
+                      ) : (
+                          <User size={20}/>
+                      )}
+                      <span>{user.displayName || user.email}</span>
+                      <ChevronDown size={16}/>
+                    </button>
+                    {dropdownOpen && (
+                        <div className="absolute right-0 bg-white text-black mt-2 shadow-md rounded-lg w-48">
+                          <ul>
+                            <li className="px-4 py-2 hover:bg-gray-100">
+                              <Link href="/user-area">Profilo</Link>
+                            </li>
+                            <li className="px-4 py-2 hover:bg-gray-100">
+                              <Link href="/ordereffettuati">I miei ordini</Link>
+                            </li>
+                            <li className="px-4 py-2 hover:bg-gray-100">
+                              <Link href="/user-active-ads">I miei annunci</Link>
+                            </li>
+                            <li className="px-4 py-2 hover:bg-gray-100" onClick={handleLogout}>
+                              <LogOut size={16}/> Esci
+                            </li>
+                          </ul>
+                        </div>
                     )}
-                  </button>
-                </div>
-            )}
+                  </div>
+              ) : (
+                  <Link href="/login" className="hover:text-gray-200">
+                    Login
+                  </Link>
+              )}
+
+              {/* Icona Chat con contatore di notifiche */}
+              {user && (
+                  <div className="relative">
+                    <button
+                        onClick={() => router.push(`/chat/${user.uid}`)}
+                        className="flex items-center space-x-2 hover:text-gray-200">
+                      <MessageCircle size={20}/>
+                      {unreadMessagesCount > 0 && (
+                          <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-2 py-1">
+                {unreadMessagesCount}
+              </span>
+                      )}
+                    </button>
+                  </div>
+              )}
+            </div>
           </div>
         </header>
-
         {/* Hero Section */}
         <section className="bg-[#41978F] text-white py-20">
           <div className="container mx-auto text-center">
