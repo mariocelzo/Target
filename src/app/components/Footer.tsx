@@ -20,11 +20,6 @@ const Footer = () => {
                             </a>
                         </li>
                         <li>
-                            <a href="/categories" className="hover:underline">
-                                Categorie
-                            </a>
-                        </li>
-                        <li>
                             <a href="/help" className="hover:underline">
                                 Centro Assistenza
                             </a>

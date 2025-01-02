@@ -157,6 +157,41 @@ export default function Home() {
       setUserImage(userData?.imageUrl || null); // Imposta la foto o null se non trovata
     }
   };
+  const [userProducts, setUserProducts] = useState<Product[]>([]);
+
+// Recupera gli articoli in vendita dell'utente
+  const fetchUserProducts = async (userId: string) => {
+    try {
+      const q = query(collection(db, "products"), where("userId", "==", userId));
+      const querySnapshot = await getDocs(q);
+
+      const products: Product[] = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as Product),
+      }));
+      setUserProducts(products);
+    } catch (error) {
+      console.error("Errore durante il recupero degli articoli:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchUserProducts(user.uid); // Assicurati di avere l'ID utente autenticato
+    }
+  }, [user]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openProductDetails = (product: Product) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const closeProductDetails = () => {
+    setSelectedProduct(null);
+    setIsModalOpen(false);
+  };
 
   return (
       <div className="min-h-screen bg-gray-100">
@@ -414,6 +449,97 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </section>
+        {/* Sezione Articoli dell'utente */}
+        <section className="py-16 bg-gray-50">
+          <div className="container mx-auto text-center">
+            <h2 className="text-4xl font-semibold mb-8 text-gray-800">I tuoi articoli in vendita</h2>
+            {userProducts.filter(product => !product.sold).length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {userProducts
+                      .filter(product => !product.sold) // Filtra solo i prodotti non venduti
+                      .map((product) => (
+                          <div
+                              key={product.id}
+                              className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+                              onClick={() => openProductDetails(product)}
+                          >
+                            <img
+                                src={product.image}
+                                alt={product.name}
+                                className="w-full h-48 object-cover"
+                            />
+                            <div className="p-4">
+                              <h3 className="text-xl font-semibold text-gray-800 mb-2">{product.name}</h3>
+                              <p className="text-gray-500">{product.category}</p>
+                              <p className="text-sm text-gray-600 mt-2">{product.description}</p>
+                            </div>
+                          </div>
+                      ))}
+                </div>
+            ) : (
+                <p className="text-gray-500">Non hai ancora pubblicato articoli in vendita o sono stati tutti venduti.</p>
+            )}
+          </div>
+
+          {/* Modale per i dettagli del prodotto */}
+          {isModalOpen && selectedProduct && (
+              <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
+                <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
+                  <button
+                      className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
+                      onClick={closeProductDetails}
+                  >
+                    ✕
+                  </button>
+
+                  {/* Immagine del prodotto */}
+                  <img
+                      src={selectedProduct.image}
+                      alt={selectedProduct.name}
+                      className="w-full h-64 object-cover rounded-lg mb-4"
+                  />
+
+                  {/* Intestazione con nome e icona modifica */}
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-2xl font-bold">{selectedProduct.name}</h2>
+                    <a
+                        href={`/edit/${selectedProduct.id}`}
+                        className="relative inline-flex items-center justify-center w-10 h-10 bg-teal-500 text-white rounded-full hover:bg-blue-500 transition-colors duration-200"
+                        title="Modifica annuncio"
+                    >
+                      <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={2}
+                          stroke="currentColor"
+                          className="w-6 h-6"
+                      >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M15.232 5.232l3.536 3.536m-2.036-7.768a2.25 2.25 0 013.182 3.182L7.875 21H4.5v-3.375L16.732 2.464z"
+                        />
+                      </svg>
+                    </a>
+                  </div>
+
+                  {/* Dettagli del prodotto */}
+                  <p className="text-gray-500 mb-4">{selectedProduct.category}</p>
+                  <p className="text-gray-700 mb-4">{selectedProduct.description}</p>
+                  <p className="font-semibold mb-4">
+                    Prezzo: <span className="text-[#C4333B]">{selectedProduct.price} €</span>
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Condizione: {selectedProduct.condition}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Creato il: {new Date(selectedProduct.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+          )}
         </section>
         <Footer/>
       </div>

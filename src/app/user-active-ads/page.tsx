@@ -7,6 +7,8 @@ import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/fire
 import Link from 'next/link'
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/solid'
 import { EllipsisVerticalIcon } from '@heroicons/react/24/solid'
+import Header from "@/app/components/Header";
+import Footer from "@/app/components/Footer";
 
 interface Ad {
     id: string
@@ -77,13 +79,7 @@ export default function UserActiveAds() {
 
     return (
         <div className="min-h-screen bg-gray-100">
-            <header className="bg-[#C4333B] text-white py-4 shadow-md">
-                <div className="container mx-auto flex justify-between items-center">
-                    <Link href="/" className="text-3xl font-extrabold">
-                        Target Marketplace
-                    </Link>
-                </div>
-            </header>
+            <Header/>
 
             <section className="bg-[#41978F] text-white py-20">
                 <div className="container mx-auto text-center">
@@ -170,11 +166,7 @@ export default function UserActiveAds() {
                 </div>
             </section>
 
-            <footer className="bg-[#41978F] text-white py-8">
-                <div className="container mx-auto text-center">
-                    <p className="text-lg">&copy; 2024 Target Marketplace. Tutti i diritti riservati.</p>
-                </div>
-            </footer>
+            <Footer/>
         </div>
     )
 }

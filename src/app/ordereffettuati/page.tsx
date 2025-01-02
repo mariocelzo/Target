@@ -6,6 +6,7 @@ import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
 import { LogOut, ChevronDown, Package } from 'lucide-react';
+import Header from "@/app/components/Header";
 
 interface Order {
     id: string;
@@ -90,43 +91,7 @@ export default function OrdersPage() {
     return (
         <div className="min-h-screen bg-gray-100">
             {/* Navbar */}
-            <header className="bg-[#C4333B] text-white py-4 shadow-md">
-                <div className="container mx-auto flex justify-between items-center">
-                    <Link href="/" className="text-3xl font-extrabold">
-                        Target Marketplace
-                    </Link>
-                    <div className="flex items-center space-x-6">
-                        {user ? (
-                            <div className="relative">
-                                <button
-                                    onClick={toggleDropdown}
-                                    className="flex items-center space-x-2 hover:text-gray-200"
-                                >
-                                    <Package size={20} />
-                                    <span>{user.displayName || user.email}</span>
-                                    <ChevronDown size={16} />
-                                </button>
-                                {dropdownOpen && (
-                                    <div className="absolute right-0 bg-white text-black mt-2 shadow-md rounded-lg w-48">
-                                        <ul>
-                                            <li className="px-4 py-2 hover:bg-gray-100">
-                                                <Link href="/user-area">Profilo</Link>
-                                            </li>
-                                            <li className="px-4 py-2 hover:bg-gray-100" onClick={handleLogout}>
-                                                <LogOut size={16} /> Esci
-                                            </li>
-                                        </ul>
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            <Link href="/login" className="hover:text-gray-200">
-                                Login
-                            </Link>
-                        )}
-                    </div>
-                </div>
-            </header>
+            <Header/>
 
             {/* Orders Section */}
             <main className="container mx-auto py-8 px-4">
