@@ -244,90 +244,103 @@ export default function ProductDetailPage() {
         );
     }
 
+
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gradient-to-r from-red-500 to-teal-500">
             <Header />
 
-            <section className="bg-[#41978F] text-white py-8 shadow-lg">
-                <div className="container mx-auto text-center">
-                    <h1 className="text-4xl font-extrabold mb-3">{product?.name}</h1>
-                    <p className="text-lg font-semibold">{product?.category}</p>
+            {/* Sezione principale con immagine e dettagli prodotto */}
+            <section className="container mx-auto py-16 px-6 lg:px-8 flex flex-col lg:flex-row items-stretch space-y-8 lg:space-y-0">
+
+                {/* Colonna sinistra: Immagine del prodotto */}
+                <div className="lg:w-1/2 flex items-center justify-center bg-gray-200 rounded-2xl shadow-xl transition-all duration-300 hover:scale-105 mr-6 lg:mr-8">
+                    <img
+                        src={product?.image || '/images/placeholder.jpg'}
+                        alt={product?.name}
+                        className="w-full h-full object-contain rounded-2xl shadow-md transition-transform duration-300"
+                    />
                 </div>
-            </section>
 
-            <section className="container mx-auto py-12 px-6 lg:px-8">
-                <div className="bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden max-w-3xl mx-auto">
-                    <div className="h-96 bg-gray-200 flex items-center justify-center">
-                        <img
-                            src={product?.image || '/images/placeholder.jpg'}
-                            alt={product?.name}
-                            className="w-full h-full object-cover rounded-lg shadow-md"
-                        />
-                    </div>
-                    <div className="p-6">
-                        <h3 className="text-xl font-bold text-gray-700 mb-3">Descrizione</h3>
-                        <p className="text-sm text-gray-600 mb-6">{product?.description}</p>
-                        <p className="text-2xl text-gray-800 font-bold">€ {product?.price}</p>
+                {/* Colonna destra: Dettagli del prodotto */}
+                <div className="lg:w-1/2 p-8 bg-white rounded-2xl shadow-2xl max-w-lg mx-auto lg:mx-0 space-y-6">
+                    <h3 className="text-3xl font-bold text-gray-800">{product?.name}</h3>
+                    <p className="text-lg font-semibold text-gray-600">{product?.category}</p>
+                    <p className="text-sm text-gray-600">{product?.description}</p>
+                    <p className="text-3xl text-gray-800 font-semibold">€ {product?.price}</p>
 
-                        {userOffer !== null && (
-                            <p className="text-xl text-gray-600 mt-4">La tua offerta: € {userOffer}</p>
-                        )}
+                    {/* Offerte utente */}
+                    {userOffer !== null && (
+                        <p className="text-xl text-gray-600">La tua offerta: € {userOffer}</p>
+                    )}
 
-                        {maxOffer !== null && maxOffer > 0 && (
-                            <p className="text-xl text-gray-600 mt-4">Massima offerta ricevuta: € {maxOffer}</p>
-                        )}
+                    {/* Massima offerta ricevuta */}
+                    {maxOffer !== null && maxOffer > 0 && (
+                        <p className="text-xl text-gray-600">Massima offerta ricevuta: € {maxOffer}</p>
+                    )}
 
-                        {product?.createdAt && (
-                            <p className="text-sm text-gray-500 mt-2">
-                                Pubblicato il: {formatDate(product.createdAt)}
-                            </p>
-                        )}
+                    {/* Data di pubblicazione */}
+                    {product?.createdAt && (
+                        <p className="text-sm text-gray-500">
+                            Pubblicato il: {formatDate(product.createdAt)}
+                        </p>
+                    )}
 
-                        {sellerName && (
-                            <div className="mt-6 flex items-center space-x-4">
-                                <img
-                                    src={sellerImage ? sellerImage : '/images/default-profile.jpg'}
-                                    alt={sellerName}
-                                    className="w-12 h-12 rounded-full object-cover border-2 border-gray-300"
-                                />
-                                <p className="text-sm text-gray-600">Venduto da: {sellerName}</p>
+                    {/* Informazioni sul venditore */}
+                    {sellerName && (
+                        <div className="flex items-center space-x-4 mt-6">
+                            <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-300 text-gray-700 font-semibold">
+                                {sellerImage ? (
+                                    <img
+                                        src={sellerImage}
+                                        alt={sellerName}
+                                        className="w-full h-full rounded-full object-cover"
+                                    />
+                                ) : (
+                                    <span>👤</span>
+                                    )}
                             </div>
-                        )}
-
-                        <div className="mt-8 flex justify-between space-x-4">
-                            <Link
-                                href={product?.id ? `/order/${product.id}` : '#'}
-                                className="bg-red-600 text-white py-3 px-6 rounded-lg text-lg hover:bg-red-700 focus:outline-none transition"
-                            >
-                                Acquista
-                            </Link>
-
-                            <button
-                                className="bg-red-600 text-white py-3 px-6 rounded-lg text-lg hover:bg-red-700 focus:outline-none transition"
-                                onClick={handleContactSeller}
-                            >
-                                Contatta il venditore
-                            </button>
-
-                            <button
-                                className="bg-red-600 text-white py-3 px-6 rounded-lg text-lg hover:bg-red-700 focus:outline-none transition"
-                                onClick={() => setShowModal(true)}
-                            >
-                                Fai un'offerta
-                            </button>
+                            <p className="text-sm text-gray-600">Venduto da: {sellerName}</p>
                         </div>
+                    )}
+
+                    {/* Bottoni Azione */}
+                    <div className="flex space-x-4 mt-8 justify-between">
+                        {/* Bottone Acquista */}
+                        <Link
+                            href={product?.id ? `/order/${product.id}` : '#'}
+                            className="bg-gradient-to-r from-orange-400 to-red-600 text-white py-2 px-6 rounded-full text-lg font-semibold hover:bg-gradient-to-l hover:from-orange-500 hover:to-red-700 transition-all duration-300"
+                        >
+                            Acquista
+                        </Link>
+
+                        {/* Bottone Contatta il venditore */}
+                        <button
+                            className="bg-teal-500 text-white py-2 px-6 rounded-full text-lg font-semibold hover:bg-teal-600 transition-all duration-300"
+                            onClick={handleContactSeller}
+                        >
+                            Contatta
+                        </button>
+
+                        {/* Bottone Fai un'offerta */}
+                        <button
+                            className="bg-yellow-400 text-white py-2 px-6 rounded-full text-lg font-semibold hover:bg-yellow-500 transition-all duration-300"
+                            onClick={() => setShowModal(true)}
+                        >
+                            Offerta
+                        </button>
                     </div>
                 </div>
             </section>
 
+            {/* Modale per inserire offerta */}
             {showModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+                    <div className="bg-white p-6 rounded-2xl shadow-lg max-w-sm w-full">
                         <h2 className="text-xl font-bold mb-4">Inserisci la tua offerta</h2>
                         <input
                             type="number"
                             placeholder="Importo offerta"
-                            className="w-full border border-gray-300 rounded-lg p-2 mb-4"
+                            className="w-full border border-gray-300 rounded-lg p-2 mb-4 focus:ring-2 focus:ring-teal-500 transition-all duration-300"
                             value={offerAmount}
                             onChange={(e) => setOfferAmount(e.target.value)}
                         />
@@ -341,7 +354,7 @@ export default function ProductDetailPage() {
                                 </button>
                             )}
                             <button
-                                className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition"
+                                className="bg-teal-600 text-white py-2 px-4 rounded-lg hover:bg-teal-700 transition"
                                 onClick={handleMakeOffer}
                             >
                                 Invia offerta
