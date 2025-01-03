@@ -23,7 +23,13 @@ export default function ElectronicsPage() {
                     return
                 }
 
-                const q = query(collection(db, 'products'), where('category', '==', 'Elettronica'))
+                // Aggiungi la condizione per escludere i prodotti venduti
+                const q = query(
+                    collection(db, 'products'),
+                    where('category', '==', 'Elettronica'),
+                    where('sold', '==', false) // Filtro per escludere i prodotti venduti
+                )
+
                 const querySnapshot = await getDocs(q)
                 const productList: any[] = []
 

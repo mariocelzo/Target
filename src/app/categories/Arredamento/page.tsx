@@ -8,8 +8,6 @@ import { getAuth } from 'firebase/auth'
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 
-
-
 export default function ElectronicsPage() {
     const [products, setProducts] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(true)
@@ -25,7 +23,13 @@ export default function ElectronicsPage() {
                     return
                 }
 
-                const q = query(collection(db, 'products'), where('category', '==', 'Arredamento'))
+                // Modifica la query per escludere i prodotti venduti
+                const q = query(
+                    collection(db, 'products'),
+                    where('category', '==', 'Arredamento'),
+                    where('sold', '==', false) // Aggiungi la condizione che il prodotto non sia venduto
+                )
+
                 const querySnapshot = await getDocs(q)
                 const productList: any[] = []
 
@@ -63,6 +67,7 @@ export default function ElectronicsPage() {
             </div>
         )
     }
+
     return (
         <div className="min-h-screen bg-white">
             {/* Aggiungi l'Header */}

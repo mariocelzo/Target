@@ -8,7 +8,7 @@ import { getAuth } from 'firebase/auth'
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 
-export default function ElectronicsPage() {
+export default function ToysPage() {
     const [products, setProducts] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(true)
 
@@ -23,7 +23,13 @@ export default function ElectronicsPage() {
                     return
                 }
 
-                const q = query(collection(db, 'products'), where('category', '==', 'Giocattoli'))
+                // Modifica la query per escludere i prodotti venduti
+                const q = query(
+                    collection(db, 'products'),
+                    where('category', '==', 'Giocattoli'),
+                    where('sold', '==', false) // Esclude i prodotti venduti
+                )
+
                 const querySnapshot = await getDocs(q)
                 const productList: any[] = []
 
