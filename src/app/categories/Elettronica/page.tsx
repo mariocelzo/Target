@@ -63,64 +63,67 @@ export default function ElectronicsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <Header/>
+        <div className="min-h-screen bg-white">
+            <Header />
+
             {/* Hero Section */}
-            <section className="bg-[#41978F] text-white py-12">
+            <section className="bg-gradient-to-r from-teal-600 to-teal-400 text-white py-12">
                 <div className="container mx-auto text-center">
                     <h1 className="text-4xl font-extrabold mb-4">Prodotti Elettronica</h1>
-                    <p className="text-lg">Scopri i migliori articoli tecnologici disponibili</p>
+                    <p className="text-lg">Scopri la tecnologia migliore con le nostre offerte imperdibili</p>
                 </div>
             </section>
 
-            {/* Product Grid */}
-            <section className="container mx-auto py-12 px-4">
-                <h2 className="text-2xl font-bold mb-6 text-center">Esplora i Prodotti</h2>
+            {/* Product List */}
+            <section className="container mx-auto py-12 px-6">
+                <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">Esplora i Prodotti</h2>
                 {products.length === 0 ? (
                     <p className="text-center text-gray-500">Nessun prodotto trovato nella categoria Elettronica.</p>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <div className="space-y-6">
                         {products.map((product) => (
-                            <div
+                            <Link
+                                href={`/products/${product.id}`}
                                 key={product.id}
-                                className="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 relative"
+                                className="block bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
                             >
-                                {/* Check if product is sold */}
-                                {product.sold && (
-                                    <div className="absolute top-0 left-0 bg-red-500 text-white text-xs font-bold px-2 py-1 uppercase rounded-br-lg">
-                                        Venduto
+                                <div className="flex items-center">
+                                    {/* Colonna sinistra: Immagine prodotto */}
+                                    <div className="w-1/3 flex items-center justify-center h-48 bg-gray-100 rounded-l-xl">
+                                        <img
+                                            src={product.image || '/images/placeholder.jpg'}
+                                            alt={product.title}
+                                            className="max-h-full max-w-full object-contain"
+                                        />
                                     </div>
-                                )}
 
-                                <div className="h-48 bg-gray-200 flex items-center justify-center">
-                                    {/* Placeholder per l'immagine del prodotto */}
-                                    <img
-                                        src={product.image || '/images/placeholder.jpg'}
-                                        alt={product.title}
-                                        className="w-full h-full object-cover"
-                                    />
+                                    {/* Colonna destra: Dettagli prodotto */}
+                                    <div className="w-2/3 p-6 flex flex-col space-y-2">
+                                        <h3 className="text-lg font-semibold text-gray-800 truncate">
+                                            {product.title}
+                                        </h3>
+                                        <p className="text-sm text-gray-600 line-clamp-2">
+                                            {product.description}
+                                        </p>
+                                        <p className="text-lg font-semibold text-teal-600">
+                                            € {product.price}
+                                        </p>
+
+                                        {/* Stato "Venduto" */}
+                                        {product.sold && (
+                                            <p className="text-sm font-semibold text-red-500 uppercase">
+                                                Venduto
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="p-4">
-                                    <h3 className="text-lg font-bold mb-2">{product.title}</h3>
-                                    <p className="text-sm text-gray-600 mb-4 truncate">{product.description}</p>
-
-
-                                    {/* Conditionally render "Visualizza Dettagli" link */}
-                                    {!product.sold && (
-                                        <Link
-                                            href={`/products/${product.id}`}
-                                            className="text-white bg-[#C4333B] hover:bg-[#A12229] px-4 py-2 rounded-md text-sm font-medium"
-                                        >
-                                            Visualizza Dettagli
-                                        </Link>
-                                    )}
-                                </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 )}
             </section>
-            <Footer/>
+
+            <Footer />
         </div>
-    )
+    );
 }
