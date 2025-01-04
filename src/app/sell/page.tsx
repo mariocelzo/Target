@@ -232,7 +232,7 @@ export default function Sell() {
                                 <option value="Elettronica">Elettronica</option>
                                 <option value="Moda">Moda</option>
                                 <option value="Arredamento">Arredamento</option>
-                                <option value="Giocattoli">Giocattoli</option>
+                                <option value="Giocattoli">Auto e Moto</option>
                             </select>
                         </div>
 
