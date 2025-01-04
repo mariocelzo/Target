@@ -70,7 +70,7 @@ const Header = () => {
 
                     {/* User Profile */}
                     <div className="flex items-center">
-                        <Link href="/profile" className="hover:text-teal-300 transition-colors duration-200">
+                        <Link href="/user-area" className="hover:text-teal-300 transition-colors duration-200">
                             {userPhotoUrl ? (
                                 <Image
                                     src={userPhotoUrl}

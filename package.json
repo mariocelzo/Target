@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/googlepay": "^0.7.6",
     "@types/node": "^20",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",

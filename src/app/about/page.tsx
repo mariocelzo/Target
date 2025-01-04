@@ -1,6 +1,5 @@
 import Image from 'next/image';
-import Link from 'next/link';
-import { Search, User } from 'lucide-react';
+
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header"; // Usa icone già integrate nella home
 

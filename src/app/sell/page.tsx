@@ -156,7 +156,7 @@ export default function Sell() {
 
                         {/* Nuovo campo per caricare l'immagine */}
                         <div className="space-y-4">
-                            <label htmlFor="image" className="block text-lg">Immagine dell'oggetto</label>
+                            <label htmlFor="image" className="block text-lg">Immagine dell&#39;oggetto</label>
 
                             {/* Contenitore per l'immagine */}
                             <div className="relative">
@@ -238,7 +238,7 @@ export default function Sell() {
 
                         {/* Nuovo campo per la condizione dell'articolo */}
                         <div className="space-y-4">
-                            <label htmlFor="condition" className="block text-lg">Condizione dell'oggetto</label>
+                            <label htmlFor="condition" className="block text-lg">Condizione dell&#39;oggetto</label>
                             <select
                                 id="condition"
                                 value={condition}

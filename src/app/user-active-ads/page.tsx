@@ -3,13 +3,11 @@
 import { useEffect, useState } from 'react'
 import { auth, db } from '@/lib/firebase'
 import { onAuthStateChanged } from 'firebase/auth'
-import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore'
+import { collection, query, where, getDocs, doc, updateDoc, addDoc, getDoc } from 'firebase/firestore'
 import Link from 'next/link'
-import { PencilIcon, TrashIcon } from '@heroicons/react/24/solid'
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import { motion } from 'framer-motion';
-import { Transition } from '@headlessui/react';
 
 interface Ad {
     id: string
@@ -19,83 +17,87 @@ interface Ad {
     sold: boolean
     productCategory: string
     description: string
+    highestOffer?: Offer | null
 }
 
-interface Order {
-    shippingAddress: string
-    fullName: string
-    phone: string
-    productId: string
-    quantity: number
+interface Offer {
     buyerId: string
+    amount: number
+    createdAt: Date
+}
+
+interface ShippingAddress {
+    address: string
+    city: string
+    province: string
+    zipCode: string
+    name: string
 }
 
 export default function UserArea() {
     const [user, setUser] = useState<import('firebase/auth').User | null>(null)
     const [activeAds, setActiveAds] = useState<Ad[]>([])
-    const [soldAds, setSoldAds] = useState<any[]>([]) // Cambiato il tipo in "any" per gestire gli ordini
     const [loading, setLoading] = useState<boolean>(true)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [shippingAddress, setShippingAddress] = useState<ShippingAddress | null>(null)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [isAddressFormVisible, setIsAddressFormVisible] = useState<boolean>(false)
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setUser(user)
 
-                // Carica gli annunci attivi (sold = false)
+                // Recupera gli annunci attivi
                 const activeAdsQuery = query(
                     collection(db, 'products'),
                     where('userId', '==', user.uid),
-                    where('sold', '==', false)  // Annunci attivi
+                    where('sold', '==', false)
                 )
 
-                // Carica gli annunci venduti (sold = true)
-                const soldAdsQuery = query(
-                    collection(db, 'products'),
-                    where('userId', '==', user.uid),
-                    where('sold', '==', true)  // Annunci venduti
-                )
-
-                // Recupera gli annunci attivi
                 const activeSnapshot = await getDocs(activeAdsQuery)
-                const activeAdsData: Ad[] = activeSnapshot.docs.map(doc => {
+                const activeAdsData: Ad[] = []
+
+                for (const doc of activeSnapshot.docs) {
                     const data = doc.data()
-                    return {
+
+                    // Recupera le offerte relative all'annuncio
+                    const offersQuery = query(
+                        collection(db, 'offers'),
+                        where('productId', '==', doc.id)
+                    )
+                    const offersSnapshot = await getDocs(offersQuery)
+                    const offers: Offer[] = offersSnapshot.docs.map(offerDoc => {
+                        const offerData = offerDoc.data()
+                        return {
+                            buyerId: offerData.buyerId,
+                            amount: offerData.amount,
+                            createdAt: offerData.createdAt.toDate()
+                        }
+                    })
+
+                    // Trova l'offerta più alta
+                    const highestOffer = offers.length
+                        ? offers.reduce((prev, curr) => (prev.amount > curr.amount ? prev : curr), offers[0])
+                        : null
+
+                    activeAdsData.push({
                         id: doc.id,
                         title: data.title,
                         price: data.price,
-                        image: data.image || '/placeholder-image.jpg', // Immagine di fallback
+                        image: data.image || '/placeholder-image.jpg',
                         sold: data.sold,
                         productCategory: data.productCategory,
-                        description: data.description || '', // Descrizione dell'annuncio
-                    }
-                })
-                setActiveAds(activeAdsData)
-
-                // Recupera gli annunci venduti
-                const soldSnapshot = await getDocs(soldAdsQuery)
-                const soldAdsData: any[] = []
-                for (const doc of soldSnapshot.docs) {
-                    const data = doc.data()
-                    const orderQuery = query(
-                        collection(db, 'orders'),
-                        where('productId', '==', doc.id) // Prendi gli ordini per il prodotto venduto
-                    )
-                    const orderSnapshot = await getDocs(orderQuery)
-                    orderSnapshot.forEach((orderDoc) => {
-                        const orderData = orderDoc.data() as Order
-                        soldAdsData.push({
-                            ...data,
-                            orderDetails: orderData, // Aggiungi i dettagli dell'ordine
-                        })
+                        description: data.description || '',
+                        highestOffer
                     })
                 }
-                setSoldAds(soldAdsData)
 
+                setActiveAds(activeAdsData)
                 setLoading(false)
             } else {
                 setUser(null)
                 setActiveAds([])
-                setSoldAds([])
                 setLoading(false)
             }
         })
@@ -103,20 +105,65 @@ export default function UserArea() {
         return () => unsubscribe()
     }, [])
 
-    const handleDelete = async (adId: string) => {
+    const handleAcceptOffer = async (adId: string, offer: Offer) => {
         try {
-            await deleteDoc(doc(db, 'products', adId))
+            const adRef = doc(db, 'products', adId)
+            const adSnap = await getDoc(adRef)
+            if (!adSnap.exists()) {
+                throw new Error('Annuncio non trovato')
+            }
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const adData = adSnap.data()
+
+            const buyerId = offer.buyerId
+
+            // Recupera i dettagli dell'acquirente
+            const buyerRef = doc(db, 'users', buyerId)
+            const buyerSnap = await getDoc(buyerRef)
+            if (!buyerSnap.exists()) {
+                throw new Error('Acquirente non trovato')
+            }
+            const buyerData = buyerSnap.data()
+
+            // Crea il shippingAddress con i dati dell'acquirente
+            const buyerShippingAddress = {
+                address: buyerData.address,
+                city: buyerData.city,
+                province: buyerData.province,
+                zipCode: buyerData.zipCode,
+                name: buyerData.fullName
+            }
+
+            // Crea un nuovo ordine per l'acquirente
+            const orderData = {
+                createdAt: new Date(),
+                productId: adId,
+                shippingAddress: buyerShippingAddress,
+                buyerId: buyerId, // Usa buyerId invece di userId
+            }
+
+            // Aggiungi l'ordine alla tabella orders
+            const orderRef = await addDoc(collection(db, 'orders'), orderData)
+            console.log('Ordine creato con successo:', orderRef.id)
+
+            // Segna l'annuncio come venduto
+            await updateDoc(adRef, { sold: true })
+            console.log('Annuncio contrassegnato come venduto')
+
+            // Mostra un messaggio di conferma
+            alert(`Offerta accettata! L'annuncio è stato contrassegnato come venduto e l'ordine è stato creato per l'acquirente.`)
+
+            // Rimuovi l'annuncio dalla lista degli annunci attivi
             setActiveAds(activeAds.filter(ad => ad.id !== adId))
-            setSoldAds(soldAds.filter(ad => ad.id !== adId))
-            alert('Annuncio eliminato con successo.')
+
         } catch (error) {
-            console.error('Errore durante l\'eliminazione dell\'annuncio:', error)
-            alert('C\'è stato un errore nell\'eliminazione dell\'annuncio.')
+            console.error('Errore durante l\'accettazione dell\'offerta:', error)
+            alert('C\'è stato un errore nell\'accettazione dell\'offerta.')
         }
     }
 
     if (loading) {
-        return <LoadingSpinner />;
+        return <LoadingSpinner />
     }
 
     if (!user) {
@@ -131,7 +178,6 @@ export default function UserArea() {
     return (
         <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
             <Header />
-
             <motion.section
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -140,116 +186,39 @@ export default function UserArea() {
             >
                 <div className="container mx-auto text-center">
                     <h1 className="text-5xl font-extrabold mb-4">I tuoi Annunci</h1>
-                    <p className="text-2xl font-light">Gestisci i tuoi annunci attivi e venduti</p>
                 </div>
             </motion.section>
-
             <section className="py-16">
                 <div className="container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
-                    {/* Annunci attivi */}
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className="space-y-8"
-                    >
-                        <h2 className="text-3xl font-semibold mb-6 text-gray-800 border-b-2 border-[#41978F] pb-2">Annunci Attivi</h2>
-                        {activeAds.length > 0 ? (
-                            <div className="grid gap-8 sm:grid-cols-2">
-                                {activeAds.map((ad) => (
-                                    <Transition
-                                        key={ad.id || `fallback-id-${Math.random()}`}
-                                        show={true}
-                                        enter="transition-all duration-300"
-                                        enterFrom="opacity-0 scale-95"
-                                        enterTo="opacity-100 scale-100"
-                                        leave="transition-all duration-300"
-                                        leaveFrom="opacity-100 scale-100"
-                                        leaveTo="opacity-0 scale-95"
-                                    >
-                                        <div className="bg-white shadow-lg rounded-lg overflow-hidden transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
-                                            <Link href={`/edit/${ad.id}`} className="block">
-                                                <img
-                                                    src={ad.image}
-                                                    alt={ad.title}
-                                                    className="w-full h-48 object-cover"
-                                                    onError={(e) => (e.currentTarget.src = '/placeholder-image.jpg')}
-                                                />
-                                                <div className="p-6">
-                                                    <h3 className="text-xl font-semibold text-gray-800 mb-2">{ad.title}</h3>
-                                                    <p className="text-lg font-bold text-[#41978F] mb-2">{ad.price} €</p>
-                                                    <p className="text-sm text-gray-600 line-clamp-2">{ad.description}</p>
-                                                </div>
-                                            </Link>
-                                            <div className="flex justify-between p-4 bg-gray-50 border-t">
-                                                <Link href={`/edit/${ad.id}`} className="text-[#41978F] hover:text-[#2C6E68] font-medium">
-                                                    <PencilIcon className="w-5 h-5 inline mr-1" />
-                                                    Modifica
-                                                </Link>
-                                                <button
-                                                    onClick={() => handleDelete(ad.id)}
-                                                    className="text-red-600 hover:text-red-800 font-medium"
-                                                >
-                                                    <TrashIcon className="w-5 h-5 inline mr-1" />
-                                                    Elimina
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </Transition>
-                                ))}
+                    {activeAds.map((ad) => (
+                        <div key={ad.id} className="bg-white shadow-lg rounded-lg overflow-hidden">
+                            <img src={ad.image} alt={ad.title} className="w-full h-48 object-cover" />
+                            <div className="p-6">
+                                <h3 className="text-xl font-semibold">{ad.title}</h3>
+                                <p className="text-lg font-bold text-[#41978F]">{ad.price} €</p>
+                                <p className="text-sm text-gray-600">{ad.description}</p>
+                                {ad.highestOffer ? (
+                                    <div className="mt-4 bg-gray-50 p-4 rounded-lg">
+                                        <p>
+                                            <strong>Offerta più alta:</strong> {ad.highestOffer.amount} €
+                                        </p>
+                                        <p>
+                                            <strong>Data:</strong> {ad.highestOffer.createdAt.toLocaleString()}
+                                        </p>
+                                        <button
+                                            onClick={() => ad.highestOffer !== undefined && ad.highestOffer !== null ? handleAcceptOffer(ad.id, ad.highestOffer) : null}
+                                            className="bg-green-500 text-white px-4 py-2 rounded mt-4"
+                                            disabled={ad.highestOffer === undefined || ad.highestOffer === null}
+                                        >
+                                            Accetta Offerta
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <p className="text-gray-500 mt-4">Nessuna offerta ricevuta.</p>
+                                )}
                             </div>
-                        ) : (
-                            <p className="text-gray-500 text-center py-8 bg-white rounded-lg shadow">Non hai annunci attivi.</p>
-                        )}
-                    </motion.div>
-
-                    {/* Annunci venduti */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 0.4 }}
-                        className="space-y-8"
-                    >
-                        <h2 className="text-3xl font-semibold mb-6 text-gray-800 border-b-2 border-[#41978F] pb-2">Annunci Venduti</h2>
-                        {soldAds.length > 0 ? (
-                            <div className="grid gap-8 sm:grid-cols-2">
-                                {soldAds.map((ad) => (
-                                    <Transition
-                                        key={ad.id || `fallback-id-${Math.random()}`}
-                                        show={true}
-                                        enter="transition-all duration-300"
-                                        enterFrom="opacity-0 scale-95"
-                                        enterTo="opacity-100 scale-100"
-                                        leave="transition-all duration-300"
-                                        leaveFrom="opacity-100 scale-100"
-                                        leaveTo="opacity-0 scale-95"
-                                    >
-                                        <div className="bg-gray-100 shadow-lg rounded-lg overflow-hidden transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
-                                            <img
-                                                src={ad.image}
-                                                alt={ad.title}
-                                                className="w-full h-48 object-cover"
-                                                onError={(e) => (e.currentTarget.src = '/placeholder-image.jpg')}
-                                            />
-                                            <div className="p-6">
-                                                <h3 className="text-xl font-semibold text-gray-800 mb-2">{ad.title}</h3>
-                                                <p className="text-lg font-bold text-[#41978F] mb-2">{ad.price} €</p>
-                                                <p className="text-sm text-red-600 mb-2">Questo annuncio è stato venduto.</p>
-                                                <div className="bg-white p-4 rounded-lg mt-4 shadow-inner">
-                                                    <h4 className="text-sm font-semibold text-gray-800 mb-2">Dettagli Ordine</h4>
-                                                    <p className="text-gray-700"><span className="font-medium">Nome Acquirente:</span> {ad.orderDetails.fullName}</p>
-                                                    <p className="text-gray-700"><span className="font-medium">Indirizzo:</span> {ad.orderDetails.shippingAddress}</p>
-                                                    <p className="text-gray-700"><span className="font-medium">Telefono:</span> {ad.orderDetails.phone}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </Transition>
-                                ))}
-                            </div>
-                        ) : (
-                            <p className="text-gray-500 text-center py-8 bg-white rounded-lg shadow">Non hai annunci venduti.</p>
-                        )}
-                    </motion.div>
+                        </div>
+                    ))}
                 </div>
             </section>
 

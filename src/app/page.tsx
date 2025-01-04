@@ -75,7 +75,7 @@ export default function Home() {
       let unreadCount = 0;
       querySnapshot.forEach((doc) => {
         const chatData = doc.data();
-        chatData.messages.forEach((message: any) => {
+        chatData.messages.forEach((message: { read: boolean; senderId: string }) => {
           if (!message.read && message.senderId !== userId) {
             unreadCount++;
           }
@@ -87,6 +87,7 @@ export default function Home() {
       console.error('Errore durante il recupero dei messaggi:', error);
     }
   };
+
 
   const handleSearchChange = useCallback(
       async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,6 +134,7 @@ export default function Home() {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
   const handleLogout = async () => {
@@ -156,13 +158,22 @@ export default function Home() {
 
   const fetchUserProducts = async (userId: string) => {
     try {
+      // Esegui la query per recuperare i prodotti dell'utente specificato
       const q = query(collection(db, "products"), where("userId", "==", userId));
       const querySnapshot = await getDocs(q);
 
-      const products: Product[] = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...(doc.data() as Product),
-      }));
+      // Mappa i documenti recuperati per creare l'array dei prodotti
+      const products: Product[] = querySnapshot.docs.map((doc) => {
+        // Destruttura i dati per escludere la proprietà 'id' (se presente)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { id: _, ...data } = doc.data() as Product; // Rimuoviamo 'id' dai dati originali
+        return {
+          id: doc.id, // Aggiungiamo l'ID del documento separatamente
+          ...data, // Aggiungiamo gli altri dati del prodotto
+        };
+      });
+
+      // Imposta lo stato con i prodotti recuperati
       setUserProducts(products);
     } catch (error) {
       console.error("Errore durante il recupero degli articoli:", error);
@@ -288,7 +299,7 @@ const CategoryDropdown = () => (
           <CategoryLink href="/categories/Elettronica">Elettronica</CategoryLink>
           <CategoryLink href="/categories/Arredamento">Arredamento</CategoryLink>
           <CategoryLink href="/categories/Moda">Moda</CategoryLink>
-          <CategoryLink href="/categories/Auto-e-Moto">Auto e Moto</CategoryLink>
+          <CategoryLink href="/categories/Giocattoli">Auto e Moto</CategoryLink>
         </div>
       </div>
     </div>

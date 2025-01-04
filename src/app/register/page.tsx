@@ -91,11 +91,18 @@ export default function RegisterPage() {
 
             setAlert({ type: 'success', message: 'Registrazione completata con successo!' })
             setTimeout(() => router.push('/login'), 3000)
-        } catch (error: any) {
-            console.error('Errore durante la registrazione:', error.message || error)
-            setAlert({ type: 'error', message: error.message || 'Errore durante la registrazione. Riprova più tardi.' })
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                // Gestisci l'errore come un'istanza di Error
+                console.error('Errore durante la registrazione:', error.message);
+                setAlert({ type: 'error', message: error.message || 'Errore durante la registrazione. Riprova più tardi.' });
+            } else {
+                // Gestisci l'errore come errore generico
+                console.error('Errore sconosciuto:', error);
+                setAlert({ type: 'error', message: 'Errore durante la registrazione. Riprova più tardi.' });
+            }
         } finally {
-            setIsSubmitting(false)
+            setIsSubmitting(false);
         }
     }
 
@@ -111,8 +118,14 @@ export default function RegisterPage() {
                 createdAt: serverTimestamp(),
             })
             router.push('/') // Redirect to home after successful sign-in
-        } catch (error) {
-            console.error('Errore durante la registrazione con Google:', error.message || error)
+        }catch (error: unknown) {
+            if (error instanceof Error) {
+                // Se l'errore è un'istanza di Error, possiamo accedere alla proprietà 'message'
+                console.error('Errore durante la registrazione con Google:', error.message);
+            } else {
+                // Se l'errore non è un'istanza di Error, trattiamo l'errore come generico
+                console.error('Errore durante la registrazione con Google:', error);
+            }
         }
     }
 

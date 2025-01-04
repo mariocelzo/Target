@@ -9,6 +9,10 @@ import Footer from '../../components/Footer';
 import Link from "next/link";
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase';
+import { Timestamp } from 'firebase/firestore';
+
+
+
 
 interface Product {
     id: string;
@@ -16,7 +20,7 @@ interface Product {
     description: string;
     price: number;
     category: string;
-    createdAt: any;
+    createdAt: Timestamp;
     userId: string;
     image?: string;
 }
@@ -28,6 +32,7 @@ export default function ProductDetailPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [redirectToChat, setRedirectToChat] = useState<string | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [currentOffer, setCurrentOffer] = useState<number | null>(null);
     const [maxOffer, setMaxOffer] = useState<number | null>(null);  // Massima offerta ricevuta da tutti i clienti
     const [userOffer, setUserOffer] = useState<number | null>(null);
@@ -55,8 +60,8 @@ export default function ProductDetailPage() {
                         description: data.description || '',
                         price: data.price || 0,
                         category: data.category || '',
-                        createdAt: data.createdAt,
                         userId: data.userId || '',
+                        createdAt: data.createdAt || Timestamp.now(),
                         image: data.image || '',
                     };
                     setProduct(productData);
@@ -94,6 +99,7 @@ export default function ProductDetailPage() {
                 } else {
                     setError('Prodotto non trovato');
                 }
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
             } catch (error) {
                 setError('Errore nel recupero dei dettagli del prodotto');
             } finally {
@@ -166,7 +172,13 @@ export default function ProductDetailPage() {
 
         const offerAmountValue = Number(offerAmount);
 
-        if (offerAmountValue > product?.price) {
+
+        if (!product) {
+            alert('Prodotto non disponibile');
+            return;
+        }
+
+        if (offerAmountValue > product.price) {
             alert('L\'offerta non può superare il prezzo di vendita del prodotto.');
             return;
         }
@@ -202,7 +214,16 @@ export default function ProductDetailPage() {
         try {
             // Trova l'offerta dell'utente
             const offersRef = collection(db, 'offers');
-            const q = query(offersRef, where('productId', '==', product?.id), where('buyerId', '==', user.uid));
+            if (!user) {
+                alert('Devi essere autenticato per fare questa azione.');
+                return;
+            }
+
+            const q = query(
+                offersRef,
+                where('productId', '==', product?.id),
+                where('buyerId', '==', user.uid)
+            );
             const querySnapshot = await getDocs(q);
 
             querySnapshot.forEach(async (doc) => {
@@ -219,8 +240,8 @@ export default function ProductDetailPage() {
         }
     };
 
-    const formatDate = (createdAt: any) => {
-        const date = createdAt?.toDate ? createdAt.toDate() : new Date(createdAt);
+    const formatDate = (createdAt: Timestamp) => {
+        const date = createdAt.toDate(); // Converte Timestamp in oggetto Date
         return date.toLocaleDateString('it-IT', {
             day: '2-digit',
             month: '2-digit',

@@ -120,7 +120,7 @@ export default function EditAd() {
                                 />
                             ) : (
                                 <div className="flex items-center justify-center w-full h-full bg-gray-100 text-gray-500">
-                                    Clicca per aggiungere/modificare un'immagine
+                                    Clicca per aggiungere/modificare un&#39;immagine
                                 </div>
                             )}
                             {/* Icona di modifica */}
@@ -130,7 +130,7 @@ export default function EditAd() {
                         </div>
                         {/* Testo esplicativo */}
                         <p className="text-sm text-center text-gray-500 mt-2">
-                            Clicca sull'immagine per modificarla
+                            Clicca sull&#39;immagine per modificarla
                         </p>
                         <input
                             type="file"

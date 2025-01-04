@@ -22,6 +22,7 @@ export default function LoginForm() {
         const provider = new GoogleAuthProvider()
 
         try {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const userCredential = await signInWithPopup(auth, provider)
             router.push('/') // Reindirizza alla home page dopo il login
         } catch (err: unknown) {
