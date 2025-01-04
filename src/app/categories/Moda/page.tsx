@@ -101,8 +101,8 @@ export default function FurniturePage() {
             {/* Hero Section */}
             <section className="bg-gradient-to-r from-teal-600 to-teal-400 text-white py-12">
                 <div className="container mx-auto text-center">
-                    <h1 className="text-4xl font-extrabold mb-4">Prodotti Arredamento</h1>
-                    <p className="text-lg">Scopri i migliori articoli di arredamento disponibili</p>
+                    <h1 className="text-4xl font-extrabold mb-4">Prodotti Moda</h1>
+                    <p className="text-lg">Scopri i migliori articoli di moda disponibili</p>
                 </div>
             </section>
 

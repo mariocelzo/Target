@@ -102,8 +102,8 @@ export default function ToysPage() {
             {/* Hero Section */}
             <section className="bg-gradient-to-r from-teal-600 to-teal-400 text-white py-12">
                 <div className="container mx-auto text-center">
-                    <h1 className="text-4xl font-extrabold mb-4">Prodotti Giocattoli</h1>
-                    <p className="text-lg">Scopri i migliori articoli per i più piccoli</p>
+                    <h1 className="text-4xl font-extrabold mb-4">Prodotti Auto e Moto</h1>
+                    <p className="text-lg">Scopri le migliori auto e le migliori moto</p>
                 </div>
             </section>
 
