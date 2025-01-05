@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db } from '@/data/firebase';
 import Link from 'next/link';
 import { getAuth } from 'firebase/auth';
-import Header from '@/app/components/Header';
-import Footer from '@/app/components/Footer';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
 // Interfacce per i tipi
 interface User {

@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
-import { useFormValidation } from '@/hooks/use-form-validation'
+import { useFormValidation } from '@/services/use-form-validation'
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
-import { auth } from '@/lib/firebase'
+import { auth } from '@/data/firebase'
 import { useRouter } from 'next/navigation'
 
 export default function LoginForm() {

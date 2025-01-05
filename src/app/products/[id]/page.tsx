@@ -3,12 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where, deleteDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
+import { db } from '@/data/firebase';
+import Header from '../../../components/Header';
+import Footer from '../../../components/Footer';
 import Link from "next/link";
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '@/lib/firebase';
+import { auth } from '@/data/firebase';
 import { Timestamp } from 'firebase/firestore';
 
 

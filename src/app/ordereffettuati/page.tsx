@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
-import { db, auth } from '@/lib/firebase';
+import { db, auth } from '@/data/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import Image from 'next/image';
-import Header from "@/app/components/Header";
-import Footer from "@/app/components/Footer";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { Spin, Alert, Card, Typography, Tag, Divider } from 'antd';
 import { ShoppingOutlined, CalendarOutlined, DollarOutlined } from '@ant-design/icons';
 

@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import Header from '../components/Header'  // Import the Header component
+import Header from '../../components/Header'  // Import the Header component
 import LoginForm from '../components/login-form'
-import Footer from '../components/Footer'  // Import the Footer component
+import Footer from '../../components/Footer'  // Import the Footer component
 
 export default function LoginPage() {
     return (

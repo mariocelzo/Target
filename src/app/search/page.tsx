@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation'; // Cambia useRouter con useSearchParams
 import { query, collection, where, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db } from '@/data/firebase';
 import Link from 'next/link';
 
 interface Product {

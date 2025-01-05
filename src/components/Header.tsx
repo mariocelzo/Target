@@ -5,9 +5,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { User, Menu } from 'lucide-react';
-import { auth } from '@/lib/firebase';
+import { auth } from '@/data/firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db } from '@/data/firebase';
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -37,7 +37,7 @@ const Header = () => {
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center space-x-2">
+                    <Link href="/public" className="flex items-center space-x-2">
                         <img
                             src="/logoNosfondo.png"
                             alt="Logo"
@@ -47,7 +47,7 @@ const Header = () => {
 
                     {/* Desktop Navigation */}
                     <nav className="hidden md:flex space-x-6 text-lg">
-                        <NavLink href="/" isActive={isActive('/')}>Home</NavLink>
+                        <NavLink href="/public" isActive={isActive('/')}>Home</NavLink>
                         <NavLink href="/sell" isActive={isActive('/sell')}>Vendi</NavLink>
                         <div className="relative group">
                             <button className="flex items-center hover:text-teal-300 transition-colors duration-200">
@@ -98,7 +98,7 @@ const Header = () => {
                 {isMenuOpen && (
                     <nav className="mt-4 md:hidden">
                         <div className="flex flex-col space-y-2">
-                            <MobileNavLink href="/" onClick={() => setIsMenuOpen(false)}>Home</MobileNavLink>
+                            <MobileNavLink href="/public" onClick={() => setIsMenuOpen(false)}>Home</MobileNavLink>
                             <MobileNavLink href="/sell" onClick={() => setIsMenuOpen(false)}>Vendi</MobileNavLink>
                             <MobileNavLink href="/categories" onClick={() => setIsMenuOpen(false)}>Categorie</MobileNavLink>
                             <MobileNavLink href="/about" onClick={() => setIsMenuOpen(false)}>Chi Siamo</MobileNavLink>

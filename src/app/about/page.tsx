@@ -1,13 +1,17 @@
-import Image from 'next/image';
+'use client';
 
-import Footer from "@/app/components/Footer";
-import Header from "@/app/components/Header"; // Usa icone già integrate nella home
+import Image from 'next/image';
+import Footer from '@/components/Footer';
+import Header from '@/components/Header';
+import { useTeam } from '@/services/teamService'; // Importa logica dal BLL
 
 export default function About() {
+    const teamMembers = useTeam(); // Ottieni i membri del team dal livello BLL
+
     return (
         <div className="min-h-screen bg-white">
             {/* Header */}
-         <Header/>
+            <Header />
 
             {/* Main Section */}
             <main className="py-16">
@@ -15,7 +19,7 @@ export default function About() {
                     {/* Logo */}
                     <div className="mb-8">
                         <Image
-                            src="/logoNosfondo.png" // Percorso corretto
+                            src="/logoNosfondo.png"
                             alt="Logo Target"
                             width={150}
                             height={150}
@@ -35,12 +39,7 @@ export default function About() {
                     <div className="container mx-auto">
                         <h2 className="text-3xl font-bold mb-8 text-center text-[#41978F]">Il Nostro Team</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            {/* Placeholder per i membri del team */}
-                            {[
-                                { name: 'Mario Celzo', role: 'CEO', img: '/images/team1.jpg' },
-                                { name: 'Renato Mancino', role: 'CEO', img: '/images/team2.jpg' },
-                                { name: 'Fabio Di Lieto', role: 'CEO', img: '/images/team3.jpg' },
-                            ].map((member, index) => (
+                            {teamMembers.map((member, index) => (
                                 <div key={index} className="text-center">
                                     <div className="bg-gray-300 h-48 w-48 mx-auto rounded-full overflow-hidden">
                                         <Image
@@ -71,7 +70,7 @@ export default function About() {
             </main>
 
             {/* Footer */}
-            <Footer/>
+            <Footer />
         </div>
     );
 }

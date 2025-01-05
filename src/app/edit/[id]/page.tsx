@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { db } from '@/lib/firebase'
+import { db } from '@/data/firebase'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 
 interface Ad {

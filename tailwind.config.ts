@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 
+
 export default {
 	darkMode: ["class"],
 	content: [
@@ -10,38 +11,26 @@ export default {
 	theme: {
 		extend: {
 			colors: {
+				// Colori esistenti
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				popover: {
-					DEFAULT: 'hsl(var(--popover))',
-					foreground: 'hsl(var(--popover-foreground))'
-				},
 				primary: {
-					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					DEFAULT: '#41978F', // Verde Primario
+					foreground: '#FFFFFF', // Testo su sfondo primario
+					hover: '#357B74', // Hover verde scuro
 				},
 				secondary: {
-					DEFAULT: 'hsl(var(--secondary))',
-					foreground: 'hsl(var(--secondary-foreground))'
-				},
-				muted: {
-					DEFAULT: 'hsl(var(--muted))',
-					foreground: 'hsl(var(--muted-foreground))'
-				},
-				accent: {
-					DEFAULT: 'hsl(var(--accent))',
-					foreground: 'hsl(var(--accent-foreground))'
-				},
-				destructive: {
-					DEFAULT: 'hsl(var(--destructive))',
-					foreground: 'hsl(var(--destructive-foreground))'
+					DEFAULT: '#C4333B', // Rosso Secondario
+					foreground: '#FFFFFF', // Testo su sfondo secondario
+					hover: '#a82c30', // Hover rosso scuro
 				},
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
+				muted: 'hsl(var(--muted))',
 				ring: 'hsl(var(--ring))',
 				chart: {
 					'1': 'hsl(var(--chart-1))',
@@ -54,16 +43,44 @@ export default {
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				sm: 'calc(var(--radius) - 4px)',
+				xl: '12px', // Nuova opzione per curve più grandi
 			},
 			animation: {
-				scroll: 'scroll 20s linear infinite', // Animazione di scorrimento
+				scroll: 'scroll 20s linear infinite',
+				fadeIn: 'fadeIn 0.5s ease-in-out',
 			},
 			keyframes: {
 				scroll: {
-					'0%': { transform: 'translateX(100%)' }, // Inizio dell'animazione, fuori a destra
-					'100%': { transform: 'translateX(-100%)' }, // Fine dell'animazione, fuori a sinistra
+					'0%': { transform: 'translateX(100%)' },
+					'100%': { transform: 'translateX(-100%)' },
 				},
+				fadeIn: {
+					'0%': { opacity: 0 },
+					'100%': { opacity: 1 },
+				},
+			},
+			screens: {
+				'xs': '480px', // Aggiunto per schermi piccoli
+				'sm': '640px',
+				'md': '768px',
+				'lg': '1024px',
+				'xl': '1280px',
+				'2xl': '1536px',
+			},
+			zIndex: {
+				'0': '0',
+				'10': '10',
+				'20': '20',
+				'30': '30',
+				'40': '40',
+				'50': '50',
+				'modal': '999', // Nuovo z-index per i modali
+				'tooltip': '1000', // Nuovo z-index per tooltip
+			},
+			boxShadow: {
+				soft: '0 2px 4px rgba(0, 0, 0, 0.1)',
+				strong: '0 4px 8px rgba(0, 0, 0, 0.25)',
 			},
 		},
 	},

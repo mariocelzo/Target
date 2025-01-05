@@ -4,11 +4,11 @@ import { collection, getDocs, addDoc, updateDoc, onSnapshot, doc, query, where }
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { db } from '@/lib/firebase';
+import { db } from '@/data/firebase';
 import { Input } from "@/components/ui/input";
 import { UserCircle2, Send } from 'lucide-react';
-import Header from "@/app/components/Header";
-import Footer from "@/app/components/Footer";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 interface Message {
     senderId: string;
