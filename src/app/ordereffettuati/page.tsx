@@ -7,8 +7,10 @@ import { onAuthStateChanged } from 'firebase/auth';
 import Image from 'next/image';
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
-import { Spin, Alert } from 'antd';
+import { Spin, Alert, Card, Typography, Tag, Divider } from 'antd';
 import { ShoppingOutlined, CalendarOutlined, DollarOutlined } from '@ant-design/icons';
+
+const { Title, Text } = Typography;
 
 interface Order {
     id: string;
@@ -54,14 +56,20 @@ export default function OrdersPage() {
 
             for (const docSnapshot of querySnapshot.docs) {
                 const data = docSnapshot.data();
-                const createdAtFormatted = data.createdAt.toDate().toLocaleString('it-IT', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
 
+                // Verifica se createdAt esiste e può essere convertito
+                let createdAtFormatted = 'Data non disponibile';
+                if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+                    createdAtFormatted = data.createdAt.toDate().toLocaleString('it-IT', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                }
+
+                // Recupera i dettagli del prodotto
                 const productRef = doc(db, 'products', data.productId);
                 const productDoc = await getDoc(productRef);
                 const productData = productDoc.exists() ? productDoc.data() : null;
@@ -81,9 +89,10 @@ export default function OrdersPage() {
                             condition: productData.condition,
                             sold: productData.sold,
                         },
-                        quantity: data.quantity,
+                        quantity: data.quantity || 1, // Default a 1 se non esiste
                     };
 
+                    // Evita duplicati
                     const isDuplicate = ordersData.some(
                         (existingOrder) =>
                             existingOrder.productDetails.name === order.productDetails.name &&
@@ -113,57 +122,62 @@ export default function OrdersPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="min-h-screen bg-gray-100 flex flex-col">
             <Header />
             <main className="flex-grow container mx-auto py-8 px-4">
-                <h1 className="text-3xl font-bold text-gray-800 mb-8">I miei Ordini</h1>
+                <Title level={2} className="mb-6">I miei Ordini</Title>
                 {isLoading ? (
-                    <div className="flex flex-col items-center justify-center h-64">
+                    <div className="text-center">
                         <Spin size="large" />
-                        <p className="mt-4 text-gray-600">Caricamento ordini...</p>
+                        <Text className="mt-4 block">Caricamento ordini...</Text>
                     </div>
                 ) : error ? (
-                    <Alert message={error} type="info" showIcon className="max-w-md mx-auto" />
+                    <Alert message={error} type="info" showIcon />
                 ) : orders.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {orders.map((order) => (
-                            <div key={order.id} className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105">
-                                <div className="h-48 relative">
-                                    <Image
-                                        src={order.productDetails?.image || '/placeholder.png'}
-                                        alt={order.productName}
-                                        layout="fill"
-                                        objectFit="cover"
-                                    />
+                            <Card
+                                key={order.id}
+                                hoverable
+                                cover={
+                                    <div className="h-48 relative">
+                                        <Image
+                                            src={order.productDetails?.image || '/placeholder.png'}
+                                            alt={order.productName}
+                                            layout="fill"
+                                            objectFit="cover"
+                                        />
+                                    </div>
+                                }
+                                className="shadow-md"
+                            >
+                                <Title level={4} className="text-sm sm:text-base">{order.productName}</Title>
+                                <div className="flex items-center mb-2">
+                                    <CalendarOutlined className="mr-2" />
+                                    <Text type="secondary">{order.createdAt}</Text>
                                 </div>
-                                <div className="p-4">
-                                    <h2 className="text-xl font-semibold text-gray-800 mb-2">{order.productName}</h2>
-                                    <div className="flex items-center mb-2 text-gray-600">
-                                        <CalendarOutlined className="mr-2" />
-                                        <span>{order.createdAt}</span>
+                                <div className="flex items-center mb-4">
+                                    <DollarOutlined className="mr-2" />
+                                    <Text strong>€{order.price.toFixed(2)}</Text>
+                                </div>
+                                <div className="flex items-center mb-2">
+                                    <Text type="secondary">Quantità: {order.quantity}</Text>
+                                </div>
+                                <Divider />
+                                <div className="mt-4">
+                                    <Title level={5} className="text-xs sm:text-sm">Dettagli del prodotto:</Title>
+                                    <Text className="text-xs sm:text-sm">{order.productDetails?.description}</Text>
+                                    <div className="mt-2 text-xs sm:text-sm">
+                                        <Text strong>Categoria:</Text> {order.productDetails?.category}
                                     </div>
-                                    <div className="flex items-center mb-4 text-gray-800">
-                                        <DollarOutlined className="mr-2" />
-                                        <span className="font-bold">€{order.price.toFixed(2)}</span>
-                                    </div>
-                                    <div className="text-gray-600 mb-2">
-                                        Quantità: {order.quantity}
-                                    </div>
-                                    <div className="border-t border-gray-200 pt-4 mt-4">
-                                        <h3 className="text-lg font-semibold text-gray-800 mb-2">Dettagli del prodotto:</h3>
-                                        <p className="text-gray-600 text-sm mb-2">{order.productDetails?.description}</p>
-                                        <div className="text-sm text-gray-600">
-                                            <p><span className="font-semibold">Categoria:</span> {order.productDetails?.category}</p>
-                                            <p><span className="font-semibold">Condizione:</span> {order.productDetails?.condition}</p>
-                                        </div>
-                                    </div>
-                                    <div className="mt-4">
-                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                                            <ShoppingOutlined className="mr-1" /> Acquistato
-                                        </span>
+                                    <div className="mt-2 text-xs sm:text-sm">
+                                        <Text strong>Condizione:</Text> {order.productDetails?.condition}
                                     </div>
                                 </div>
-                            </div>
+                                <div className="mt-4">
+                                    <Tag color="blue"><ShoppingOutlined /> Acquistato</Tag>
+                                </div>
+                            </Card>
                         ))}
                     </div>
                 ) : null}
