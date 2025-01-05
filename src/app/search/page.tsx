@@ -1,33 +1,37 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation'; // Cambia useRouter con useSearchParams
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { query, collection, where, getDocs } from 'firebase/firestore';
 import { db } from '@/data/firebase';
 import Link from 'next/link';
+import Header from '@/components/Header'; // Importa Header
+import Footer from '@/components/Footer'; // Importa Footer
 
 interface Product {
     id: string;
-    name: string;  // Cambia 'title' con 'name'
+    name: string;
     description: string;
     price?: number;
+    image?: string; // Aggiunto per gestire l'immagine del prodotto
 }
 
 export default function SearchResults() {
     return (
-        <Suspense fallback={<div>Caricamento...</div>}>
+        <>
+            <Header />
             <SearchResultsContent />
-        </Suspense>
+            <Footer />
+        </>
     );
 }
 
 function SearchResultsContent() {
-    const searchParams = useSearchParams(); // Ottieni i parametri di query
+    const searchParams = useSearchParams();
     const [searchResults, setSearchResults] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Ottieni la query dall'URL
-    const searchQuery = searchParams.get('query') || ''; // Fallback a stringa vuota
+    const searchQuery = searchParams.get('query') || '';
 
     useEffect(() => {
         const fetchSearchResults = async () => {
@@ -37,7 +41,7 @@ function SearchResultsContent() {
             const q = query(
                 collection(db, 'products'),
                 where('name', '>=', searchQuery),
-                where('name', '<=', searchQuery + '\uf8ff')  // Ricerca su 'name' (campo del prodotto)
+                where('name', '<=', searchQuery + '\uf8ff')
             );
 
             try {
@@ -58,29 +62,49 @@ function SearchResultsContent() {
     }, [searchQuery]);
 
     return (
-        <div className="min-h-screen bg-gray-100 py-8">
+        <div className="min-h-screen bg-gradient-to-r from-gray-50 to-gray-100 py-8">
             <div className="container mx-auto">
-                <h1 className="text-3xl font-bold mb-6">
-                    Risultati della ricerca per: &#34;{searchQuery}&#34;
+                <h1 className="text-4xl font-bold text-gray-800 mb-6 text-center">
+                    Risultati per: <span className="text-teal-600">&#34;{searchQuery}&#34;</span>
                 </h1>
 
                 {isLoading ? (
-                    <div className="text-center">Caricamento...</div>
+                    <div className="text-center text-lg font-medium text-gray-500">
+                        Caricamento risultati...
+                    </div>
                 ) : searchResults.length > 0 ? (
                     <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {searchResults.map((product) => (
-                            <li key={product.id} className="bg-white shadow-md rounded-lg p-4">
-                                <Link href={`/products/${product.id}`}>
-                                    <h3 className="text-xl font-bold">{product.name}</h3> {/* Cambia title con name */}
-                                    <p className="text-gray-500">{product.description}</p>
-                                    <p className="text-green-600 font-bold">€{product.price}</p>
+                            <li
+                                key={product.id}
+                                className="bg-white shadow-md hover:shadow-lg rounded-lg overflow-hidden transform transition-all hover:-translate-y-1"
+                            >
+                                <Link href={`/products/${product.id}`} className="block">
+                                    <div className="p-4">
+                                        {/* Aggiunta immagine prodotto */}
+                                        {product.image ? (
+                                            <img
+                                                src={product.image}
+                                                alt={product.name}
+                                                className="w-full h-48 object-cover rounded-t-lg"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500">
+                                                Nessuna immagine
+                                            </div>
+                                        )}
+                                        <h3 className="text-xl font-bold text-gray-800 mt-4">{product.name}</h3>
+                                        <p className="text-gray-600 line-clamp-2">{product.description}</p>
+                                        <p className="text-green-600 font-bold">€{product.price}</p>
+                                    </div>
                                 </Link>
                             </li>
                         ))}
                     </ul>
                 ) : (
-                    <p className="text-center text-gray-500">
-                        Nessun prodotto trovato per &#34;{searchQuery}&#34;.
+                    <p className="text-center text-gray-500 text-lg">
+                        Nessun prodotto trovato per{' '}
+                        <span className="font-semibold">&#34;{searchQuery}&#34;</span>.
                     </p>
                 )}
             </div>

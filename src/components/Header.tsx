@@ -36,8 +36,8 @@ const Header = () => {
         <header className="w-full bg-gradient-to-r from-[#C4333B] to-[#8B0000] text-white py-4 shadow-lg">
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between">
-                    {/* Logo */}
-                    <Link href="/public" className="flex items-center space-x-2">
+                    {/* Logo → ora href="/" */}
+                    <Link href="/" className="flex items-center space-x-2">
                         <img
                             src="/logoNosfondo.png"
                             alt="Logo"
@@ -47,7 +47,8 @@ const Header = () => {
 
                     {/* Desktop Navigation */}
                     <nav className="hidden md:flex space-x-6 text-lg">
-                        <NavLink href="/public" isActive={isActive('/')}>Home</NavLink>
+                        {/* Home → ora href="/" */}
+                        <NavLink href="/" isActive={isActive('/')}>Home</NavLink>
                         <NavLink href="/sell" isActive={isActive('/sell')}>Vendi</NavLink>
                         <div className="relative group">
                             <button className="flex items-center hover:text-teal-300 transition-colors duration-200">
@@ -98,7 +99,8 @@ const Header = () => {
                 {isMenuOpen && (
                     <nav className="mt-4 md:hidden">
                         <div className="flex flex-col space-y-2">
-                            <MobileNavLink href="/public" onClick={() => setIsMenuOpen(false)}>Home</MobileNavLink>
+                            {/* Home → ora href="/" */}
+                            <MobileNavLink href="/" onClick={() => setIsMenuOpen(false)}>Home</MobileNavLink>
                             <MobileNavLink href="/sell" onClick={() => setIsMenuOpen(false)}>Vendi</MobileNavLink>
                             <MobileNavLink href="/categories" onClick={() => setIsMenuOpen(false)}>Categorie</MobileNavLink>
                             <MobileNavLink href="/about" onClick={() => setIsMenuOpen(false)}>Chi Siamo</MobileNavLink>
@@ -129,4 +131,3 @@ const MobileNavLink = ({ href, children, onClick }: { href: string; children: Re
 );
 
 export default Header;
-
