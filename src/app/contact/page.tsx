@@ -1,8 +1,7 @@
+// src/pages/contact.tsx
 'use client';
 
-import { useState, ChangeEvent, FormEvent } from 'react';
-import { collection, addDoc } from 'firebase/firestore';
-import { db } from '@/data/firebase';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useRouter } from 'next/navigation';
 import { Home } from 'lucide-react';
+import { handleContactFormSubmit } from '@/services/contactService';
 
 export default function ContactForm() {
     const [contactData, setContactData] = useState({
@@ -22,32 +22,19 @@ export default function ContactForm() {
     const router = useRouter();
 
     // Handle form input changes
-    const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setContactData((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Handle form submission
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-
         try {
-            const contactRef = collection(db, 'contacts');
-            await addDoc(contactRef, { ...contactData, timestamp: new Date() });
-
-            // Simulate sending an email (replace this with actual email integration)
-            console.log(`Sending email to ${contactData.email}:
-            Subject: Grazie per averci contattato!
-            Body: Ciao ${contactData.name},
-
-Grazie per aver contattato il nostro supporto. Abbiamo ricevuto la tua richiesta e faremo del nostro meglio per risponderti il prima possibile.
-
-Cordiali saluti,
-Il Team di Supporto`);
-
+            await handleContactFormSubmit(contactData);
             alert('Messaggio inviato con successo!');
             setContactData({ name: '', surname: '', email: '', message: '' });
+            router.push('/');  // Reindirizza alla Home
         } catch (error) {
             console.error('Errore durante l invio del messaggio:', error);
             alert('Si è verificato un errore. Riprova più tardi.');
