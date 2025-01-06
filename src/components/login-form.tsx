@@ -3,8 +3,7 @@
 import { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { useFormValidation } from '@/services/use-form-validation'
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
-import { auth } from '@/data/firebase'
+import { signInWithGoogle, signInWithEmail } from '@/services/authService'
 import { useRouter } from 'next/navigation'
 
 export default function LoginForm() {
@@ -17,17 +16,13 @@ export default function LoginForm() {
     const emailError = useFormValidation(email, { required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ })
     const passwordError = useFormValidation(password, { required: true, minLength: 8 })
 
-    // Gestione login con Google
     const handleGoogleSignIn = async () => {
-        const provider = new GoogleAuthProvider()
-
         try {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const userCredential = await signInWithPopup(auth, provider)
+            await signInWithGoogle()
             router.push('/') // Reindirizza alla home page dopo il login
         } catch (err: unknown) {
             if (err instanceof Error) {
-                setError(err.message) // Usa il messaggio dell'errore
+                setError(err.message)
             } else {
                 setError('Errore nel login con Google. Riprova.')
             }
@@ -39,11 +34,11 @@ export default function LoginForm() {
         if (emailError || passwordError) return
 
         try {
-            await signInWithEmailAndPassword(auth, email, password)
+            await signInWithEmail(email, password)
             router.push('/') // Reindirizza alla home page dopo il login
         } catch (err: unknown) {
             if (err instanceof Error) {
-                setError(err.message) // Usa il messaggio dell'errore
+                setError(err.message)
             } else {
                 setError('Credenziali non valide. Riprova.')
             }
