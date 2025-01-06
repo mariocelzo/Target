@@ -2,17 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getUserProfile, updateUserProfile, updateProfileImage } from '@/services/userService';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/Avatar';
-import { Button } from '@/components/Button';
-import { Input } from '@/components/Input';
-import { Label } from '@/components/Label';
-import { Textarea } from '@/components/Textarea';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Save, Home, Camera } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Home, Camera, Save } from 'lucide-react';
+import { UserData } from '../data/userData';
+import { fetchUserDataFromFirestore, updateUserDataInFirestore, uploadProfileImage } from '@/services/userServicearea';
 
 export default function UserProfile() {
-    const [userData, setUserData] = useState({
+    const [userData, setUserData] = useState<UserData>({
         fullName: '',
         email: '',
         dateOfBirth: '',
@@ -29,114 +30,163 @@ export default function UserProfile() {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'personal' | 'address'>('personal');
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const router = useRouter();
 
-    useEffect(() => {
-        const loadUserProfile = async () => {
-            setLoading(true);
-            try {
-                const data = await getUserProfile();
-                setUserData((prev) => ({ ...prev, ...data }));
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            } catch (err) {
-                setError('Errore durante il caricamento dei dati utente.');
-            } finally {
-                setLoading(false);
+    // Recupera i dati utente da Firestore
+    const fetchUserData = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await fetchUserDataFromFirestore();
+            if (data) {
+                setUserData(data);
             }
-        };
-        loadUserProfile();
+        } catch (error) {
+            console.error('Errore nel recupero dei dati utente:', error);
+            setError('Impossibile recuperare i dati utente. Riprova più tardi.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchUserData();
     }, []);
 
+    // Gestisce il cambiamento degli input del form
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setUserData((prev) => ({ ...prev, [name]: value }));
     };
 
+    // Gestisce il caricamento dell'immagine del profilo
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             setUploading(true);
+            setError(null);
             try {
-                const base64Image = await updateProfileImage(file);
+                const base64Image = await uploadProfileImage(file);
                 setUserData((prev) => ({ ...prev, imageUrl: base64Image }));
+
+                await updateUserDataInFirestore({ ...userData, imageUrl: base64Image });
                 setSuccess('Immagine del profilo aggiornata con successo!');
-            } catch {
-                setError('Errore durante il caricamento dell\'immagine.');
+            } catch (error) {
+                console.error('Errore durante la conversione dell\'immagine:', error);
+                setError('Impossibile caricare l\'immagine. Riprova più tardi.');
             } finally {
                 setUploading(false);
             }
         }
     };
 
+    // Gestisce l'invio del form
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setError(null);
+        setSuccess(null);
         try {
-            await updateUserProfile(userData);
+            await updateUserDataInFirestore(userData);
             setSuccess('Dati aggiornati con successo!');
-        } catch {
-            setError('Errore durante l\'aggiornamento dei dati.');
+        } catch (error) {
+            console.error('Errore nell\'aggiornamento dei dati:', error);
+            setError('Impossibile aggiornare i dati. Riprova più tardi.');
         }
     };
 
     if (loading) {
-        return <div>Caricamento...</div>;
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-[#41978F] to-[#2c6964] p-8">
+                <Card className="max-w-2xl mx-auto">
+                    <CardHeader className="bg-[#C4333B] text-white">
+                        <h1 className="text-3xl font-bold">Caricamento...</h1>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                        <p>Stiamo caricando i tuoi dati...</p>
+                    </CardContent>
+                </Card>
+            </div>
+        );
     }
 
     return (
-        <div className="container mx-auto py-8 px-4">
-            <h1 className="text-3xl font-bold mb-8 text-center">Profilo Utente</h1>
+        <div className="min-h-screen bg-gradient-to-br from-[#41978F] to-[#2c6964] p-8">
+            <Card className="max-w-2xl mx-auto overflow-hidden">
+                <CardHeader className="bg-[#C4333B] text-white">
+                    <div className="flex justify-between items-center">
+                        <h1 className="text-3xl font-bold">Profilo Utente</h1>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => router.push('/')}
+                            className="text-white hover:bg-[#A62D34] rounded-full"
+                        >
+                            <Home className="w-6 h-6" />
+                        </Button>
+                    </div>
+                    <p className="text-sm opacity-75">Modifica e visualizza le tue informazioni personali</p>
+                </CardHeader>
+                <CardContent className="p-6">
+                    <div className="flex items-center space-x-4 mb-6">
+                        <div className="relative group">
+                            <input
+                                id="profileImage"
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleImageUpload}
+                                disabled={uploading}
+                            />
+                            <label htmlFor="profileImage" className="cursor-pointer">
+                                <div className="relative w-24 h-24">
+                                    <Avatar className="w-full h-full">
+                                        <AvatarImage src={userData.imageUrl} alt={userData.fullName} />
+                                        <AvatarFallback>{userData.fullName?.split(' ').map((n) => n[0]).join('')}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
+                                        <Camera className="w-6 h-6 text-white" />
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        {uploading && <p className="text-sm text-yellow-500">Caricamento in corso...</p>}
+                        <div>
+                            <h2 className="text-2xl font-semibold text-[#C4333B]">{userData.fullName}</h2>
+                            <p className="text-sm text-gray-500">{userData.email}</p>
+                        </div>
+                    </div>
 
-            {/* Tabs */}
-            <div className="flex justify-center mb-6">
-                <button
-                    className={`px-4 py-2 rounded-t-lg ${
-                        activeTab === 'personal' ? 'bg-[#41978F] text-white' : 'bg-gray-200 text-gray-600'
-                    }`}
-                    onClick={() => setActiveTab('personal')}
-                >
-                    Dati Personali
-                </button>
-                <button
-                    className={`px-4 py-2 rounded-t-lg ${
-                        activeTab === 'address' ? 'bg-[#41978F] text-white' : 'bg-gray-200 text-gray-600'
-                    }`}
-                    onClick={() => setActiveTab('address')}
-                >
-                    Indirizzo
-                </button>
-            </div>
+                    {error && <div className="text-sm text-red-500">{error}</div>}
+                    {success && <div className="text-sm text-green-500">{success}</div>}
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
-                {error && <div className="text-red-500 mb-4">{error}</div>}
-                {success && <div className="text-green-500 mb-4">{success}</div>}
+                    <div className="flex mb-4">
+                        <button
+                            onClick={() => setActiveTab('personal')}
+                            className={`w-1/2 text-center py-2 ${activeTab === 'personal' ? 'bg-[#C4333B] text-white' : 'bg-gray-200'}`}
+                        >
+                            Informazioni Personali
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('address')}
+                            className={`w-1/2 text-center py-2 ${activeTab === 'address' ? 'bg-[#C4333B] text-white' : 'bg-gray-200'}`}
+                        >
+                            Indirizzo
+                        </button>
+                    </div>
 
-                {activeTab === 'personal' && (
-                    <>
-                        {/* Personal Information */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
+                    {activeTab === 'personal' && (
+                        <form onSubmit={handleSubmit}>
+                            <div className="space-y-2">
                                 <Label htmlFor="fullName">Nome Completo</Label>
                                 <Input
                                     id="fullName"
                                     name="fullName"
                                     value={userData.fullName}
                                     onChange={handleInputChange}
-                                    placeholder="Mario Rossi"
+                                    className="w-full border rounded-md"
                                 />
                             </div>
-                            <div>
-                                <Label htmlFor="email">Email</Label>
-                                <Input
-                                    id="email"
-                                    name="email"
-                                    value={userData.email}
-                                    onChange={handleInputChange}
-                                    placeholder="mario.rossi@example.com"
-                                />
-                            </div>
-                            <div>
+                            <div className="space-y-2">
                                 <Label htmlFor="dateOfBirth">Data di Nascita</Label>
                                 <Input
                                     id="dateOfBirth"
@@ -144,110 +194,77 @@ export default function UserProfile() {
                                     type="date"
                                     value={userData.dateOfBirth}
                                     onChange={handleInputChange}
+                                    className="w-full border rounded-md"
                                 />
                             </div>
-                            <div>
-                                <Label htmlFor="phoneNumber">Telefono</Label>
+                            <div className="space-y-2">
+                                <Label htmlFor="phoneNumber">Numero di Telefono</Label>
                                 <Input
                                     id="phoneNumber"
                                     name="phoneNumber"
                                     value={userData.phoneNumber}
                                     onChange={handleInputChange}
-                                    placeholder="1234567890"
+                                    className="w-full border rounded-md"
                                 />
                             </div>
-                            <div className="md:col-span-2">
+                            <div className="space-y-2">
                                 <Label htmlFor="bio">Biografia</Label>
                                 <Textarea
                                     id="bio"
                                     name="bio"
                                     value={userData.bio}
                                     onChange={handleInputChange}
-                                    placeholder="Scrivi qualcosa su di te..."
+                                    className="w-full border rounded-md"
+                                    rows={4}
                                 />
                             </div>
-                        </div>
-                    </>
-                )}
+                            <Button type="submit" className="mt-6 bg-[#C4333B] text-white py-2 px-4 rounded-md w-full">
+                                <Save className="w-4 h-4 mr-2" />
+                                Salva Modifiche
+                            </Button>
+                        </form>
+                    )}
 
-                {activeTab === 'address' && (
-                    <>
-                        {/* Address Information */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <Label htmlFor="province">Provincia</Label>
-                                <Input
-                                    id="province"
-                                    name="province"
-                                    value={userData.province}
-                                    onChange={handleInputChange}
-                                    placeholder="Provincia"
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="city">Città</Label>
-                                <Input
-                                    id="city"
-                                    name="city"
-                                    value={userData.city}
-                                    onChange={handleInputChange}
-                                    placeholder="Città"
-                                />
-                            </div>
-                            <div>
+                    {activeTab === 'address' && (
+                        <form onSubmit={handleSubmit}>
+                            <div className="space-y-2">
                                 <Label htmlFor="address">Indirizzo</Label>
                                 <Input
                                     id="address"
                                     name="address"
                                     value={userData.address}
                                     onChange={handleInputChange}
-                                    placeholder="Via Roma, 123"
+                                    className="w-full border rounded-md"
                                 />
                             </div>
-                            <div>
+                            <div className="space-y-2">
+                                <Label htmlFor="city">Città</Label>
+                                <Input
+                                    id="city"
+                                    name="city"
+                                    value={userData.city}
+                                    onChange={handleInputChange}
+                                    className="w-full border rounded-md"
+                                />
+                            </div>
+                            <div className="space-y-2">
                                 <Label htmlFor="zipCode">CAP</Label>
                                 <Input
                                     id="zipCode"
                                     name="zipCode"
                                     value={userData.zipCode}
                                     onChange={handleInputChange}
-                                    placeholder="CAP"
+                                    className="w-full border rounded-md"
                                 />
                             </div>
-                        </div>
-                    </>
-                )}
-
-                <div className="mt-6 flex justify-end">
-                    <Button type="submit" className="bg-[#41978F] text-white px-6 py-2 rounded-lg flex items-center">
-                        <Save className="mr-2" />
-                        Salva
-                    </Button>
-                </div>
-            </form>
-
-            {/* Profile Image Upload */}
-            <div className="mt-8 text-center">
-                <h2 className="text-2xl font-bold mb-4">Immagine del Profilo</h2>
-                <Avatar className="mx-auto mb-4">
-                    <AvatarImage src={userData.imageUrl || '/default-avatar.png'} alt="Immagine Profilo" />
-                    <AvatarFallback>U</AvatarFallback>
-                </Avatar>
-                <label
-                    htmlFor="profileImage"
-                    className="cursor-pointer bg-[#C4333B] text-white px-4 py-2 rounded-lg hover:bg-[#a82c30]"
-                >
-                    <Camera className="mr-2 inline" />
-                    Carica Immagine
-                </label>
-                <input
-                    id="profileImage"
-                    type="file"
-                    className="hidden"
-                    onChange={handleImageUpload}
-                />
-                {uploading && <p className="text-gray-600 mt-2">Caricamento in corso...</p>}
-            </div>
+                            <Button type="submit" className="mt-6 bg-[#C4333B] text-white py-2 px-4 rounded-md w-full">
+                                <Save className="w-4 h-4 mr-2" />
+                                Salva Modifiche
+                            </Button>
+                        </form>
+                    )}
+                </CardContent>
+            </Card>
         </div>
     );
 }
