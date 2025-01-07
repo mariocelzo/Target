@@ -6,29 +6,54 @@ import { getCurrentUserId } from '@/services/usservicecat';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import LoadingSpinner from '@/components/LoadingSpinner'; // Importa la rotella di caricamento
+
+// Interfaccia per l'utente
+interface User {
+    fullName: string;
+    city: string;
+}
+
+// Interfaccia per il prodotto
+interface Product {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    image?: string; // Campo opzionale
+    sold: boolean;
+    user?: User; // Campo opzionale
+}
 
 export default function ElectronicsPage() {
-    const [products, setProducts] = useState<any[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [products, setProducts] = useState<Product[]>([]); // Tipo specifico per l'array dei prodotti
+    const [isLoading, setIsLoading] = useState(true); // Stato di caricamento
 
     // Funzione per caricare i prodotti, da usare ogni volta che l'utente è disponibile
     const loadProducts = async () => {
-        const userId = getCurrentUserId();
-        if (userId) {
-            const products = await fetchProductsele(userId);
-            setProducts(products);
+        setIsLoading(true); // Attiva il caricamento
+        try {
+            const userId = getCurrentUserId();
+            if (userId) {
+                const products = await fetchProductsele(userId);
+                setProducts(products as Product[]); // Cast esplicito
+            }
+        } catch (error) {
+            console.error('Errore durante il caricamento dei prodotti:', error);
+        } finally {
+            setIsLoading(false); // Disattiva il caricamento
         }
-        setIsLoading(false);
     };
 
     useEffect(() => {
         loadProducts();
     }, []); // La dipendenza vuota fa sì che venga eseguito solo una volta al primo caricamento
 
+    // Mostra la rotella di caricamento durante il caricamento
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-100">
-                <p className="text-2xl text-gray-600">Caricamento dei prodotti...</p>
+                <LoadingSpinner /> {/* Rotella di caricamento */}
             </div>
         );
     }

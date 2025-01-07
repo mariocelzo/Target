@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { query, collection, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db, auth } from '@/data/firebase';
 import { useRouter } from 'next/navigation';
-import { Search, User, ChevronDown, LogOut, MessageCircle, Edit } from 'lucide-react';
+import {Search, User, ChevronDown, LogOut, MessageCircle, Edit, Moon, Sun} from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -41,7 +41,16 @@ export default function Home() {
   const [userProducts, setUserProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isNightMode, setIsNightMode] = useState(false);
+  const toggleNightMode = () => setIsNightMode((prev) => !prev);
 
+  useEffect(() => {
+    if (isNightMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isNightMode]);
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
@@ -191,30 +200,38 @@ export default function Home() {
   };
 
   return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div
+          className={`min-h-screen flex flex-col ${
+              isNightMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-800'
+          }`}>
         {/* Header */}
         <header className="bg-gradient-to-r from-[#C4333B] to-[#41978F] text-white py-4 shadow-lg">
           <div className="container mx-auto px-4 flex justify-between items-center">
             <Link href="/" className="text-3xl font-extrabold flex items-center space-x-2">
-              <Image src="/logoNosfondo.png" alt="Logo" width={40} height={40} />
+              <Image src="/logoNosfondo.png" alt="Logo" width={40} height={40}/>
               <span>Target Marketplace</span>
             </Link>
 
             <nav className="hidden md:flex space-x-6 text-lg">
-              <CategoryDropdown />
+              <CategoryDropdown/>
               <NavLink href="/sell">Vendi</NavLink>
               <NavLink href="/about">Chi Siamo</NavLink>
             </nav>
 
             <div className="flex items-center space-x-6">
-              <UserMenu user={user} userImage={userImage} handleLogout={handleLogout} />
-              <ChatNotification user={user} unreadMessagesCount={unreadMessagesCount} />
+              <UserMenu user={user} userImage={userImage} handleLogout={handleLogout}/>
+              <ChatNotification user={user} unreadMessagesCount={unreadMessagesCount}/>
             </div>
           </div>
         </header>
 
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-[#41978F] to-[#2C6D68] text-white py-20">
+        <section
+            className={`py-20 ${
+                isNightMode
+                    ? 'bg-gradient-to-r from-[#2C6D68] to-[#1A4342] text-gray-300 opacity-80'
+                    : 'bg-gradient-to-r from-[#41978F] to-[#2C6D68] text-white'
+            }`}>
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-5xl font-extrabold mb-6 animate-fade-in-down">Trova e Vendi con Facilità!</h1>
             <p className="text-xl mb-8 animate-fade-in-up">
@@ -233,29 +250,29 @@ export default function Home() {
                   onClick={handleSearch}
                   className="absolute right-2 top-2 bg-[#C4333B] text-white p-2 rounded-full transition-all duration-300 ease-in-out transform hover:scale-110"
               >
-                <Search size={20} />
+                <Search size={20}/>
               </button>
 
-              <SearchResults searchQuery={searchQuery} isLoading={isLoading} searchResults={searchResults} />
+              <SearchResults searchQuery={searchQuery} isLoading={isLoading} searchResults={searchResults}/>
             </div>
           </div>
         </section>
 
         {/* Featured Categories Section */}
-        <section className="py-16 bg-white">
+        <section className={`py-16 ${isNightMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-800'}`}>
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-4xl font-semibold mb-12 text-gray-800">Categorie in Evidenza</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <CategoryCard name="Elettronica" image="/elettronica.png" href="/categories/Elettronica" />
-              <CategoryCard name="Moda" image="/moda.png" href="/categories/Moda" />
-              <CategoryCard name="Arredamento" image="/arredamento.png" href="/categories/Arredamento" />
-              <CategoryCard name="Auto e Moto" image="/auto.png" href="/categories/Giocattoli" />
+              <CategoryCard name="Elettronica" image="/elettronica.png" href="/categories/Elettronica"/>
+              <CategoryCard name="Moda" image="/moda.png" href="/categories/Moda"/>
+              <CategoryCard name="Arredamento" image="/arredamento.png" href="/categories/Arredamento"/>
+              <CategoryCard name="Auto e Moto" image="/auto.png" href="/categories/Giocattoli"/>
             </div>
           </div>
         </section>
 
         {/* User Products Section */}
-        <section className="py-16 bg-gray-50">
+        <section className={`py-16 ${isNightMode ? 'bg-gray-800 text-gray-200' : 'bg-gray-50 text-gray-800'}`}>
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-4xl font-semibold mb-12 text-gray-800">I tuoi articoli in vendita</h2>
             {userProducts.filter(product => !product.sold).length > 0 ? (
@@ -263,26 +280,35 @@ export default function Home() {
                   {userProducts
                       .filter(product => !product.sold)
                       .map((product) => (
-                          <ProductCard key={product.id} product={product} onClick={() => openProductDetails(product)} />
+                          <ProductCard key={product.id} product={product} onClick={() => openProductDetails(product)}/>
                       ))}
                 </div>
             ) : (
-                <p className="text-xl text-gray-600">Non hai ancora pubblicato articoli in vendita o sono stati tutti venduti.</p>
+                <p className="text-xl text-gray-600">Non hai ancora pubblicato articoli in vendita o sono stati tutti
+                  venduti.</p>
             )}
           </div>
         </section>
 
         {/* Product Details Modal */}
         {isModalOpen && selectedProduct && (
-            <ProductModal product={selectedProduct} onClose={closeProductDetails} />
+            <ProductModal product={selectedProduct} onClose={closeProductDetails}/>
         )}
+        <button
+            onClick={toggleNightMode}
+            className={`fixed bottom-4 right-4 p-4 rounded-full shadow-lg transition-all ${
+                isNightMode ? 'bg-white text-black' : 'bg-black text-white'
+            }`}
+        >
+          {isNightMode ? <Sun size={20}/> : <Moon size={20}/>}
+        </button>
 
-        <Footer />
+        <Footer/>
       </div>
   );
 }
 
-const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
+const NavLink = ({href, children}: { href: string; children: React.ReactNode }) => (
     <Link href={href} className="hover:text-teal-300 transition-colors duration-200">
       {children}
     </Link>

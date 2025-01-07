@@ -16,7 +16,7 @@ export default function ImageUploader({ image, onImageChange, onRemoveImage }: I
                         htmlFor="image-uploader"
                         className="block w-full h-48 border-4 border-dashed border-gray-300 rounded-lg flex justify-center items-center text-gray-500 cursor-pointer hover:border-[#41978F] hover:text-[#41978F] transition"
                     >
-                        <span className="text-lg font-semibold">Seleziona un'immagine</span>
+                        <span className="text-lg font-semibold">Seleziona un&#39;immagine</span>
                         <input
                             id="image-uploader"
                             type="file"

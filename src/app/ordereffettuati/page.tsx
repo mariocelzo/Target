@@ -33,17 +33,21 @@ export default function OrdersPage() {
         })();
     }, []);
 
+    if (isLoading) {
+        // Mostra la rotella di caricamento a schermo intero
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-100">
+                <Spin size="large" tip="Caricamento in corso..." />
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
             <Header />
             <main className="flex-grow container mx-auto py-8 px-4">
                 <Title level={2} className="mb-6">I miei Ordini</Title>
-                {isLoading ? (
-                    <div className="text-center">
-                        <Spin size="large" />
-                        <Text className="mt-4 block">Caricamento ordini...</Text>
-                    </div>
-                ) : error ? (
+                {error ? (
                     <Alert message={error} type="info" showIcon />
                 ) : orders.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -92,7 +96,9 @@ export default function OrdersPage() {
                             </Card>
                         ))}
                     </div>
-                ) : null}
+                ) : (
+                    <Text type="secondary" className="text-center block">Nessun ordine trovato.</Text>
+                )}
             </main>
             <Footer />
         </div>

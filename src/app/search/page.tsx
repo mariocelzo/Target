@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { query, collection, where, getDocs } from 'firebase/firestore';
@@ -20,7 +21,10 @@ export default function SearchResults() {
     return (
         <>
             <Header />
-            <SearchResultsContent />
+            {/* Aggiunta del Suspense boundary */}
+            <Suspense fallback={<LoadingFallback />}>
+                <SearchResultsContent />
+            </Suspense>
             <Footer />
         </>
     );
@@ -108,6 +112,14 @@ function SearchResultsContent() {
                     </p>
                 )}
             </div>
+        </div>
+    );
+}
+
+function LoadingFallback() {
+    return (
+        <div className="flex items-center justify-center min-h-screen">
+            <p className="text-gray-500 text-lg font-medium">Caricamento in corso...</p>
         </div>
     );
 }

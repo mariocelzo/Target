@@ -1,7 +1,7 @@
 // src/data/ordersData.ts
 
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db } from '@/data/firebase';
 
 export const fetchOrdersByBuyerId = async (buyerId: string) => {
     const q = query(collection(db, 'orders'), where('buyerId', '==', buyerId));

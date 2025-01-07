@@ -6,29 +6,53 @@ import { getCurrentUserId } from '@/services/usservicecat';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import LoadingSpinner from '@/components/LoadingSpinner'; // Importa la rotella di caricamento
+
+// Interfaccia per i dati utente
+interface User {
+    fullName: string;
+    city: string;
+}
+
+// Interfaccia per i prodotti
+interface Product {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    image?: string; // Campo opzionale
+    sold: boolean;
+    user?: User; // Campo opzionale
+}
 
 export default function ElectronicsPage() {
-    const [products, setProducts] = useState<any[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [products, setProducts] = useState<Product[]>([]); // Definito il tipo Product[]
+    const [isLoading, setIsLoading] = useState(true); // Stato di caricamento
 
-    // Funzione per caricare i prodotti, da usare ogni volta che l'utente è disponibile
+    // Funzione per caricare i prodotti
     const loadProducts = async () => {
-        const userId = getCurrentUserId();
-        if (userId) {
-            const products = await fetchProductsauto(userId);
-            setProducts(products);
+        setIsLoading(true); // Avvia il caricamento
+        try {
+            const userId = getCurrentUserId();
+            if (userId) {
+                const products = (await fetchProductsauto(userId)) as Product[]; // Supponiamo che questa restituisca Product[]
+                setProducts(products);
+            }
+        } catch (error) {
+            console.error('Errore durante il caricamento dei prodotti:', error);
+        } finally {
+            setIsLoading(false); // Termina il caricamento
         }
-        setIsLoading(false);
     };
 
     useEffect(() => {
         loadProducts();
-    }, []); // La dipendenza vuota fa sì che venga eseguito solo una volta al primo caricamento
+    }, []); // La dipendenza vuota esegue loadProducts una sola volta al caricamento
 
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-100">
-                <p className="text-2xl text-gray-600">Caricamento dei prodotti...</p>
+                <LoadingSpinner /> {/* Rotella di caricamento */}
             </div>
         );
     }
@@ -39,7 +63,6 @@ export default function ElectronicsPage() {
             <section className="bg-gradient-to-r from-teal-600 to-teal-400 text-white py-12">
                 <div className="container mx-auto text-center">
                     <h1 className="text-4xl font-extrabold mb-4">Auto e Moto</h1>
-
                 </div>
             </section>
 

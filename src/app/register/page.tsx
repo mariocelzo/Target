@@ -1,26 +1,27 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
-import PasswordStrengthMeter from '@/components/PasswordStrengthMeter'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import PasswordStrengthMeter from '@/components/PasswordStrengthMeter';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import LoadingSpinner from '@/components/LoadingSpinner'; // Import del componente per il caricamento
 
 // Import dal Service Layer
-import { registerUser, registerOrLoginWithGoogle } from '@/data/userRepository'
+import { registerUser, registerOrLoginWithGoogle } from '@/data/userRepository';
 
 interface FormData {
-    fullName: string
-    email: string
-    password: string
-    confirmPassword: string
-    dateOfBirth: string
-    province: string
-    city: string
-    address: string
-    zipCode: string
-    phoneNumber: string
+    fullName: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    dateOfBirth: string;
+    province: string;
+    city: string;
+    address: string;
+    zipCode: string;
+    phoneNumber: string;
 }
 
 export default function RegisterPage() {
@@ -35,82 +36,83 @@ export default function RegisterPage() {
         address: '',
         zipCode: '',
         phoneNumber: '',
-    })
-    const [errors, setErrors] = useState<Record<string, string>>({})
-    const [isSubmitting, setIsSubmitting] = useState(false)
-    const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
-    const router = useRouter()
+    });
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+    const router = useRouter();
 
     // ---- Gestione del form e validazioni base di UI ----
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target
-        setFormData(prev => ({ ...prev, [name]: value }))
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
         if (errors[name]) {
-            setErrors(prev => ({ ...prev, [name]: '' }))
+            setErrors((prev) => ({ ...prev, [name]: '' }));
         }
-    }
+    };
 
     const validateForm = () => {
-        const newErrors: Record<string, string> = {}
+        const newErrors: Record<string, string> = {};
 
         if (!formData.fullName.trim()) {
-            newErrors.fullName = 'Il nome completo è obbligatorio'
+            newErrors.fullName = 'Il nome completo è obbligatorio';
         }
         if (!formData.email.trim()) {
-            newErrors.email = "L'email è obbligatoria"
+            newErrors.email = "L'email è obbligatoria";
         } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = 'Email non valida'
+            newErrors.email = 'Email non valida';
         }
 
         if (!formData.password) {
-            newErrors.password = 'La password è obbligatoria'
+            newErrors.password = 'La password è obbligatoria';
         } else if (formData.password.length < 8) {
-            newErrors.password = 'La password deve essere di almeno 8 caratteri'
+            newErrors.password = 'La password deve essere di almeno 8 caratteri';
         }
 
         if (formData.password !== formData.confirmPassword) {
-            newErrors.confirmPassword = 'Le password non corrispondono'
+            newErrors.confirmPassword = 'Le password non corrispondono';
         }
 
         if (!formData.dateOfBirth) {
-            newErrors.dateOfBirth = 'La data di nascita è obbligatoria'
+            newErrors.dateOfBirth = 'La data di nascita è obbligatoria';
         } else {
-            const birthDate = new Date(formData.dateOfBirth)
-            const today = new Date()
-            let age = today.getFullYear() - birthDate.getFullYear()
-            const m = today.getMonth() - birthDate.getMonth()
+            const birthDate = new Date(formData.dateOfBirth);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
             if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-                age--
+                age--;
             }
-            if (age < 18) newErrors.dateOfBirth = 'Devi avere almeno 18 anni per registrarti'
+            if (age < 18) newErrors.dateOfBirth = 'Devi avere almeno 18 anni per registrarti';
         }
 
         if (!formData.province.trim()) {
-            newErrors.province = 'La provincia è obbligatoria'
+            newErrors.province = 'La provincia è obbligatoria';
         }
         if (!formData.address.trim()) {
-            newErrors.address = "L'indirizzo è obbligatorio"
+            newErrors.address = "L'indirizzo è obbligatorio";
         }
         if (!formData.zipCode.trim()) {
-            newErrors.zipCode = 'Il CAP è obbligatorio'
+            newErrors.zipCode = 'Il CAP è obbligatorio';
         }
 
         if (!formData.phoneNumber.trim()) {
-            newErrors.phoneNumber = 'Il numero di telefono è obbligatorio'
+            newErrors.phoneNumber = 'Il numero di telefono è obbligatorio';
         } else if (!/^\d{10}$/.test(formData.phoneNumber)) {
-            newErrors.phoneNumber = 'Numero di telefono non valido'
+            newErrors.phoneNumber = 'Numero di telefono non valido';
         }
 
-        setErrors(newErrors)
-        return Object.keys(newErrors).length === 0
-    }
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     // ---- Submit con chiamata al Service Layer ----
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (!validateForm()) return
+        e.preventDefault();
+        if (!validateForm()) return;
 
-        setIsSubmitting(true)
+        setIsSubmitting(true);
+
         try {
             await registerUser({
                 fullName: formData.fullName,
@@ -122,42 +124,54 @@ export default function RegisterPage() {
                 address: formData.address,
                 zipCode: formData.zipCode,
                 phoneNumber: formData.phoneNumber,
-            })
-            setAlert({ type: 'success', message: 'Registrazione completata con successo!' })
-            setTimeout(() => router.push('/login'), 3000)
+            });
+            setAlert({ type: 'success', message: 'Registrazione completata con successo!' });
+            setTimeout(() => router.push('/login'), 3000);
         } catch (error: unknown) {
             if (error instanceof Error) {
-                console.error('Errore durante la registrazione:', error.message)
-                setAlert({ type: 'error', message: error.message })
+                console.error('Errore durante la registrazione:', error.message);
+                setAlert({ type: 'error', message: error.message });
             } else {
-                console.error('Errore sconosciuto:', error)
-                setAlert({ type: 'error', message: 'Errore durante la registrazione. Riprova più tardi.' })
+                console.error('Errore sconosciuto:', error);
+                setAlert({ type: 'error', message: 'Errore durante la registrazione. Riprova più tardi.' });
             }
         } finally {
-            setIsSubmitting(false)
+            setIsSubmitting(false);
         }
-    }
+    };
 
     // ---- Sign-in con Google (anch’esso dal Service) ----
     const handleGoogleSignIn = async () => {
+        setIsSubmitting(true); // Mostra la rotella anche qui
         try {
-            await registerOrLoginWithGoogle()
-            router.push('/') // Torna alla home dopo sign-in
+            await registerOrLoginWithGoogle();
+            router.push('/'); // Torna alla home dopo sign-in
         } catch (error: unknown) {
             if (error instanceof Error) {
-                console.error('Errore Google Sign-In:', error.message)
+                console.error('Errore Google Sign-In:', error.message);
             } else {
-                console.error('Errore sconosciuto Google Sign-In:', error)
+                console.error('Errore sconosciuto Google Sign-In:', error);
             }
+        } finally {
+            setIsSubmitting(false);
         }
-    }
+    };
 
     useEffect(() => {
-        document.body.style.backgroundColor = '#f3f4f6'
+        document.body.style.backgroundColor = '#f3f4f6';
         return () => {
-            document.body.style.backgroundColor = ''
-        }
-    }, [])
+            document.body.style.backgroundColor = '';
+        };
+    }, []);
+
+    // Mostra la rotella di caricamento globale quando isSubmitting è true
+    if (isSubmitting) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#41978F] to-[#C4333B]">
+                <LoadingSpinner />
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -193,7 +207,7 @@ export default function RegisterPage() {
 
                         <form onSubmit={handleSubmit}>
                             <div className="space-y-4">
-                                {/* fullName */}
+                                {/* Nome Completo */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Nome Completo</label>
                                     <input
@@ -206,7 +220,7 @@ export default function RegisterPage() {
                                     {errors.fullName && <p className="text-red-500 text-sm">{errors.fullName}</p>}
                                 </div>
 
-                                {/* email */}
+                                {/* Email */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Email</label>
                                     <input
@@ -219,7 +233,7 @@ export default function RegisterPage() {
                                     {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
                                 </div>
 
-                                {/* password */}
+                                {/* Password */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Password</label>
                                     <input
@@ -233,7 +247,7 @@ export default function RegisterPage() {
                                     <PasswordStrengthMeter password={formData.password} />
                                 </div>
 
-                                {/* confirmPassword */}
+                                {/* Conferma Password */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Conferma Password</label>
                                     <input
@@ -248,7 +262,7 @@ export default function RegisterPage() {
                                     )}
                                 </div>
 
-                                {/* dateOfBirth */}
+                                {/* Data di Nascita */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Data di Nascita</label>
                                     <input
@@ -263,7 +277,7 @@ export default function RegisterPage() {
                                     )}
                                 </div>
 
-                                {/* province */}
+                                {/* Provincia */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Provincia</label>
                                     <input
@@ -278,7 +292,7 @@ export default function RegisterPage() {
                                     )}
                                 </div>
 
-                                {/* address */}
+                                {/* Indirizzo */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Indirizzo</label>
                                     <input
@@ -291,7 +305,7 @@ export default function RegisterPage() {
                                     {errors.address && <p className="text-red-500 text-sm">{errors.address}</p>}
                                 </div>
 
-                                {/* zipCode */}
+                                {/* CAP */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">CAP</label>
                                     <input
@@ -304,7 +318,7 @@ export default function RegisterPage() {
                                     {errors.zipCode && <p className="text-red-500 text-sm">{errors.zipCode}</p>}
                                 </div>
 
-                                {/* phoneNumber */}
+                                {/* Numero di Telefono */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Numero di Telefono</label>
                                     <input
@@ -348,5 +362,5 @@ export default function RegisterPage() {
 
             <Footer />
         </div>
-    )
+    );
 }

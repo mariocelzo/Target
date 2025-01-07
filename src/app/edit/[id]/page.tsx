@@ -104,7 +104,19 @@ export default function EditAd() {
     return (
         <div className="p-8 bg-[#41978F] min-h-screen">
             <div className="max-w-3xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-                <h1 className="text-2xl font-semibold mb-6 text-center">Modifica Annuncio</h1>
+                <div className="flex items-center mb-6">
+                    <button
+                        onClick={() => router.back()}
+                        className="flex items-center text-[#C4333B] hover:text-[#A12D33] transition-colors"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        Torna Indietro
+                    </button>
+                    <h1 className="text-2xl font-semibold mx-auto text-center">Modifica Annuncio</h1>
+                </div>
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Immagine */}
                     <div className="mb-6">

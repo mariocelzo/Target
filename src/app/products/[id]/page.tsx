@@ -2,37 +2,40 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Timestamp } from 'firebase/firestore';
-import { useAuthState } from 'react-firebase-hooks/auth';
-
-import { auth } from '@/data/firebase';
+import {
+    addDoc,
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    query,
+    serverTimestamp,
+    where,
+    deleteDoc
+} from 'firebase/firestore';
+import { db } from '@/data/firebase';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '@/data/firebase';
+import { Timestamp } from 'firebase/firestore';
 
-// Import dal Service Layer
-import {
-    getProductDetails,
-    contactSeller,
-    makeOffer,
-    cancelOffer,
-} from '@/services/productService';
+// ---- Nuovo: per l'alert personalizzato
+interface AlertData {
+    type: '' | 'success' | 'error';
+    message: string;
+}
 
-/**
- * Stessa interfaccia definita (o analoga) nel tuo productRepository,
- * con `image?: string; condition: string; sold: boolean;`
- */
 interface Product {
     id: string;
     name: string;
     description: string;
     price: number;
     category: string;
-    userId: string;
     createdAt: Timestamp;
-    image?: string;       // resa opzionale
-    condition: string;    // obbligatoria
-    sold: boolean;        // obbligatoria
+    userId: string;
+    image?: string;
 }
 
 export default function ProductDetailPage() {
@@ -41,52 +44,98 @@ export default function ProductDetailPage() {
     const [sellerImage, setSellerImage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
+    const [redirectToChat, setRedirectToChat] = useState<string | null>(null);
+    const [currentOffer, setCurrentOffer] = useState<number | null>(null); // eslint-disable-line
     const [maxOffer, setMaxOffer] = useState<number | null>(null);
     const [userOffer, setUserOffer] = useState<number | null>(null);
-
-    const [redirectToChat, setRedirectToChat] = useState<string | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [offerAmount, setOfferAmount] = useState<string>('');
 
     const params = useParams();
+    const id = params?.id;
+    const [user, loadingUser] = useAuthState(auth);
     const router = useRouter();
 
-    // Convertiamo params.id in una semplice stringa
-    const rawId = params?.id;
-    const productId = typeof rawId === 'string' ? rawId : rawId?.[0] ?? '';
+    // ---- Nuovo stato: alert personalizzato
+    const [alertData, setAlertData] = useState<AlertData>({
+        type: '',
+        message: '',
+    });
 
+    // Chiudi alert
+    const closeAlert = () => {
+        setAlertData({ type: '', message: '' });
+    };
+
+    // 1) Caricamento del prodotto
     useEffect(() => {
-        if (!productId) return; // se manca l'ID, usciamo
+        if (!id) return;
 
-        (async () => {
+        const fetchProductDetails = async () => {
             setIsLoading(true);
             try {
-                const result = await getProductDetails(productId, user?.uid);
+                const docRef = doc(db, 'products', String(id));
+                const docSnap = await getDoc(docRef);
 
-                if (!result.product) {
-                    setError('Prodotto non trovato');
-                } else {
-                    // Ora result.product è compatibile con il nostro stato
-                    setProduct(result.product);
-                    setSellerName(result.sellerName);
-                    setSellerImage(result.sellerImage);
-                    setMaxOffer(result.maxOffer);
-                    setUserOffer(result.userOffer);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const productData: Product = {
+                        id: docSnap.id,
+                        name: data.name || '',
+                        description: data.description || '',
+                        price: data.price || 0,
+                        category: data.category || '',
+                        userId: data.userId || '',
+                        createdAt: data.createdAt || Timestamp.now(),
+                        image: data.image || '',
+                    };
+                    setProduct(productData);
                     setError(null);
+
+                    // Dati venditore
+                    const userDocRef = doc(db, 'users', data.userId);
+                    const userDocSnap = await getDoc(userDocRef);
+                    if (userDocSnap.exists()) {
+                        setSellerName(userDocSnap.data().fullName || 'Venditore sconosciuto');
+                        setSellerImage(userDocSnap.data().imageUrl || null);
+                    }
+
+                    // Offerte
+                    const offersRef = collection(db, 'offers');
+                    const qOffers = query(offersRef, where('productId', '==', productData.id));
+                    const querySnapshot = await getDocs(qOffers);
+
+                    let maxOfferAmount = 0;
+                    let userCurrentOffer = null;
+
+                    querySnapshot.forEach((doc) => {
+                        const offerData = doc.data();
+                        const offerVal = offerData.amount;
+                        if (offerVal > maxOfferAmount) {
+                            maxOfferAmount = offerVal;
+                        }
+                        if (offerData.buyerId === user?.uid) {
+                            userCurrentOffer = offerVal;
+                        }
+                    });
+
+                    setMaxOffer(maxOfferAmount);
+                    setUserOffer(userCurrentOffer || null);
+                } else {
+                    setError('Prodotto non trovato');
                 }
-            } catch (err) {
-                console.error(err);
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            } catch (error) {
                 setError('Errore nel recupero dei dettagli del prodotto');
             } finally {
                 setIsLoading(false);
             }
-        })();
-    }, [productId]);
+        };
 
-    const [user, loadingUser] = useAuthState(auth);
+        fetchProductDetails();
+    }, [id, user]);
 
-    // Se dobbiamo reindirizzare alla chat
+    // 2) Se esiste un redirectToChat, reindirizza
     useEffect(() => {
         if (redirectToChat) {
             router.push(redirectToChat);
@@ -96,87 +145,163 @@ export default function ProductDetailPage() {
     // Contatta venditore
     const handleContactSeller = async () => {
         if (loadingUser) {
-            alert('Caricamento in corso...');
+            setAlertData({
+                type: 'error',
+                message: 'Caricamento in corso...',
+            });
             return;
         }
         if (!user) {
-            alert('Devi essere autenticato per contattare il venditore.');
+            setAlertData({
+                type: 'error',
+                message: 'Devi essere autenticato per contattare il venditore.',
+            });
             return;
         }
         if (!product) {
-            alert('Prodotto non disponibile');
+            setAlertData({
+                type: 'error',
+                message: 'Prodotto non disponibile.',
+            });
             return;
         }
-        try {
-            const chatId = await contactSeller(product.id, user.uid, product.userId);
+
+        const chatsRef = collection(db, 'chats');
+        const qChats = query(
+            chatsRef,
+            where('productId', '==', product.id),
+            where('buyerId', '==', user.uid),
+            where('sellerId', '==', product.userId)
+        );
+
+        const querySnapshot = await getDocs(qChats);
+
+        if (!querySnapshot.empty) {
+            const chatId = querySnapshot.docs[0].id;
             setRedirectToChat(`/chat/${chatId}`);
-        } catch (error) {
-            console.error(error);
-            alert('Errore durante la creazione/trovamento chat.');
+        } else {
+            const newChat = {
+                productId: product.id,
+                buyerId: user.uid,
+                sellerId: product.userId,
+                messages: [],
+                createdAt: serverTimestamp(),
+            };
+            const chatDoc = await addDoc(chatsRef, newChat);
+            setRedirectToChat(`/chat/${chatDoc.id}`);
         }
     };
 
-    // Fai offerta
+    // Invio offerta
     const handleMakeOffer = async () => {
         if (!user) {
-            alert("Devi essere autenticato per fare un'offerta.");
+            setAlertData({
+                type: 'error',
+                message: 'Devi essere autenticato per fare un\'offerta.',
+            });
             return;
         }
         if (!offerAmount || isNaN(Number(offerAmount)) || Number(offerAmount) <= 0) {
-            alert('Inserisci un importo valido.');
+            setAlertData({
+                type: 'error',
+                message: 'Inserisci un importo valido.',
+            });
             return;
         }
+        const offerAmountValue = Number(offerAmount);
         if (!product) {
-            alert('Prodotto non disponibile');
+            setAlertData({
+                type: 'error',
+                message: 'Prodotto non disponibile.',
+            });
             return;
         }
-        if (Number(offerAmount) > product.price) {
-            alert("L'offerta non può superare il prezzo di vendita del prodotto.");
+        if (offerAmountValue > product.price) {
+            setAlertData({
+                type: 'error',
+                message: 'L\'offerta non può superare il prezzo di vendita del prodotto.',
+            });
             return;
         }
 
         try {
-            await makeOffer(product, user.uid, Number(offerAmount));
-            setUserOffer(Number(offerAmount));
-            alert('Offerta inviata con successo!');
+            await addDoc(collection(db, 'offers'), {
+                productId: product.id,
+                buyerId: user.uid,
+                amount: offerAmountValue,
+                createdAt: serverTimestamp(),
+            });
+
+            setUserOffer(offerAmountValue);
+            setAlertData({
+                type: 'success',
+                message: 'Offerta inviata con successo!',
+            });
             setShowModal(false);
 
-            if (Number(offerAmount) >= product.price) {
-                alert("L'offerta è stata accettata! Il prodotto è stato acquistato.");
+            if (offerAmountValue >= product.price) {
+                setAlertData({
+                    type: 'success',
+                    message: 'L\'offerta è stata accettata! Il prodotto è stato acquistato.',
+                });
             }
-        } catch (err) {
-            console.error("Errore durante l'invio dell'offerta:", err);
-            alert("Errore durante l'invio dell'offerta.");
+        } catch (error) {
+            console.error('Errore durante l\'invio dell\'offerta:', error);
+            setAlertData({
+                type: 'error',
+                message: 'Errore durante l\'invio dell\'offerta.',
+            });
         }
     };
 
-    // Cancella offerta
+    // Annulla offerta
     const handleCancelOffer = async () => {
         if (!userOffer) {
-            alert('Non hai effettuato alcuna offerta.');
+            setAlertData({
+                type: 'error',
+                message: 'Non hai effettuato alcuna offerta.',
+            });
             return;
         }
+
         if (!user) {
-            alert('Devi essere autenticato per fare questa azione.');
-            return;
-        }
-        if (!product) {
-            alert('Prodotto non disponibile');
+            setAlertData({
+                type: 'error',
+                message: 'Devi essere autenticato per ritirare l\'offerta.',
+            });
             return;
         }
 
         try {
-            await cancelOffer(product.id, user.uid);
+            const offersRef = collection(db, 'offers');
+            const qCancel = query(
+                offersRef,
+                where('productId', '==', product?.id),
+                where('buyerId', '==', user.uid)
+            );
+            const querySnapshot = await getDocs(qCancel);
+
+            querySnapshot.forEach(async (doc) => {
+                await deleteDoc(doc.ref);
+            });
+
             setUserOffer(null);
-            alert('Offerta ritirata con successo!');
+            setAlertData({
+                type: 'success',
+                message: 'Offerta ritirata con successo!',
+            });
             setShowModal(false);
-        } catch (err) {
-            console.error("Errore durante il ritiro dell'offerta:", err);
-            alert("Errore durante il ritiro dell'offerta.");
+
+        } catch (error) {
+            console.error('Errore durante il ritiro dell\'offerta:', error);
+            setAlertData({
+                type: 'error',
+                message: 'Errore durante il ritiro dell\'offerta.',
+            });
         }
     };
 
-    // Formatta Timestamp
+    // Format data
     const formatDate = (createdAt: Timestamp) => {
         const date = createdAt.toDate();
         return date.toLocaleDateString('it-IT', {
@@ -206,9 +331,54 @@ export default function ProductDetailPage() {
         <div className="min-h-screen bg-gradient-to-r from-red-500 to-teal-500">
             <Header />
 
-            {/* Sezione principale con immagine e dettagli prodotto */}
+            {/* ALERT PERSONALIZZATO */}
+            {alertData.type !== '' && (
+                <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black bg-opacity-60">
+                    <div className="bg-white max-w-sm w-full rounded-md shadow-lg p-6 relative">
+                        {/* Bottone per chiudere l'alert */}
+                        <button
+                            onClick={() => closeAlert()}
+                            className="absolute top-2 right-2 text-gray-400 hover:text-gray-700"
+                        >
+                            ✕
+                        </button>
+                        {/* Logo */}
+                        <div className="flex justify-center mb-4">
+                            <img
+                                src="/logoNosfondo.png"
+                                alt="Logo"
+                                className="h-20 w-auto"
+                            />
+                        </div>
+                        <p
+                            className={`text-center text-lg font-semibold ${
+                                alertData.type === 'success' ? 'text-teal-600' : 'text-red-600'
+                            }`}
+                        >
+                            {alertData.message}
+                        </p>
+                        <div className="mt-4 flex justify-center">
+                            <button
+                                onClick={closeAlert}
+                                className={`px-6 py-2 rounded-md font-bold 
+                  ${
+                                    alertData.type === 'success'
+                                        ? 'bg-teal-600 hover:bg-teal-700'
+                                        : 'bg-red-600 hover:bg-red-700'
+                                }
+                  text-white transition-colors duration-300
+                `}
+                            >
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Fine alert personalizzato */}
+
             <section className="container mx-auto py-16 px-6 lg:px-8 flex flex-col lg:flex-row items-stretch space-y-8 lg:space-y-0">
-                {/* Colonna sinistra: Immagine del prodotto */}
+                {/* Colonna sinistra: Immagine prodotto */}
                 <div className="lg:w-1/2 flex items-center justify-center bg-gray-200 rounded-2xl shadow-xl transition-all duration-300 hover:scale-105 mr-6 lg:mr-8">
                     <img
                         src={product?.image || '/images/placeholder.jpg'}
@@ -217,7 +387,7 @@ export default function ProductDetailPage() {
                     />
                 </div>
 
-                {/* Colonna destra: Dettagli del prodotto */}
+                {/* Colonna destra: Dettagli prodotto */}
                 <div className="lg:w-1/2 p-8 bg-white rounded-2xl shadow-2xl max-w-lg mx-auto lg:mx-0 space-y-6">
                     <h3 className="text-3xl font-bold text-gray-800">{product?.name}</h3>
                     <p className="text-lg font-semibold text-gray-600">{product?.category}</p>
@@ -228,20 +398,19 @@ export default function ProductDetailPage() {
                     {userOffer !== null && (
                         <p className="text-xl text-gray-600">La tua offerta: € {userOffer}</p>
                     )}
-
                     {/* Massima offerta ricevuta */}
                     {maxOffer !== null && maxOffer > 0 && (
                         <p className="text-xl text-gray-600">Massima offerta ricevuta: € {maxOffer}</p>
                     )}
 
-                    {/* Data di pubblicazione */}
+                    {/* Data */}
                     {product?.createdAt && (
                         <p className="text-sm text-gray-500">
                             Pubblicato il: {formatDate(product.createdAt)}
                         </p>
                     )}
 
-                    {/* Informazioni sul venditore */}
+                    {/* Venditore */}
                     {sellerName && (
                         <div className="flex items-center space-x-4 mt-6">
                             <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-300 text-gray-700 font-semibold">
@@ -255,13 +424,11 @@ export default function ProductDetailPage() {
                                     <span>👤</span>
                                 )}
                             </div>
-                            <p className="text-sm text-gray-600">
-                                Venduto da: {sellerName}
-                            </p>
+                            <p className="text-sm text-gray-600">Venduto da: {sellerName}</p>
                         </div>
                     )}
 
-                    {/* Bottoni Azione */}
+                    {/* Bottoni azione */}
                     <div className="flex space-x-4 mt-8 justify-between">
                         <Link
                             href={product?.id ? `/order/${product.id}` : '#'}
@@ -269,14 +436,12 @@ export default function ProductDetailPage() {
                         >
                             Acquista
                         </Link>
-
                         <button
                             className="bg-teal-500 text-white py-2 px-6 rounded-full text-lg font-semibold hover:bg-teal-600 transition-all duration-300"
                             onClick={handleContactSeller}
                         >
                             Contatta
                         </button>
-
                         <button
                             className="bg-yellow-400 text-white py-2 px-6 rounded-full text-lg font-semibold hover:bg-yellow-500 transition-all duration-300"
                             onClick={() => setShowModal(true)}

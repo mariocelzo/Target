@@ -2,7 +2,22 @@ import { fetchUserData, updateUserData, updateUserProfileImage } from '@/data/us
 import { auth } from '@/data/firebase';
 
 /**
- * Gets the current authenticated user's ID.
+ * Interfaccia per i dati aggiornabili del profilo utente.
+ */
+interface UserProfileData {
+    fullName?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    province?: string;
+    postalCode?: string;
+    country?: string;
+    [key: string]: string | undefined; // Permette di gestire campi aggiuntivi opzionali
+}
+
+/**
+ * Ottiene l'ID dell'utente autenticato corrente.
  */
 export function getCurrentUserId() {
     const user = auth.currentUser;
@@ -13,7 +28,7 @@ export function getCurrentUserId() {
 }
 
 /**
- * Fetches the authenticated user's data.
+ * Recupera i dati del profilo dell'utente autenticato.
  */
 export async function getUserProfile() {
     const userId = getCurrentUserId();
@@ -21,15 +36,15 @@ export async function getUserProfile() {
 }
 
 /**
- * Updates the authenticated user's profile data.
+ * Aggiorna i dati del profilo dell'utente autenticato.
  */
-export async function updateUserProfile(userData: Record<string, any>) {
+export async function updateUserProfile(userData: UserProfileData) {
     const userId = getCurrentUserId();
     await updateUserData(userId, userData);
 }
 
 /**
- * Updates the authenticated user's profile image.
+ * Aggiorna l'immagine del profilo dell'utente autenticato.
  */
 export async function updateProfileImage(imageFile: File) {
     const userId = getCurrentUserId();
@@ -39,7 +54,7 @@ export async function updateProfileImage(imageFile: File) {
 }
 
 /**
- * Converts an image file to Base64.
+ * Converte un file immagine in Base64.
  */
 function convertToBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
