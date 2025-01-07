@@ -5,7 +5,10 @@ import { Order } from '@/types/order';
 /**
  * Recupera gli ordini di un utente da Firestore
  */
-export const fetchOrders = async (buyerId: string): Promise<Order[]> => {
+export const fetchOrders = async (
+    buyerId: string,
+    addNotification?: (message: string, type: string) => void
+): Promise<Order[]> => {
     const q = query(collection(db, 'orders'), where('buyerId', '==', buyerId));
     const querySnapshot = await getDocs(q);
 
@@ -46,6 +49,14 @@ export const fetchOrders = async (buyerId: string): Promise<Order[]> => {
                 },
                 quantity: data.quantity || 1,
             });
+
+            // Aggiungi notifica per prodotto venduto
+            if (productData.sold) {
+                addNotification?.(
+                    `Il prodotto "${productData.name}" è stato venduto!`,
+                    'success'
+                );
+            }
         }
     }
 

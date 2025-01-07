@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { query, collection, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { query, collection, where, getDocs, doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '@/data/firebase';
 import { useRouter } from 'next/navigation';
-import {Search, User, ChevronDown, LogOut, MessageCircle, Edit, Moon, Sun} from 'lucide-react';
+import {Search, User, ChevronDown, LogOut, MessageCircle, Edit, Moon, Sun, Bell} from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -29,6 +29,14 @@ interface User {
   email: string;
 }
 
+interface Notification {
+  id: string;
+  productId: string;
+  productName: string;
+  buyerName: string;
+  createdAt: string;
+}
+
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchResults, setSearchResults] = useState<Product[]>([]);
@@ -42,6 +50,12 @@ export default function Home() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isNightMode, setIsNightMode] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const removeNotification = (id: string) => {
+    setNotifications((prev) => prev.filter(notification => notification.id !== id));
+  };
+
   const toggleNightMode = () => setIsNightMode((prev) => !prev);
 
   useEffect(() => {
@@ -51,6 +65,7 @@ export default function Home() {
       document.documentElement.classList.remove('dark');
     }
   }, [isNightMode]);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
@@ -62,15 +77,50 @@ export default function Home() {
         fetchUserImage(currentUser.uid);
         fetchUnreadMessages(currentUser.uid);
         fetchUserProducts(currentUser.uid);
+        listenForOrders(currentUser.uid);
       } else {
         setUser(null);
         setUserImage(null);
         setUserProducts([]);
+        setNotifications([]);
       }
     });
 
     return () => unsubscribe();
   }, []);
+
+  const listenForOrders = (sellerId: string) => {
+    const ordersQuery = query(
+        collection(db, 'orders'),
+        where('sellerId', '==', sellerId)
+    );
+
+    const unsubscribeOrders = onSnapshot(ordersQuery, async (snapshot) => {
+      for (const change of snapshot.docChanges()) {
+        if (change.type === 'added') {
+          setUserProducts((prev) => prev.filter(product => product.id !== orderData.productId));
+          const orderData = change.doc.data();
+          const productDoc = await getDoc(doc(db, 'products', orderData.productId));
+          const productData = productDoc.data() as Product;
+          // Supponendo che tu abbia un modo per recuperare il nome del buyer (utente) basato su buyerId
+          const buyerDoc = await getDoc(doc(db, 'users', orderData.buyerId));
+          const buyerData = buyerDoc.data() as User;
+
+          const newNotification: Notification = {
+            id: change.doc.id,
+            productId: orderData.productId,
+            productName: productData.name,
+            buyerName: buyerData.displayName || buyerData.email,
+            createdAt: orderData.createdAt,
+          };
+
+          setNotifications((prev) => [newNotification, ...prev]);
+        }
+      }
+    });
+
+    return () => unsubscribeOrders();
+  };
 
   const fetchUnreadMessages = async (userId: string) => {
     const q = query(
@@ -96,7 +146,6 @@ export default function Home() {
       console.error('Errore durante il recupero dei messaggi:', error);
     }
   };
-
 
   const handleSearchChange = useCallback(
       async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -203,24 +252,67 @@ export default function Home() {
       <div
           className={`min-h-screen flex flex-col ${
               isNightMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-800'
-          }`}>
+          }`}
+      >
         {/* Header */}
-        <header className="bg-gradient-to-r from-[#C4333B] to-[#41978F] text-white py-4 shadow-lg">
+        <header className="bg-gradient-to-r from-[#C4333B] to-[#41978F] text-white py-4 shadow-lg relative">
           <div className="container mx-auto px-4 flex justify-between items-center">
             <Link href="/" className="text-3xl font-extrabold flex items-center space-x-2">
-              <Image src="/logoNosfondo.png" alt="Logo" width={40} height={40}/>
+              <Image src="/logoNosfondo.png" alt="Logo" width={40} height={40} />
               <span>Target Marketplace</span>
             </Link>
 
             <nav className="hidden md:flex space-x-6 text-lg">
-              <CategoryDropdown/>
+              <CategoryDropdown />
               <NavLink href="/sell">Vendi</NavLink>
               <NavLink href="/about">Chi Siamo</NavLink>
             </nav>
 
             <div className="flex items-center space-x-6">
-              <UserMenu user={user} userImage={userImage} handleLogout={handleLogout}/>
-              <ChatNotification user={user} unreadMessagesCount={unreadMessagesCount}/>
+              <UserMenu user={user} userImage={userImage} handleLogout={handleLogout} />
+              <ChatNotification user={user} unreadMessagesCount={unreadMessagesCount} />
+              {user && (
+                  <div className="relative">
+                    <button
+                        onClick={() => setShowNotifications(!showNotifications)}
+                        className="flex items-center hover:text-gray-200 relative"
+                    >
+                      <Bell size={20}/>
+                      {notifications.length > 0 && (
+                          <span
+                              className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1 transform translate-x-1/2 -translate-y-1/2">
+                                {notifications.length}
+                                 </span>
+                      )}
+                    </button>
+                    {showNotifications && (
+                        <div
+                            className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg z-50 max-h-96 overflow-y-auto animate-fade-in-down">
+                          {notifications.length > 0 ? (
+                              notifications.map((notification) => (
+                                  <div key={notification.id} className="p-4 border-b hover:bg-gray-100 transition-colors duration-200 flex items-center space-x-4">
+                                    <Image src="/logoNosfondo.png" alt="Logo" width={40} height={40} className="rounded-full" />
+                                    <div className="flex-1">
+                                      <p className="font-semibold text-teal-500">Hai venduto {notification.productName}</p>
+                                      <p className="text-sm text-teal-500">A {notification.buyerName}</p>
+                                      <p className="text-xs text-teal-500">{new Date(notification.createdAt).toLocaleString()}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => removeNotification(notification.id)}
+                                        className="text-red-500 hover:text-red-700 ml-4"
+                                        title="Elimina notifica"
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+                              ))
+                          ) : (
+                              <p className="p-4 text-center text-gray-500">Nessuna notifica</p>
+                          )}
+                        </div>
+                    )}
+                  </div>
+              )}
             </div>
           </div>
         </header>
@@ -231,7 +323,8 @@ export default function Home() {
                 isNightMode
                     ? 'bg-gradient-to-r from-[#2C6D68] to-[#1A4342] text-gray-300 opacity-80'
                     : 'bg-gradient-to-r from-[#41978F] to-[#2C6D68] text-white'
-            }`}>
+            }`}
+        >
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-5xl font-extrabold mb-6 animate-fade-in-down">Trova e Vendi con Facilità!</h1>
             <p className="text-xl mb-8 animate-fade-in-up">
@@ -250,10 +343,10 @@ export default function Home() {
                   onClick={handleSearch}
                   className="absolute right-2 top-2 bg-[#C4333B] text-white p-2 rounded-full transition-all duration-300 ease-in-out transform hover:scale-110"
               >
-                <Search size={20}/>
+                <Search size={20} />
               </button>
 
-              <SearchResults searchQuery={searchQuery} isLoading={isLoading} searchResults={searchResults}/>
+              <SearchResults searchQuery={searchQuery} isLoading={isLoading} searchResults={searchResults} />
             </div>
           </div>
         </section>
@@ -263,10 +356,10 @@ export default function Home() {
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-4xl font-semibold mb-12 text-gray-800">Categorie in Evidenza</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <CategoryCard name="Elettronica" image="/elettronica.png" href="/categories/Elettronica"/>
-              <CategoryCard name="Moda" image="/moda.png" href="/categories/Moda"/>
-              <CategoryCard name="Arredamento" image="/arredamento.png" href="/categories/Arredamento"/>
-              <CategoryCard name="Auto e Moto" image="/auto.png" href="/categories/Giocattoli"/>
+              <CategoryCard name="Elettronica" image="/elettronica.png" href="/categories/Elettronica" />
+              <CategoryCard name="Moda" image="/moda.png" href="/categories/Moda" />
+              <CategoryCard name="Arredamento" image="/arredamento.png" href="/categories/Arredamento" />
+              <CategoryCard name="Auto e Moto" image="/auto.png" href="/categories/Giocattoli" />
             </div>
           </div>
         </section>
@@ -280,19 +373,20 @@ export default function Home() {
                   {userProducts
                       .filter(product => !product.sold)
                       .map((product) => (
-                          <ProductCard key={product.id} product={product} onClick={() => openProductDetails(product)}/>
+                          <ProductCard key={product.id} product={product} onClick={() => openProductDetails(product)} />
                       ))}
                 </div>
             ) : (
-                <p className="text-xl text-gray-600">Non hai ancora pubblicato articoli in vendita o sono stati tutti
-                  venduti.</p>
+                <p className="text-xl text-gray-600">
+                  Non hai ancora pubblicato articoli in vendita o sono stati tutti venduti.
+                </p>
             )}
           </div>
         </section>
 
         {/* Product Details Modal */}
         {isModalOpen && selectedProduct && (
-            <ProductModal product={selectedProduct} onClose={closeProductDetails}/>
+            <ProductModal product={selectedProduct} onClose={closeProductDetails} />
         )}
         <button
             onClick={toggleNightMode}
@@ -300,15 +394,15 @@ export default function Home() {
                 isNightMode ? 'bg-white text-black' : 'bg-black text-white'
             }`}
         >
-          {isNightMode ? <Sun size={20}/> : <Moon size={20}/>}
+          {isNightMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>
 
-        <Footer/>
+        <Footer />
       </div>
   );
 }
 
-const NavLink = ({href, children}: { href: string; children: React.ReactNode }) => (
+const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
     <Link href={href} className="hover:text-teal-300 transition-colors duration-200">
       {children}
     </Link>
@@ -337,7 +431,15 @@ const CategoryLink = ({ href, children }: { href: string; children: React.ReactN
     </Link>
 );
 
-const UserMenu = ({ user, userImage, handleLogout }: { user: User | null; userImage: string | null; handleLogout: () => void }) => {
+const UserMenu = ({
+                    user,
+                    userImage,
+                    handleLogout,
+                  }: {
+  user: User | null;
+  userImage: string | null;
+  handleLogout: () => void;
+}) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return user ? (
@@ -383,26 +485,42 @@ const UserMenuItem = ({ href, children }: { href: string; children: React.ReactN
     </Link>
 );
 
-const ChatNotification = ({ user, unreadMessagesCount }: { user: User | null; unreadMessagesCount: number }) => {
+const ChatNotification = ({
+                            user,
+                            unreadMessagesCount,
+                          }: {
+  user: User | null;
+  unreadMessagesCount: number;
+}) => {
   const router = useRouter();
-  return user && (
-      <div className="relative">
-        <button
-            onClick={() => router.push(`/chat/${user.uid}`)}
-            className="flex items-center space-x-2 hover:text-gray-200"
-        >
-          <MessageCircle size={20} />
-          {unreadMessagesCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-2 py-1">
-            {unreadMessagesCount}
-          </span>
-          )}
-        </button>
-      </div>
+  return (
+      user && (
+          <div className="relative">
+            <button
+                onClick={() => router.push(`/chat/${user.uid}`)}
+                className="flex items-center space-x-2 hover:text-gray-200"
+            >
+              <MessageCircle size={20} />
+              {unreadMessagesCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-2 py-1">
+              {unreadMessagesCount}
+            </span>
+              )}
+            </button>
+          </div>
+      )
   );
 };
 
-const SearchResults = ({ searchQuery, isLoading, searchResults }: { searchQuery: string; isLoading: boolean; searchResults: Product[] }) => (
+const SearchResults = ({
+                         searchQuery,
+                         isLoading,
+                         searchResults,
+                       }: {
+  searchQuery: string;
+  isLoading: boolean;
+  searchResults: Product[];
+}) =>
     searchQuery && (
         <div className="absolute bg-white w-full shadow-lg rounded-lg mt-2 overflow-hidden max-h-60 transition-all duration-300 ease-in-out">
           {isLoading ? (
@@ -424,8 +542,7 @@ const SearchResults = ({ searchQuery, isLoading, searchResults }: { searchQuery:
               <div className="p-4 text-center text-gray-500">Nessun risultato trovato</div>
           )}
         </div>
-    )
-);
+    );
 
 const CategoryCard = ({ name, image, href }: { name: string; image: string; href: string }) => (
     <div
@@ -451,12 +568,7 @@ const ProductCard = ({ product, onClick }: { product: Product; onClick: () => vo
         onClick={onClick}
     >
       <div className="relative h-48">
-        <Image
-            src={product.image}
-            alt={product.name}
-            layout="fill"
-            objectFit="cover"
-        />
+        <Image src={product.image} alt={product.name} layout="fill" objectFit="cover" />
       </div>
       <div className="p-4">
         <h3 className="text-xl font-semibold text-gray-800 mb-2">{product.name}</h3>
@@ -468,12 +580,9 @@ const ProductCard = ({ product, onClick }: { product: Product; onClick: () => vo
 );
 
 const ProductModal = ({ product, onClose }: { product: Product; onClose: () => void }) => (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
+    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center animate-fade-in">
       <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
-        <button
-            className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
-            onClick={onClose}
-        >
+        <button className="absolute top-4 right-4 text-gray-500 hover:text-gray-800" onClick={onClose}>
           ✕
         </button>
 
@@ -503,9 +612,7 @@ const ProductModal = ({ product, onClose }: { product: Product; onClose: () => v
         <p className="font-semibold mb-4">
           Prezzo: <span className="text-[#C4333B]">{product.price} €</span>
         </p>
-        <p className="text-sm text-gray-500">
-          Condizione: {product.condition}
-        </p>
+        <p className="text-sm text-gray-500">Condizione: {product.condition}</p>
         <p className="text-sm text-gray-500">
           Creato il: {new Date(product.createdAt).toLocaleDateString()}
         </p>
