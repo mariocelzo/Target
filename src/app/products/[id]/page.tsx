@@ -20,6 +20,7 @@ import Link from 'next/link';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/data/firebase';
 import { Timestamp } from 'firebase/firestore';
+import ChatPopup from '@/components/ChatPopup';  // Aggiungi questa linea
 
 // ---- Nuovo: per l'alert personalizzato
 interface AlertData {
@@ -44,6 +45,7 @@ export default function ProductDetailPage() {
     const [sellerImage, setSellerImage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [redirectToChat, setRedirectToChat] = useState<string | null>(null);
     const [currentOffer, setCurrentOffer] = useState<number | null>(null); // eslint-disable-line
     const [maxOffer, setMaxOffer] = useState<number | null>(null);
@@ -61,6 +63,12 @@ export default function ProductDetailPage() {
         type: '',
         message: '',
     });
+    const [showChatPopup, setShowChatPopup] = useState(false);
+    const [popupSellerInfo, setPopupSellerInfo] = useState<{
+              sellerId: string;
+               sellerName: string;
+               sellerAvatar?: string;
+           } | null>(null);
 
     // Chiudi alert
     const closeAlert = () => {
@@ -165,31 +173,14 @@ export default function ProductDetailPage() {
             });
             return;
         }
-
-        const chatsRef = collection(db, 'chats');
-        const qChats = query(
-            chatsRef,
-            where('productId', '==', product.id),
-            where('buyerId', '==', user.uid),
-            where('sellerId', '==', product.userId)
-        );
-
-        const querySnapshot = await getDocs(qChats);
-
-        if (!querySnapshot.empty) {
-            const chatId = querySnapshot.docs[0].id;
-            setRedirectToChat(`/chat/${chatId}`);
-        } else {
-            const newChat = {
-                productId: product.id,
-                buyerId: user.uid,
-                sellerId: product.userId,
-                messages: [],
-                createdAt: serverTimestamp(),
-            };
-            const chatDoc = await addDoc(chatsRef, newChat);
-            setRedirectToChat(`/chat/${chatDoc.id}`);
-        }
+        // Invece di reindirizzare, imposta le informazioni del venditore per il popup
+               setPopupSellerInfo({
+                        sellerId: product.userId,
+                        sellerName: sellerName || 'Venditore sconosciuto',
+                        sellerAvatar: sellerImage || '',
+                    });
+               // Mostra il ChatPopup
+            setShowChatPopup(true);
     };
 
     // Invio offerta
@@ -483,6 +474,16 @@ export default function ProductDetailPage() {
                     </div>
                 </div>
             )}
+            {/* Renderizza ChatPopup se showChatPopup è true e popupSellerInfo è disponibile */}
+                       {showChatPopup && popupSellerInfo && (
+                            <ChatPopup
+                                productId={product!.id}
+                                sellerId={popupSellerInfo.sellerId}
+                                sellerName={popupSellerInfo.sellerName}
+                                sellerAvatar={popupSellerInfo.sellerAvatar}
+                                onClose={() => setShowChatPopup(false)}
+                            />
+                        )}
 
             <Footer />
         </div>

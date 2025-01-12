@@ -366,7 +366,7 @@ const ChatScreen = () => {
                 <div
                     ref={leftPanelRef}
                     className="w-[300px] bg-white min-h-full border-r border-gray-200 shadow-md"
-                    style={{ width: leftPanelWidth }}
+                    style={{width: leftPanelWidth}}
                 >
                     <div className="p-4">
                         <Input
@@ -393,7 +393,7 @@ const ChatScreen = () => {
                                             className="w-10 h-10 rounded-full"
                                         />
                                     ) : (
-                                        <UserCircle2 className="w-10 h-10 text-gray-400" />
+                                        <UserCircle2 className="w-10 h-10 text-gray-400"/>
                                     )}
                                     <span className="font-medium">{user.fullName}</span>
                                 </div>
@@ -403,11 +403,12 @@ const ChatScreen = () => {
                 </div>
 
                 {/* Area principale della chat */}
-                <div className="flex-1 flex flex-col bg-white rounded-lg shadow-lg m-4">
+                <div className="flex flex-col bg-white rounded-lg shadow-lg w-full h-[600px]">
                     {chat ? (
                         <>
                             {/* Header della chat */}
-                            <div className="flex items-center space-x-4 p-4 border-b border-gray-200 bg-teal-500 text-white rounded-t-lg">
+                            <div
+                                className="flex items-center space-x-4 p-4 border-b border-gray-200 bg-teal-500 text-white rounded-t-lg">
                                 {chat.partnerAvatar ? (
                                     <img
                                         src={chat.partnerAvatar}
@@ -415,7 +416,7 @@ const ChatScreen = () => {
                                         className="w-10 h-10 rounded-full border-2 border-white"
                                     />
                                 ) : (
-                                    <UserCircle2 className="w-10 h-10 text-white" />
+                                    <UserCircle2 className="w-10 h-10 text-white"/>
                                 )}
                                 <h2 className="text-xl font-semibold">{chat.partnerName}</h2>
                             </div>
@@ -443,7 +444,7 @@ const ChatScreen = () => {
                                     </div>
                                 ))}
                                 {/* Ancora per scroll all'ultimo messaggio */}
-                                <div ref={messagesEndRef} />
+                                <div ref={messagesEndRef}/>
                             </div>
 
                             {/* Input di invio messaggi */}
@@ -462,7 +463,7 @@ const ChatScreen = () => {
                                         disabled={sending}
                                         className="p-2 bg-teal-500 text-white rounded-full hover:bg-teal-600 transition duration-200 disabled:opacity-50"
                                     >
-                                        <Send size={20} />
+                                        <Send size={20}/>
                                     </button>
                                 </form>
                             </div>
@@ -475,7 +476,7 @@ const ChatScreen = () => {
                 </div>
             </div>
 
-            <Footer />
+            <Footer/>
         </div>
     );
 };

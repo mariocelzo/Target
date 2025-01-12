@@ -1,10 +1,36 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { query, collection, where, getDocs, doc, getDoc, onSnapshot } from 'firebase/firestore';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import {
+  query,
+  collection,
+  where,
+  getDocs,
+  doc,
+  getDoc,
+  onSnapshot,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  deleteDoc,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  updateDoc,
+  setDoc
+} from 'firebase/firestore';
 import { db, auth } from '@/data/firebase';
 import { useRouter } from 'next/navigation';
-import {Search, User, ChevronDown, LogOut, MessageCircle, Edit, Moon, Sun, Bell} from 'lucide-react';
+import {
+  Search,
+  User,
+  ChevronDown,
+  LogOut,
+  MessageCircle,
+  Edit,
+  Moon,
+  Sun,
+  Bell,
+  ClipboardList,
+  Package, Smile,
+} from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -51,11 +77,18 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isNightMode, setIsNightMode] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [newNotificationsCount, setNewNotificationsCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
-  const removeNotification = (id: string) => {
-    setNotifications((prev) => prev.filter(notification => notification.id !== id));
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const removeNotification = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, 'notifications', id));
+      setNotifications((prev) => prev.filter(notification => notification.id !== id));
+    } catch (error) {
+      console.error('Errore durante la rimozione della notifica:', error);
+    }
   };
-
   const toggleNightMode = () => setIsNightMode((prev) => !prev);
 
   useEffect(() => {
@@ -93,28 +126,37 @@ export default function Home() {
     const ordersQuery = query(
         collection(db, 'orders'),
         where('sellerId', '==', sellerId)
-    );
 
+    );
     const unsubscribeOrders = onSnapshot(ordersQuery, async (snapshot) => {
       for (const change of snapshot.docChanges()) {
         if (change.type === 'added') {
-          setUserProducts((prev) => prev.filter(product => product.id !== orderData.productId));
           const orderData = change.doc.data();
+          // Rimuove il prodotto venduto dall'elenco dei prodotti dell'utente
+          setUserProducts((prev) => prev.filter(product => product.id !== orderData.productId));
+
           const productDoc = await getDoc(doc(db, 'products', orderData.productId));
           const productData = productDoc.data() as Product;
-          // Supponendo che tu abbia un modo per recuperare il nome del buyer (utente) basato su buyerId
+
           const buyerDoc = await getDoc(doc(db, 'users', orderData.buyerId));
           const buyerData = buyerDoc.data() as User;
 
           const newNotification: Notification = {
-            id: change.doc.id,
+            id: change.doc.id,  // utilizza l'ID della modifica o un generatore di ID
             productId: orderData.productId,
             productName: productData.name,
             buyerName: buyerData.displayName || buyerData.email,
             createdAt: orderData.createdAt,
           };
 
+          // Salva la notifica nella collezione "notifications"
+          await setDoc(doc(db, 'notifications', newNotification.id), newNotification);
+
+          // Aggiorna lo stato delle notifiche aggiungendo la nuova notifica in cima alla lista
           setNotifications((prev) => [newNotification, ...prev]);
+
+          // Incrementa il contatore delle nuove notifiche
+          setNewNotificationsCount((prevCount) => prevCount + 1);
         }
       }
     });
@@ -274,15 +316,21 @@ export default function Home() {
               {user && (
                   <div className="relative">
                     <button
-                        onClick={() => setShowNotifications(!showNotifications)}
+                        onClick={() => {
+                          setShowNotifications(!showNotifications);
+                          if (!showNotifications) {
+                            // Se stiamo aprendo il pannello, resetta il contatore delle nuove notifiche
+                            setNewNotificationsCount(0);
+                          }
+                        }}
                         className="flex items-center hover:text-gray-200 relative"
                     >
                       <Bell size={20}/>
-                      {notifications.length > 0 && (
+                      {!showNotifications && (newNotificationsCount > 0) && (
                           <span
                               className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1 transform translate-x-1/2 -translate-y-1/2">
-                                {notifications.length}
-                                 </span>
+      {newNotificationsCount}
+    </span>
                       )}
                     </button>
                     {showNotifications && (
@@ -290,20 +338,26 @@ export default function Home() {
                             className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg z-50 max-h-96 overflow-y-auto animate-fade-in-down">
                           {notifications.length > 0 ? (
                               notifications.map((notification) => (
-                                  <div key={notification.id} className="p-4 border-b hover:bg-gray-100 transition-colors duration-200 flex items-center space-x-4">
-                                    <Image src="/logoNosfondo.png" alt="Logo" width={40} height={40} className="rounded-full" />
+                                  <div key={notification.id}
+                                       className="p-4 border-b hover:bg-gray-100 transition-colors duration-200 flex items-center space-x-4">
+                                    <Image src="/logoNosfondo.png" alt="Logo" width={40} height={40}
+                                           className="rounded-full"/>
                                     <div className="flex-1">
-                                      <p className="font-semibold text-teal-500">Hai venduto {notification.productName}</p>
+                                      <p className="font-semibold text-teal-500">Hai
+                                        venduto {notification.productName}</p>
                                       <p className="text-sm text-teal-500">A {notification.buyerName}</p>
                                       <p className="text-xs text-teal-500">{new Date(notification.createdAt).toLocaleString()}</p>
                                     </div>
-                                    <button
-                                        onClick={() => removeNotification(notification.id)}
-                                        className="text-red-500 hover:text-red-700 ml-4"
-                                        title="Elimina notifica"
-                                    >
-                                      ✕
-                                    </button>
+                                    {/* Rimosso il pulsante per eliminare la notifica */}
+                                    {/*
+                                       <button
+                                         onClick={() => removeNotification(notification.id)}
+                                            className="text-red-500 hover:text-red-700 ml-4"
+                                             title="Elimina notifica"
+                                                         >
+                                                        ✕
+                                                       </button>
+                                                       */}
                                   </div>
                               ))
                           ) : (
@@ -442,31 +496,75 @@ const UserMenu = ({
 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  const toggleMenu = () => setDropdownOpen(!dropdownOpen);
+
   return user ? (
-      <div className="relative">
-        <button
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center space-x-2 hover:text-gray-200"
-        >
-          {userImage ? (
-              <Image src={userImage} alt="Profilo" width={32} height={32} className="rounded-full" />
-          ) : (
-              <User size={20} />
-          )}
-          <span>{user.displayName || user.email}</span>
-          <ChevronDown size={16} />
-        </button>
+      <div className="relative inline-block text-left">
+        {/* Button to toggle dropdown */}
+
+          <button
+              onClick={toggleMenu}
+              className="flex items-center space-x-2 bg-transparent border border-transparent text-white py-2 px-4 rounded-full transition-colors duration-200 hover:bg-gray-700 hover:border-gray-600"
+          >
+            {userImage ? (
+                <Image
+                    src={userImage}
+                    alt="Profilo"
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                />
+            ) : (
+                <User size={20}/>
+            )}
+            <span>{user.displayName || user.email}</span>
+          </button>
+
+
+        {/* Dropdown menu */}
         {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
-              <div className="py-1">
-                <UserMenuItem href="/user-area">Profilo</UserMenuItem>
-                <UserMenuItem href="/ordereffettuati">I miei ordini</UserMenuItem>
-                <UserMenuItem href="/user-active-ads">I miei annunci</UserMenuItem>
+            <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+              {/* Warning message */}
+              <div className="p-4 text-sm text-gray-700 border-b border-gray-200 bg-green-100 flex items-start">
+                <div className="text-green-600 mr-2">
+                  <Smile size={20}/>
+                </div>
+                <span>Bentornato {user?.displayName || user?.email}!</span>
+              </div>
+
+              {/* Menu items */}
+              <ul className="py-1 text-gray-700">
+                <li className="px-4 py-2 hover:bg-gray-100 flex items-center">
+                  <ClipboardList className="mr-3 text-gray-500" size={18}/>
+                  <Link href="/ordereffettuati" className="flex-1">
+                    I tuoi ordini
+                  </Link>
+                </li>
+                <li className="px-4 py-2 hover:bg-gray-100 flex items-center">
+                  {/* Modifica qui l'icona per "I miei annunci" */}
+                  <Package className="mr-3 text-gray-500" size={18}/>
+                  <Link href="/user-active-ads" className="flex-1">
+                    I miei annunci
+                  </Link>
+                </li>
+                <li className="px-4 py-2 hover:bg-gray-100 flex items-center">
+                  {/* Sostituisco "Indirizzi" con "Area utente" e cambio icona */}
+                  <User className="mr-3 text-gray-500" size={18}/>
+                  <Link href="/area-utente" className="flex-1">
+                    Area utente
+                  </Link>
+                </li>
+                {/* Rimosso il blocco Notifiche */}
+              </ul>
+
+              {/* Logout */}
+              <div className="border-t border-gray-200">
                 <button
                     onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                    className="w-full px-4 py-2 text-left text-red-600 hover:bg-gray-100 flex items-center"
                 >
-                  <LogOut size={16} className="inline mr-2" /> Esci
+                  <LogOut className="mr-3" size={18}/>
+                  <span>Esci</span>
                 </button>
               </div>
             </div>
@@ -478,8 +576,8 @@ const UserMenu = ({
       </Link>
   );
 };
-
-const UserMenuItem = ({ href, children }: { href: string; children: React.ReactNode }) => (
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const UserMenuItem = ({href, children}: { href: string; children: React.ReactNode }) => (
     <Link href={href} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
       {children}
     </Link>

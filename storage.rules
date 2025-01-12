@@ -9,5 +9,10 @@ service cloud.firestore {
     match /products/{productId} {
       allow read: if request.auth != null;
     }
+    // Aggiungi regole per la collezione notifications
+    match /notifications/{notificationId} {
+      // Consenti a utenti autenticati di leggere e scrivere notifiche
+      allow read, write: if request.auth != null;
+    }
   }
 }
