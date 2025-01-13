@@ -550,7 +550,7 @@ const UserMenu = ({
                 <li className="px-4 py-2 hover:bg-gray-100 flex items-center">
                   {/* Sostituisco "Indirizzi" con "Area utente" e cambio icona */}
                   <User className="mr-3 text-gray-500" size={18}/>
-                  <Link href="/area-utente" className="flex-1">
+                  <Link href="/user-area" className="flex-1">
                     Area utente
                   </Link>
                 </li>
