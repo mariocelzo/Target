@@ -171,4 +171,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# Ignora il file di credenziali Firebase
+src/script/target-8b44c-firebase-adminsdk-os9pa-766161f9cc.json
 >>>>>>> 6f50928aecbdbbb6ec717f9cde1cbcedc9b60660
