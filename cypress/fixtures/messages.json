@@ -1,0 +1,13 @@
+[
+  {
+    "userId": "current-user-id",
+    "partnerId": "user-1-id",
+    "messages": [
+      {
+        "senderId": "user-1-id",
+        "text": "Hello Test User",
+        "timestamp": 1609459200000
+      }
+    ]
+  }
+]

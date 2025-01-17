@@ -158,8 +158,8 @@ export default function EditAd() {
                         <label className="block text-sm font-semibold text-gray-700">Titolo</label>
                         <input
                             type="text"
-                            name="title"
-                            value={formData.name}
+                            name="name" // Usa 'name' per allinearlo con la proprietà di formData
+                            value={formData.name} // Collega il valore a formData.name
                             onChange={handleChange}
                             placeholder="Titolo"
                             required

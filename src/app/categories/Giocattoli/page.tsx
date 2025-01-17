@@ -77,6 +77,7 @@ export default function ElectronicsPage() {
                                 href={`/products/${product.id}`}
                                 key={product.id}
                                 className="block bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                                data-testid={`product-${product.id}`}  // Aggiungi un 'data-testid' personalizzato
                             >
                                 <div className="flex items-center">
                                     <div className="w-1/3 flex items-center justify-center h-48 bg-gray-100 rounded-l-xl">

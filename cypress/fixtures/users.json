@@ -1,0 +1,12 @@
+[
+  {
+    "id": "user-1-id",
+    "fullName": "John Doe",
+    "imageUrl": "https://example.com/john-avatar.jpg"
+  },
+  {
+    "id": "user-2-id",
+    "fullName": "Jane Smith",
+    "imageUrl": "https://example.com/jane-avatar.jpg"
+  }
+]
