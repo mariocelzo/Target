@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchProductsauto } from '@/services/categoryService';
+import { fetchProductsmoda } from '@/services/categoryService';
 import { getCurrentUserId } from '@/services/usservicecat';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import LoadingSpinner from '@/components/LoadingSpinner'; // Importa la rotella di caricamento
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 // Interfaccia per i dati utente
 interface User {
@@ -20,39 +20,50 @@ interface Product {
     name: string;
     description: string;
     price: number;
-    image?: string; // Campo opzionale
+    image?: string;
     sold: boolean;
-    user?: User; // Campo opzionale
+    user?: User;
 }
 
-export default function ElectronicsPage() {
-    const [products, setProducts] = useState<Product[]>([]); // Definito il tipo Product[]
-    const [isLoading, setIsLoading] = useState(true); // Stato di caricamento
+export default function ModaPage() {
+    const [products, setProducts] = useState<Product[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    // Funzione per caricare i prodotti
     const loadProducts = async () => {
-        setIsLoading(true); // Avvia il caricamento
+        setIsLoading(true);
         try {
+            // Verifica se esistono dati in cache per la categoria Moda
+            const storedProducts = localStorage.getItem('modaProducts');
+            if (storedProducts) {
+                const parsedProducts: Product[] = JSON.parse(storedProducts);
+                setProducts(parsedProducts);
+                setIsLoading(false);
+                return; // Se i dati sono disponibili in cache, interrompi la funzione qui
+            }
+
+            // Se non ci sono dati in cache, procedi con la fetch dal server
             const userId = getCurrentUserId();
             if (userId) {
-                const products = (await fetchProductsauto(userId)) as Product[]; // Supponiamo che questa restituisca Product[]
-                setProducts(products);
+                const fetchedProducts = (await fetchProductsmoda(userId)) as Product[];
+                setProducts(fetchedProducts);
+                // Salva i prodotti nel localStorage per future consultazioni
+                localStorage.setItem('modaProducts', JSON.stringify(fetchedProducts));
             }
         } catch (error) {
             console.error('Errore durante il caricamento dei prodotti:', error);
         } finally {
-            setIsLoading(false); // Termina il caricamento
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
         loadProducts();
-    }, []); // La dipendenza vuota esegue loadProducts una sola volta al caricamento
+    }, []);
 
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-100">
-                <LoadingSpinner /> {/* Rotella di caricamento */}
+                <LoadingSpinner />
             </div>
         );
     }
@@ -62,14 +73,18 @@ export default function ElectronicsPage() {
             <Header />
             <section className="bg-gradient-to-r from-teal-600 to-teal-400 text-white py-12">
                 <div className="container mx-auto text-center">
-                    <h1 className="text-4xl font-extrabold mb-4">Auto e Moto</h1>
+                    <h1 className="text-4xl font-extrabold mb-4">Moda</h1>
                 </div>
             </section>
 
             <section className="container mx-auto py-12 px-6">
-                <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">Esplora le auto e moto</h2>
+                <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">
+                    Esplora i miglior brand su Target
+                </h2>
                 {products.length === 0 ? (
-                    <p className="text-center text-gray-500">Nessun prodotto trovato nella categoria Auto e moto.</p>
+                    <p className="text-center text-gray-500">
+                        Nessun prodotto trovato nella categoria Moda
+                    </p>
                 ) : (
                     <div className="space-y-6">
                         {products.map((product) => (
@@ -77,7 +92,6 @@ export default function ElectronicsPage() {
                                 href={`/products/${product.id}`}
                                 key={product.id}
                                 className="block bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
-                                data-testid={`product-${product.id}`}  // Aggiungi un 'data-testid' personalizzato
                             >
                                 <div className="flex items-center">
                                     <div className="w-1/3 flex items-center justify-center h-48 bg-gray-100 rounded-l-xl">
@@ -91,10 +105,16 @@ export default function ElectronicsPage() {
                                         <h3 className="text-lg font-semibold text-gray-800 truncate">
                                             {product.name}
                                         </h3>
-                                        <p className="text-sm text-gray-600 line-clamp-2">{product.description}</p>
-                                        <p className="text-lg font-semibold text-teal-600">€ {product.price}</p>
+                                        <p className="text-sm text-gray-600 line-clamp-2">
+                                            {product.description}
+                                        </p>
+                                        <p className="text-lg font-semibold text-teal-600">
+                                            € {product.price}
+                                        </p>
                                         {product.sold && (
-                                            <p className="text-sm font-semibold text-red-500 uppercase">Venduto</p>
+                                            <p className="text-sm font-semibold text-red-500 uppercase">
+                                                Venduto
+                                            </p>
                                         )}
                                         {product.user && (
                                             <p className="text-sm text-gray-500">

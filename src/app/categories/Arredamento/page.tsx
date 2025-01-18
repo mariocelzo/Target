@@ -6,42 +6,52 @@ import { getCurrentUserId } from '@/services/usservicecat';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import LoadingSpinner from '@/components/LoadingSpinner'; // Importa la rotella di caricamento
+import LoadingSpinner from '@/components/LoadingSpinner';
 
-// Interfaccia per l'utente
 interface User {
     fullName: string;
     city: string;
 }
 
-// Interfaccia per il prodotto
 interface Product {
     id: string;
     name: string;
     description: string;
     price: number;
-    image?: string; // Campo opzionale
+    image?: string;
     sold: boolean;
-    user?: User; // Campo opzionale
+    user?: User;
 }
 
 export default function ElectronicsPage() {
-    const [products, setProducts] = useState<Product[]>([]); // Rimosso any
+    const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const loadProducts = async () => {
-            setIsLoading(true); // Attiva il caricamento
+            setIsLoading(true);
             try {
+                // Prova a recuperare i prodotti dal localStorage
+                const storedProducts = localStorage.getItem('arredamentoProducts');
+                if (storedProducts) {
+                    const parsedProducts: Product[] = JSON.parse(storedProducts);
+                    setProducts(parsedProducts);
+                    setIsLoading(false);
+                    return; // Se troviamo i dati in cache, evitiamo la fetch
+                }
+
+                // Se non ci sono dati in cache, effettua la fetch
                 const userId = getCurrentUserId();
                 if (userId) {
-                    const products = await fetchProducts(userId) as Product[]; // Cast esplicito
-                    setProducts(products);
+                    const fetchedProducts = await fetchProducts(userId) as Product[];
+                    setProducts(fetchedProducts);
+                    // Salva i dati nel localStorage per utilizzi futuri
+                    localStorage.setItem('arredamentoProducts', JSON.stringify(fetchedProducts));
                 }
             } catch (error) {
                 console.error('Errore durante il caricamento dei prodotti:', error);
             } finally {
-                setIsLoading(false); // Disattiva il caricamento
+                setIsLoading(false);
             }
         };
 
@@ -51,7 +61,7 @@ export default function ElectronicsPage() {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-100">
-                <LoadingSpinner /> {/* Mostra la rotella di caricamento */}
+                <LoadingSpinner />
             </div>
         );
     }
@@ -69,7 +79,9 @@ export default function ElectronicsPage() {
             <section className="container mx-auto py-12 px-6">
                 <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">Esplora i Prodotti</h2>
                 {products.length === 0 ? (
-                    <p className="text-center text-gray-500">Nessun prodotto trovato nella categoria Arredamento.</p>
+                    <p className="text-center text-gray-500">
+                        Nessun prodotto trovato nella categoria Arredamento.
+                    </p>
                 ) : (
                     <div className="space-y-6">
                         {products.map((product) => (
@@ -90,10 +102,16 @@ export default function ElectronicsPage() {
                                         <h3 className="text-lg font-semibold text-gray-800 truncate">
                                             {product.name}
                                         </h3>
-                                        <p className="text-sm text-gray-600 line-clamp-2">{product.description}</p>
-                                        <p className="text-lg font-semibold text-teal-600">€ {product.price}</p>
+                                        <p className="text-sm text-gray-600 line-clamp-2">
+                                            {product.description}
+                                        </p>
+                                        <p className="text-lg font-semibold text-teal-600">
+                                            € {product.price}
+                                        </p>
                                         {product.sold && (
-                                            <p className="text-sm font-semibold text-red-500 uppercase">Venduto</p>
+                                            <p className="text-sm font-semibold text-red-500 uppercase">
+                                                Venduto
+                                            </p>
                                         )}
                                         {product.user && (
                                             <p className="text-sm text-gray-500">

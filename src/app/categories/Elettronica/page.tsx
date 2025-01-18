@@ -6,7 +6,7 @@ import { getCurrentUserId } from '@/services/usservicecat';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import LoadingSpinner from '@/components/LoadingSpinner'; // Importa la rotella di caricamento
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 // Interfaccia per l'utente
 interface User {
@@ -20,40 +20,49 @@ interface Product {
     name: string;
     description: string;
     price: number;
-    image?: string; // Campo opzionale
+    image?: string;
     sold: boolean;
-    user?: User; // Campo opzionale
+    user?: User;
 }
 
 export default function ElectronicsPage() {
-    const [products, setProducts] = useState<Product[]>([]); // Tipo specifico per l'array dei prodotti
-    const [isLoading, setIsLoading] = useState(true); // Stato di caricamento
+    const [products, setProducts] = useState<Product[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    // Funzione per caricare i prodotti, da usare ogni volta che l'utente è disponibile
     const loadProducts = async () => {
-        setIsLoading(true); // Attiva il caricamento
+        setIsLoading(true);
         try {
+            // Verifica la presenza di dati nel localStorage per la categoria Elettronica
+            const storedProducts = localStorage.getItem('elettronicaProducts');
+            if (storedProducts) {
+                const parsedProducts: Product[] = JSON.parse(storedProducts);
+                setProducts(parsedProducts);
+                setIsLoading(false);
+                return; // Se i dati sono disponibili in cache, evita una nuova fetch
+            }
+
             const userId = getCurrentUserId();
             if (userId) {
-                const products = await fetchProductsele(userId);
-                setProducts(products as Product[]); // Cast esplicito
+                const fetchedProducts = await fetchProductsele(userId) as Product[];
+                setProducts(fetchedProducts);
+                // Salva i prodotti recuperati nel localStorage
+                localStorage.setItem('elettronicaProducts', JSON.stringify(fetchedProducts));
             }
         } catch (error) {
             console.error('Errore durante il caricamento dei prodotti:', error);
         } finally {
-            setIsLoading(false); // Disattiva il caricamento
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
         loadProducts();
-    }, []); // La dipendenza vuota fa sì che venga eseguito solo una volta al primo caricamento
+    }, []);
 
-    // Mostra la rotella di caricamento durante il caricamento
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-100">
-                <LoadingSpinner /> {/* Rotella di caricamento */}
+                <LoadingSpinner />
             </div>
         );
     }
@@ -71,7 +80,9 @@ export default function ElectronicsPage() {
             <section className="container mx-auto py-12 px-6">
                 <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">Esplora i Prodotti</h2>
                 {products.length === 0 ? (
-                    <p className="text-center text-gray-500">Nessun prodotto trovato nella categoria Elettronica.</p>
+                    <p className="text-center text-gray-500">
+                        Nessun prodotto trovato nella categoria Elettronica.
+                    </p>
                 ) : (
                     <div className="space-y-6">
                         {products.map((product) => (
@@ -92,10 +103,16 @@ export default function ElectronicsPage() {
                                         <h3 className="text-lg font-semibold text-gray-800 truncate">
                                             {product.name}
                                         </h3>
-                                        <p className="text-sm text-gray-600 line-clamp-2">{product.description}</p>
-                                        <p className="text-lg font-semibold text-teal-600">€ {product.price}</p>
+                                        <p className="text-sm text-gray-600 line-clamp-2">
+                                            {product.description}
+                                        </p>
+                                        <p className="text-lg font-semibold text-teal-600">
+                                            € {product.price}
+                                        </p>
                                         {product.sold && (
-                                            <p className="text-sm font-semibold text-red-500 uppercase">Venduto</p>
+                                            <p className="text-sm font-semibold text-red-500 uppercase">
+                                                Venduto
+                                            </p>
                                         )}
                                         {product.user && (
                                             <p className="text-sm text-gray-500">
