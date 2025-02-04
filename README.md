@@ -1,41 +1,90 @@
-<<<<<<< HEAD
-# Target
-progetto di is
-=======
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🛍️ Target Marketplace
 
-## Getting Started
+Benvenuto su **Target**, il marketplace innovativo per la compravendita di prodotti di seconda mano! 🚀
 
-First, run the development server:
+🔗 **Visita il sito:** [Target Marketplace](https://v0-target-svp6klexsij.vercel.app/)
 
+---
+
+## 📌 **Descrizione del Progetto**
+
+Target è una piattaforma di e-commerce che consente agli utenti di **comprare e vendere prodotti usati** in modo semplice e sicuro. Basato su **Next.js**, **Firebase** e un'architettura **Three-Tier**, il sito offre un'esperienza moderna e performante per gli utenti.
+
+### ✨ **Funzionalità principali**
+- 📦 **Pubblicazione Annunci**: Crea annunci per vendere prodotti usati.
+- 🔍 **Ricerca Avanzata**: Filtra e cerca prodotti per categoria, prezzo e condizione.
+- 👤 **Gestione Account**: Registrati, accedi e modifica il tuo profilo utente.
+- 💬 **Messaggistica**: Comunica con altri utenti per accordarti sulla vendita.
+- 🔔 **Notifiche in tempo reale**: Ricevi aggiornamenti sui tuoi annunci e offerte.
+- 📊 **Gestione Ordini**: Monitora lo stato degli acquisti e delle vendite.
+
+---
+
+## 🚀 **Tecnologie Utilizzate**
+
+Target è stato sviluppato con le seguenti tecnologie:
+
+- **Frontend:** Next.js (React.js)
+- **Backend:** Firebase Firestore (Database) & Firebase Authentication
+- **Styling:** Tailwind CSS
+- **Testing:** Cypress (E2E Testing)
+- **Hosting & Deployment:** Vercel
+
+---
+
+## 📂 **Struttura del Progetto**
+
+📁 **`src/`** - Contiene il codice principale del progetto
+- 📂 **`components/`** - Componenti UI riutilizzabili
+- 📂 **`pages/`** - Pagine del sito
+- 📂 **`services/`** - Logica di business e connessione a Firebase
+- 📂 **`models/`** - Definizione dei modelli di dati
+- 📂 **`hooks/`** - Hook personalizzati per l'interazione con Firebase
+- 📂 **`styles/`** - Fogli di stile CSS/Tailwind
+
+---
+
+## 🛠️ **Come avviare il progetto in locale**
+
+1️⃣ **Clona il repository:**
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+ git clone https://github.com/tuo-repo/target-marketplace.git
+ cd target-marketplace
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2️⃣ **Installa le dipendenze:**
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3️⃣ **Configura le variabili d'ambiente:**
+Crea un file `.env.local` e aggiungi le credenziali Firebase.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4️⃣ **Avvia il server di sviluppo:**
+```bash
+npm run dev
+```
 
-## Learn More
+🔗 Apri **[http://localhost:3000](http://localhost:3000)** nel tuo browser per vedere il sito in locale!
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🚀 **Deployment**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Il sito è **deployato automaticamente su Vercel** ad ogni push su GitHub. Se vuoi fare il deploy manualmente, esegui:
+```bash
+vercel --prod
+```
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📝 **Contributi**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
->>>>>>> 6f50928aecbdbbb6ec717f9cde1cbcedc9b60660
+Vuoi contribuire al progetto? Sentiti libero di **fare fork del repository**, aprire una **pull request** o segnalare bug nella sezione **Issues**!
+
+📩 **Contattaci** per qualsiasi domanda o suggerimento!
+
+---
+
+💡 **Target - Compra, Vendi, Guadagna!**
+
