@@ -514,23 +514,23 @@ const UserMenu = ({
       <div className="relative inline-block text-left">
         {/* Button to toggle dropdown */}
 
-          <button
-              onClick={toggleMenu}
-              className="flex items-center space-x-2 bg-transparent border border-transparent text-white py-2 px-4 rounded-full transition-colors duration-200 hover:bg-gray-700 hover:border-gray-600"
-          >
-            {userImage ? (
-                <Image
-                    src={userImage}
-                    alt="Profilo"
-                    width={32}
-                    height={32}
-                    className="rounded-full"
-                />
-            ) : (
-                <User size={20}/>
-            )}
-            <span>{user.displayName || user.email}</span>
-          </button>
+        <button
+            onClick={toggleMenu}
+            className="flex items-center space-x-2 bg-transparent border border-transparent text-white py-2 px-4 rounded-full transition-colors duration-200 hover:bg-gray-700 hover:border-gray-600"
+        >
+          {userImage ? (
+              <Image
+                  src={userImage}
+                  alt="Profilo"
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+              />
+          ) : (
+              <User size={20}/>
+          )}
+          <span>{user.displayName || user.email}</span>
+        </button>
 
 
         {/* Dropdown menu */}

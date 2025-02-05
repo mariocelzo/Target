@@ -29,17 +29,30 @@ export default function GiocattoliPage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Carica sempre i dati dal server e filtra i prodotti venduti
+    /**
+     * Carica i prodotti da localStorage, se presenti;
+     * altrimenti fa la fetch da Firestore e salva in localStorage.
+     */
     const loadProducts = async () => {
         setIsLoading(true);
         try {
+            // 1. Verifica se esistono dati in cache per la categoria "Auto e Moto"
+            const storedProducts = localStorage.getItem('giocattoliProducts');
+            if (storedProducts) {
+                // Se esistono in localStorage, li parsiamo e li impostiamo nello stato
+                const parsedProducts: Product[] = JSON.parse(storedProducts);
+                setProducts(parsedProducts);
+                setIsLoading(false);
+                return; // Interrompiamo qui: non serve fare la fetch
+            }
+
+            // 2. Se non ci sono dati in cache, procediamo con la fetch dal server
             const userId = getCurrentUserId();
             if (userId) {
-                // Esegui la fetch dei prodotti
                 const fetchedProducts = (await fetchProductsmoda(userId)) as Product[];
-                // Filtra i prodotti già venduti (sold: true)
-                const unsoldProducts = fetchedProducts.filter((p) => !p.sold);
-                setProducts(unsoldProducts);
+                // Salviamo in localStorage per evitare future fetch
+                localStorage.setItem('giocattoliProducts', JSON.stringify(fetchedProducts));
+                setProducts(fetchedProducts);
             } else {
                 // Se per qualche motivo non c'è userId, non carichiamo nulla
                 setProducts([]);
@@ -51,6 +64,9 @@ export default function GiocattoliPage() {
         }
     };
 
+    /**
+     * Eseguiamo loadProducts solo la prima volta (o quando ricarica la pagina)
+     */
     useEffect(() => {
         loadProducts();
     }, []);
@@ -67,6 +83,7 @@ export default function GiocattoliPage() {
         <div className="min-h-screen bg-white">
             <Header />
 
+            {/* Sezione Hero / Titolo */}
             <section className="bg-gradient-to-r from-teal-600 to-teal-400 text-white py-12">
                 <div className="container mx-auto text-center">
                     <h1 className="text-4xl font-extrabold mb-4">Auto e Moto</h1>
@@ -107,12 +124,15 @@ export default function GiocattoliPage() {
                                         <p className="text-lg font-semibold text-teal-600">
                                             € {product.price}
                                         </p>
-                                        {/* Se vuoi mostrare un badge "Venduto" nei prodotti venduti (non visibili perché filtrati), lascialo pure:
+
+                                        {/* Badge "Venduto" */}
                                         {product.sold && (
                                             <p className="text-sm font-semibold text-red-500 uppercase">
                                                 Venduto
                                             </p>
-                                        )} */}
+                                        )}
+
+                                        {/* Info venditore */}
                                         {product.user && (
                                             <p className="text-sm text-gray-500">
                                                 Venduto da: {product.user.fullName} ({product.user.city})

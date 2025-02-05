@@ -29,20 +29,24 @@ export default function ElectronicsPage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Carica sempre i dati dal server e filtra i prodotti venduti
     const loadProducts = async () => {
         setIsLoading(true);
         try {
+            // Verifica la presenza di dati nel localStorage per la categoria Elettronica
+            const storedProducts = localStorage.getItem('elettronicaProducts');
+            if (storedProducts) {
+                const parsedProducts: Product[] = JSON.parse(storedProducts);
+                setProducts(parsedProducts);
+                setIsLoading(false);
+                return; // Se i dati sono disponibili in cache, evita una nuova fetch
+            }
+
             const userId = getCurrentUserId();
             if (userId) {
-                // Esegui la fetch dei prodotti
-                const fetchedProducts = (await fetchProductsele(userId)) as Product[];
-                // Filtra i prodotti con sold: true
-                const unsoldProducts = fetchedProducts.filter((p) => !p.sold);
-                setProducts(unsoldProducts);
-            } else {
-                // Se non esiste userId, lista vuota
-                setProducts([]);
+                const fetchedProducts = await fetchProductsele(userId) as Product[];
+                setProducts(fetchedProducts);
+                // Salva i prodotti recuperati nel localStorage
+                localStorage.setItem('elettronicaProducts', JSON.stringify(fetchedProducts));
             }
         } catch (error) {
             console.error('Errore durante il caricamento dei prodotti:', error);
@@ -69,16 +73,12 @@ export default function ElectronicsPage() {
             <section className="bg-gradient-to-r from-teal-600 to-teal-400 text-white py-12">
                 <div className="container mx-auto text-center">
                     <h1 className="text-4xl font-extrabold mb-4">Prodotti Elettronica</h1>
-                    <p className="text-lg">
-                        Scopri i migliori articoli di elettronica disponibili
-                    </p>
+                    <p className="text-lg">Scopri i migliori articoli di elettronica disponibili</p>
                 </div>
             </section>
 
             <section className="container mx-auto py-12 px-6">
-                <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">
-                    Esplora i Prodotti
-                </h2>
+                <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">Esplora i Prodotti</h2>
                 {products.length === 0 ? (
                     <p className="text-center text-gray-500">
                         Nessun prodotto trovato nella categoria Elettronica.

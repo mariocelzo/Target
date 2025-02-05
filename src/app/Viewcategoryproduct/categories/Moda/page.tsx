@@ -32,17 +32,22 @@ export default function ModaPage() {
     const loadProducts = async () => {
         setIsLoading(true);
         try {
-            // Otteniamo l'UID dell'utente
+            // Verifica se esistono dati in cache per la categoria Moda
+            const storedProducts = localStorage.getItem('modaProducts');
+            if (storedProducts) {
+                const parsedProducts: Product[] = JSON.parse(storedProducts);
+                setProducts(parsedProducts);
+                setIsLoading(false);
+                return; // Se i dati sono disponibili in cache, interrompi la funzione qui
+            }
+
+            // Se non ci sono dati in cache, procedi con la fetch dal server
             const userId = getCurrentUserId();
             if (userId) {
-                // Facciamo la fetch ogni volta
                 const fetchedProducts = (await fetchProductsmoda(userId)) as Product[];
-                // Filtra i prodotti venduti
-                const unsoldProducts = fetchedProducts.filter((p) => !p.sold);
-                setProducts(unsoldProducts);
-            } else {
-                // Se per qualche motivo non c'è userId, non carichiamo nulla
-                setProducts([]);
+                setProducts(fetchedProducts);
+                // Salva i prodotti nel localStorage per future consultazioni
+                localStorage.setItem('modaProducts', JSON.stringify(fetchedProducts));
             }
         } catch (error) {
             console.error('Errore durante il caricamento dei prodotti:', error);
@@ -106,6 +111,11 @@ export default function ModaPage() {
                                         <p className="text-lg font-semibold text-teal-600">
                                             € {product.price}
                                         </p>
+                                        {product.sold && (
+                                            <p className="text-sm font-semibold text-red-500 uppercase">
+                                                Venduto
+                                            </p>
+                                        )}
                                         {product.user && (
                                             <p className="text-sm text-gray-500">
                                                 Venduto da: {product.user.fullName} ({product.user.city})

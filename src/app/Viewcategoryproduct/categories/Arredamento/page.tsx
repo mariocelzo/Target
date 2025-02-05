@@ -23,33 +23,38 @@ interface Product {
     user?: User;
 }
 
-export default function ArredamentoPage() {
+export default function ElectronicsPage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const loadProducts = async () => {
-        setIsLoading(true);
-        try {
-            const userId = getCurrentUserId();
-            if (userId) {
-                // Recupera i prodotti da Firestore
-                const fetchedProducts = (await fetchProducts(userId)) as Product[];
-
-                // Filtra quelli venduti (sold = true)
-                const unsoldProducts = fetchedProducts.filter((p) => !p.sold);
-                setProducts(unsoldProducts);
-            } else {
-                // Se manca l'ID utente, non carichiamo nulla
-                setProducts([]);
-            }
-        } catch (error) {
-            console.error('Errore durante il caricamento dei prodotti:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     useEffect(() => {
+        const loadProducts = async () => {
+            setIsLoading(true);
+            try {
+                // Prova a recuperare i prodotti dal localStorage
+                const storedProducts = localStorage.getItem('arredamentoProducts');
+                if (storedProducts) {
+                    const parsedProducts: Product[] = JSON.parse(storedProducts);
+                    setProducts(parsedProducts);
+                    setIsLoading(false);
+                    return; // Se troviamo i dati in cache, evitiamo la fetch
+                }
+
+                // Se non ci sono dati in cache, effettua la fetch
+                const userId = getCurrentUserId();
+                if (userId) {
+                    const fetchedProducts = await fetchProducts(userId) as Product[];
+                    setProducts(fetchedProducts);
+                    // Salva i dati nel localStorage per utilizzi futuri
+                    localStorage.setItem('arredamentoProducts', JSON.stringify(fetchedProducts));
+                }
+            } catch (error) {
+                console.error('Errore durante il caricamento dei prodotti:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
         loadProducts();
     }, []);
 
@@ -64,20 +69,15 @@ export default function ArredamentoPage() {
     return (
         <div className="min-h-screen bg-white">
             <Header />
-
             <section className="bg-gradient-to-r from-teal-600 to-teal-400 text-white py-12">
                 <div className="container mx-auto text-center">
                     <h1 className="text-4xl font-extrabold mb-4">Prodotti Arredamento</h1>
-                    <p className="text-lg">
-                        Scopri i migliori articoli di arredamento disponibili
-                    </p>
+                    <p className="text-lg">Scopri i migliori articoli di arredamento disponibili</p>
                 </div>
             </section>
 
             <section className="container mx-auto py-12 px-6">
-                <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">
-                    Esplora i Prodotti
-                </h2>
+                <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">Esplora i Prodotti</h2>
                 {products.length === 0 ? (
                     <p className="text-center text-gray-500">
                         Nessun prodotto trovato nella categoria Arredamento.
@@ -108,14 +108,11 @@ export default function ArredamentoPage() {
                                         <p className="text-lg font-semibold text-teal-600">
                                             € {product.price}
                                         </p>
-
-                                        {/* Se fosse venduto (filtrato qui, quindi non dovrebbe apparire) */}
                                         {product.sold && (
                                             <p className="text-sm font-semibold text-red-500 uppercase">
                                                 Venduto
                                             </p>
                                         )}
-
                                         {product.user && (
                                             <p className="text-sm text-gray-500">
                                                 Venduto da: {product.user.fullName} ({product.user.city})
