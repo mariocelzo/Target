@@ -55,7 +55,7 @@ const Header = () => {
         try {
             await signOut(auth);
             setUserPhotoUrl(null);
-            // router.push('/login'); // Se vuoi reindirizzare al login
+             router.push('/Autenticazione/login'); // Se vuoi reindirizzare al login
         } catch (error) {
             console.error('Errore durante il logout:', error);
         }
@@ -106,7 +106,7 @@ const Header = () => {
                                     <CategoryLink href="/Viewcategoryproduct/categories/Elettronica">Elettronica</CategoryLink>
                                     <CategoryLink href="/Viewcategoryproduct/categories/Arredamento">Arredamento</CategoryLink>
                                     <CategoryLink href="/Viewcategoryproduct/categories/Moda">Moda</CategoryLink>
-                                    <CategoryLink href="/Viewcategoryproduct/categories/Auto-e-Moto">Auto e Moto</CategoryLink>
+                                    <CategoryLink href="/Viewcategoryproduct/categories/Giocattoli">Auto e Moto</CategoryLink>
                                 </div>
                             </div>
                         </div>
@@ -151,7 +151,7 @@ const Header = () => {
                                 <div className="absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
                                     <div className="flex flex-col py-2">
                                         <Link
-                                            href="/user-area"
+                                            href="/Autenticazione/user-area"
                                             className="px-4 py-2 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
                                             onClick={() => setIsUserMenuOpen(false)}
                                         >

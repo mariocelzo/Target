@@ -130,7 +130,7 @@ export default function OrderPage() {
                 sold: true,
             });
 
-            router.push(`/ordereffettuati`);
+            router.push(`/Autenticazione/ordereffettuati`);
         } catch (error) {
             console.error('Errore durante la creazione dell\'ordine:', error);
             alert('Si è verificato un errore durante l\'ordine.');

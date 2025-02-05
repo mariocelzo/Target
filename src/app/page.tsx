@@ -408,7 +408,13 @@ export default function Home() {
         {/* Featured Categories Section */}
         <section className={`py-16 ${isNightMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-800'}`}>
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-4xl font-semibold mb-12 text-gray-800">Categorie in Evidenza</h2>
+            <h2
+                className={`text-4xl font-semibold mb-12 ${
+                    isNightMode ? 'text-teal-300' : 'text-gray-800'
+                }`}
+            >
+              Categorie in Evidenza
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               <CategoryCard name="Elettronica" image="/elettronica.png" href="Viewcategoryproduct/categories/Elettronica" />
               <CategoryCard name="Moda" image="/moda.png" href="Viewcategoryproduct/categories/Moda" />
@@ -421,7 +427,13 @@ export default function Home() {
         {/* User Products Section */}
         <section className={`py-16 ${isNightMode ? 'bg-gray-800 text-gray-200' : 'bg-gray-50 text-gray-800'}`}>
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-4xl font-semibold mb-12 text-gray-800">I tuoi articoli in vendita</h2>
+            <h2
+                className={`text-4xl font-semibold mb-12 ${
+                    isNightMode ? 'text-teal-300' : 'text-gray-800'
+                }`}
+            >
+              I tuoi articoli in vendita
+            </h2>
             {userProducts.filter(product => !product.sold).length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                   {userProducts

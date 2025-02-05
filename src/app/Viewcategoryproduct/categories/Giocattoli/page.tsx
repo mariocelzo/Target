@@ -25,29 +25,24 @@ interface Product {
     user?: User;
 }
 
-export default function ModaPage() {
+export default function GiocattoliPage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    // Carica sempre i dati dal server e filtra i prodotti venduti
     const loadProducts = async () => {
         setIsLoading(true);
         try {
-            // Verifica se esistono dati in cache per la categoria Moda
-            const storedProducts = localStorage.getItem('modaProducts');
-            if (storedProducts) {
-                const parsedProducts: Product[] = JSON.parse(storedProducts);
-                setProducts(parsedProducts);
-                setIsLoading(false);
-                return; // Se i dati sono disponibili in cache, interrompi la funzione qui
-            }
-
-            // Se non ci sono dati in cache, procedi con la fetch dal server
             const userId = getCurrentUserId();
             if (userId) {
+                // Esegui la fetch dei prodotti
                 const fetchedProducts = (await fetchProductsmoda(userId)) as Product[];
-                setProducts(fetchedProducts);
-                // Salva i prodotti nel localStorage per future consultazioni
-                localStorage.setItem('modaProducts', JSON.stringify(fetchedProducts));
+                // Filtra i prodotti già venduti (sold: true)
+                const unsoldProducts = fetchedProducts.filter((p) => !p.sold);
+                setProducts(unsoldProducts);
+            } else {
+                // Se per qualche motivo non c'è userId, non carichiamo nulla
+                setProducts([]);
             }
         } catch (error) {
             console.error('Errore durante il caricamento dei prodotti:', error);
@@ -71,19 +66,20 @@ export default function ModaPage() {
     return (
         <div className="min-h-screen bg-white">
             <Header />
+
             <section className="bg-gradient-to-r from-teal-600 to-teal-400 text-white py-12">
                 <div className="container mx-auto text-center">
-                    <h1 className="text-4xl font-extrabold mb-4">Moda</h1>
+                    <h1 className="text-4xl font-extrabold mb-4">Auto e Moto</h1>
                 </div>
             </section>
 
             <section className="container mx-auto py-12 px-6">
                 <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">
-                    Esplora i miglior brand su Target
+                    Esplora la categoria Auto e Moto
                 </h2>
                 {products.length === 0 ? (
                     <p className="text-center text-gray-500">
-                        Nessun prodotto trovato nella categoria Moda
+                        Nessun prodotto trovato nella categoria Auto e Moto
                     </p>
                 ) : (
                     <div className="space-y-6">
@@ -111,11 +107,12 @@ export default function ModaPage() {
                                         <p className="text-lg font-semibold text-teal-600">
                                             € {product.price}
                                         </p>
+                                        {/* Se vuoi mostrare un badge "Venduto" nei prodotti venduti (non visibili perché filtrati), lascialo pure:
                                         {product.sold && (
                                             <p className="text-sm font-semibold text-red-500 uppercase">
                                                 Venduto
                                             </p>
-                                        )}
+                                        )} */}
                                         {product.user && (
                                             <p className="text-sm text-gray-500">
                                                 Venduto da: {product.user.fullName} ({product.user.city})
