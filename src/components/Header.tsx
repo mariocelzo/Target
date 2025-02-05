@@ -79,7 +79,7 @@ const Header = () => {
                         <NavLink href="/" isActive={isActive('/')}>
                             Home
                         </NavLink>
-                        <NavLink href="/sell" isActive={isActive('/sell')}>
+                        <NavLink href="/Sellpackage/sell" isActive={isActive('/sell')}>
                             Vendi
                         </NavLink>
 
@@ -103,15 +103,15 @@ const Header = () => {
                             </button>
                             <div className="absolute left-0 mt-2 w-48 bg-white text-gray-800 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                                 <div className="py-1">
-                                    <CategoryLink href="/categories/Elettronica">Elettronica</CategoryLink>
-                                    <CategoryLink href="/categories/Arredamento">Arredamento</CategoryLink>
-                                    <CategoryLink href="/categories/Moda">Moda</CategoryLink>
-                                    <CategoryLink href="/categories/Auto-e-Moto">Auto e Moto</CategoryLink>
+                                    <CategoryLink href="/Viewcategoryproduct/categories/Elettronica">Elettronica</CategoryLink>
+                                    <CategoryLink href="/Viewcategoryproduct/categories/Arredamento">Arredamento</CategoryLink>
+                                    <CategoryLink href="/Viewcategoryproduct/categories/Moda">Moda</CategoryLink>
+                                    <CategoryLink href="/Viewcategoryproduct/categories/Auto-e-Moto">Auto e Moto</CategoryLink>
                                 </div>
                             </div>
                         </div>
 
-                        <NavLink href="/about" isActive={isActive('/about')}>
+                        <NavLink href="/Team/about" isActive={isActive('/about')}>
                             Chi Siamo
                         </NavLink>
                     </nav>
@@ -200,7 +200,7 @@ const Header = () => {
                             <MobileNavLink href="/" onClick={() => setIsMenuOpen(false)}>
                                 Home
                             </MobileNavLink>
-                            <MobileNavLink href="/sell" onClick={() => setIsMenuOpen(false)}>
+                            <MobileNavLink href="/Sellpackage/sell" onClick={() => setIsMenuOpen(false)}>
                                 Vendi
                             </MobileNavLink>
                             <MobileNavLink href="/categories" onClick={() => setIsMenuOpen(false)}>

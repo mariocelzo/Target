@@ -1,6 +1,6 @@
 import { getCurrentUser } from '@/services/authService';
 import { fetchOrders } from '@/data/orderRepository';
-import { Order } from '@/types/order';
+import { Order } from '@/data/order';
 import { doc, updateDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/data/firebase';
 

@@ -1,6 +1,6 @@
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/data/firebase';
-import { Order } from '@/types/order';
+import { Order } from '@/data/order';
 
 /**
  * Recupera gli ordini di un utente da Firestore

@@ -15,7 +15,7 @@ const Footer = () => {
                     <h3 className="text-lg font-bold mb-4">Link Utili</h3>
                     <ul className="space-y-2">
                         <li>
-                            <a href="/about" className="hover:underline">
+                            <a href="/Team/about" className="hover:underline">
                                 Chi Siamo
                             </a>
                         </li>
@@ -44,7 +44,7 @@ const Footer = () => {
                         <li>Email: <a href="mailto:support@target.com" className="hover:underline">support@target.com</a></li>
                         <li>Telefono: <a href="tel:+1234567890" className="hover:underline">+123 456 7890</a></li>
                         <li>
-                            <a href="/contact" className="hover:underline">
+                            <a href="/Team/contact" className="hover:underline">
                                 Modulo di Contatto
                             </a>
                         </li>

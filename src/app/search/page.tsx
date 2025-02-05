@@ -83,7 +83,7 @@ function SearchResultsContent() {
                                 key={product.id}
                                 className="bg-white shadow-md hover:shadow-lg rounded-lg overflow-hidden transform transition-all hover:-translate-y-1"
                             >
-                                <Link href={`/products/${product.id}`} className="block">
+                                <Link href={`/Viewcategoryproduct/products/${product.id}`} className="block">
                                     <div className="p-4">
                                         {/* Aggiunta immagine prodotto */}
                                         {product.image ? (

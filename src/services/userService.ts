@@ -1,6 +1,7 @@
-import { fetchUserData, updateUserData, updateUserProfileImage } from '@/data/userRepository';
-import { auth } from '@/data/firebase';
-
+import { fetchUserData, updateUserData, updateUserProfileImage,UserData} from '@/data/userRepository';
+import {db, auth } from '@/data/firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, User as FirebaseUser } from 'firebase/auth';
 /**
  * Interfaccia per i dati aggiornabili del profilo utente.
  */
@@ -63,4 +64,44 @@ function convertToBase64(file: File): Promise<string> {
         reader.onerror = reject;
         reader.readAsDataURL(file);
     });
+}
+
+export async function registerUser(data: UserData): Promise<FirebaseUser> {
+    const userCredential = await createUserWithEmailAndPassword(auth, data.email!, data.password!);
+    const firebaseUser = userCredential.user;
+
+    // Salvataggio utente in Firestore
+    const userRef = doc(db, 'users', firebaseUser.uid);
+    await setDoc(userRef, {
+        fullName: data.fullName || '',
+        email: data.email || '',
+        dateOfBirth: data.dateOfBirth || '',
+        province: data.province || '',
+        city: data.city || '',
+        address: data.address || '',
+        zipCode: data.zipCode || '',
+        phoneNumber: data.phoneNumber || '',
+        createdAt: serverTimestamp(),
+    }, { merge: true });
+
+    return firebaseUser;
+}
+
+/**
+ * Effettua il sign-in o la registrazione con Google.
+ */
+export async function registerOrLoginWithGoogle(): Promise<FirebaseUser> {
+    const provider = new GoogleAuthProvider();
+    const userCredential = await signInWithPopup(auth, provider);
+    const firebaseUser = userCredential.user;
+
+    // Creazione/Aggiornamento dati utente in Firestore
+    const userRef = doc(db, 'users', firebaseUser.uid);
+    await setDoc(userRef, {
+        fullName: firebaseUser.displayName || '',
+        email: firebaseUser.email || '',
+        createdAt: serverTimestamp(),
+    }, { merge: true });
+
+    return firebaseUser;
 }
