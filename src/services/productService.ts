@@ -10,7 +10,7 @@ import {
     findChat,
     createChat,
     Product, // <-- Tipo che include 'condition' e 'sold'
-} from '@/data/productRepository';
+} from '@/data/Inserzioni/productRepository';
 
 export interface ProductDetail {
     product: Product | null;

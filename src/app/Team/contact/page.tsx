@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useRouter } from 'next/navigation';
 import { Home } from 'lucide-react';
-import { handleContactFormSubmit } from '@/services/contactService';
+import { handleContactFormSubmit } from '@/services/Team/contactService';
 
 export default function ContactForm() {
     const [contactData, setContactData] = useState({

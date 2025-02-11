@@ -14,12 +14,12 @@ import { Home, Camera, Save, Edit2 } from 'lucide-react';
 import LoadingSpinner from '@/components/LoadingSpinner'; // Import del componente per il caricamento
 
 
-import { UserData } from '@/data/userData';
+import { UserData } from '@/data/Autenticazione/userData';
 import {
     fetchUserDataFromFirestore,
     updateUserDataInFirestore,
     uploadProfileImage,
-} from '@/services/userServicearea';
+} from '@/services/Autenticazione/userServicearea';
 
 export default function UserProfile() {
     const [userData, setUserData] = useState<UserData>({

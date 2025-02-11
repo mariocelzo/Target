@@ -518,7 +518,7 @@ export default function UserActiveAdsPage() {
                                                 {/* Bottone Elimina */}
                                                 <div className="mt-6 flex justify-between">
                                                     <Link
-                                                        href={`/Sellpackage/edit/${ad.id}`}
+                                                        href={`/Inserzioni/edit/${ad.id}`}
                                                         className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out flex items-center"
                                                     >
                                                         <PencilIcon className="h-5 w-5 mr-2"/>
@@ -552,7 +552,7 @@ export default function UserActiveAdsPage() {
                                     </p>
                                     <div className="mt-6">
                                         <Link
-                                            href="/sell"
+                                            href="/Inserzioni/sell"
                                             className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#41978F] hover:bg-[#357b74] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#41978F]"
                                         >
                                             Crea un annuncio

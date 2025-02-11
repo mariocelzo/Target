@@ -306,7 +306,7 @@ export default function Home() {
 
             <nav className="hidden md:flex space-x-6 text-lg">
               <CategoryDropdown />
-              <NavLink href="/Sellpackage/sell">Vendi</NavLink>
+              <NavLink href="/Inserzioni/sell">Vendi</NavLink>
               <NavLink href="/Team/about">Chi Siamo</NavLink>
             </nav>
 
@@ -410,10 +410,10 @@ export default function Home() {
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-4xl font-semibold mb-12 text-gray-800">Categorie in Evidenza</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <CategoryCard name="Elettronica" image="/elettronica.png" href="Viewcategoryproduct/categories/Elettronica" />
-              <CategoryCard name="Moda" image="/moda.png" href="Viewcategoryproduct/categories/Moda" />
-              <CategoryCard name="Arredamento" image="/arredamento.png" href="Viewcategoryproduct/categories/Arredamento" />
-              <CategoryCard name="Auto e Moto" image="/auto.png" href="Viewcategoryproduct/categories/Giocattoli" />
+              <CategoryCard name="Elettronica" image="/elettronica.png" href="Ordini/categories/Elettronica" />
+              <CategoryCard name="Moda" image="/moda.png" href="Ordini/categories/Moda" />
+              <CategoryCard name="Arredamento" image="/arredamento.png" href="Ordini/categories/Arredamento" />
+              <CategoryCard name="Auto e Moto" image="/auto.png" href="Ordini/categories/Giocattoli" />
             </div>
           </div>
         </section>
@@ -470,10 +470,10 @@ const CategoryDropdown = () => (
       </button>
       <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
         <div className="py-1">
-          <CategoryLink href="/Viewcategoryproduct/categories/Elettronica">Elettronica</CategoryLink>
-          <CategoryLink href="/Viewcategoryproduct/categories/Arredamento">Arredamento</CategoryLink>
-          <CategoryLink href="/Viewcategoryproduct/categories/Moda">Moda</CategoryLink>
-          <CategoryLink href="/Viewcategoryproduct/categories/Giocattoli">Auto e Moto</CategoryLink>
+          <CategoryLink href="/Ordini/categories/Elettronica">Elettronica</CategoryLink>
+          <CategoryLink href="/Ordini/categories/Arredamento">Arredamento</CategoryLink>
+          <CategoryLink href="/Ordini/categories/Moda">Moda</CategoryLink>
+          <CategoryLink href="/Ordini/categories/Giocattoli">Auto e Moto</CategoryLink>
         </div>
       </div>
     </div>
@@ -595,7 +595,7 @@ const ChatNotification = ({
       user && (
           <div className="relative">
             <button
-                onClick={() => router.push(`Messages/chat/${user.uid}`)}
+                onClick={() => router.push(`Comunicazione/chat/${user.uid}`)}
                 className="flex items-center space-x-2 hover:text-gray-200"
             >
               <MessageCircle size={20} />
@@ -629,7 +629,7 @@ const SearchResults = ({
               <ul className="max-h-60 overflow-y-auto">
                 {searchResults.map((result) => (
                     <li key={result.id} className="px-4 py-2 border-b hover:bg-[#F1F1F1] transition-all duration-200">
-                      <Link href={`/Viewcategoryproduct/products/${result.id}`} className="flex flex-col">
+                      <Link href={`/Ordini/products/${result.id}`} className="flex flex-col">
                         <div className="font-bold text-[#333]">{result.name}</div>
                         <div className="text-sm text-gray-500">{result.description}</div>
                       </Link>
@@ -697,7 +697,7 @@ const ProductModal = ({ product, onClose }: { product: Product; onClose: () => v
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold">{product.name}</h2>
           <Link
-              href={`/Sellpackage/edit/${product.id}`}
+              href={`/Inserzioni/edit/${product.id}`}
               className="bg-teal-500 text-white p-2 rounded-full hover:bg-blue-500 transition-colors duration-200"
               title="Modifica annuncio"
           >

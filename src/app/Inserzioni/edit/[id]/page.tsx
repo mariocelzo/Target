@@ -1,25 +1,73 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import { Ad } from '@/services/Inserzioni/adEditService'
-import { handleImageChange, handleSubmit } from '@/services/Inserzioni/adEditService'
+import { useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
+import { db } from '@/data/firebase'
+import { doc, getDoc, updateDoc } from 'firebase/firestore'
 
-interface EditAdProps {
-    initialData: Ad | null
-    onSubmit: (formData: Ad) => void
-    loading: boolean
+interface Ad {
+    name: string
+    description: string
+    price: string
+    category: string
+    image?: string
 }
 
-export default function EditAd({ initialData, onSubmit, loading }: EditAdProps) {
+export default function EditAd() {
+    const router = useRouter()
+    const pathname = usePathname()
     const fileInputRef = useRef<HTMLInputElement | null>(null)
-    const [formData, setFormData] = useState<Ad>(initialData || {
+    const [id, setId] = useState<string | null>(null)
+    const [loading, setLoading] = useState(true)
+    const [formData, setFormData] = useState<Ad>({
         name: '',
         description: '',
         price: '',
         category: '',
         image: ''
     })
-    const [previewImage, setPreviewImage] = useState<string | null>(formData.image || null)
+    const [previewImage, setPreviewImage] = useState<string | null>(null)
+
+    // Estrai l'ID dall'URL
+    useEffect(() => {
+        if (typeof window !== 'undefined' && pathname) {
+            const pathParts = pathname.split('/')
+            setId(pathParts[pathParts.length - 1] || null)
+        }
+    }, [pathname])
+
+    // Carica i dati dell'annuncio da Firestore
+    useEffect(() => {
+        if (id) {
+            const fetchAd = async () => {
+                const adRef = doc(db, 'products', id)
+                const adDoc = await getDoc(adRef)
+                if (adDoc.exists()) {
+                    const adData = adDoc.data() as Ad
+                    setFormData(adData)
+                    setPreviewImage(adData.image || null)
+                } else {
+                    console.error('Annuncio non trovato')
+                }
+                setLoading(false)
+            }
+            fetchAd()
+        }
+    }, [id])
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            const reader = new FileReader()
+            reader.onloadend = () => {
+                const base64String = reader.result as string
+                setPreviewImage(base64String)
+                setFormData(prev => ({ ...prev, image: base64String }))
+            }
+            reader.readAsDataURL(file)
+        }
+    }
 
     const handleImageClick = () => {
         fileInputRef.current?.click()
@@ -27,7 +75,26 @@ export default function EditAd({ initialData, onSubmit, loading }: EditAdProps) 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target
-        setFormData(prev => ({ ...prev, [name]: value }))  // Usa il name corretto
+        setFormData(prev => ({ ...prev, [name]: value }))
+    }
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+
+        if (!formData.name|| !formData.description || !formData.price || !formData.category) {
+            alert('Tutti i campi sono obbligatori')
+            return
+        }
+
+        try {
+            const adRef = doc(db, 'products', id as string)
+            await updateDoc(adRef, { ...formData })
+
+            router.push('/Autenticazione/user-active-ads')
+        } catch (error) {
+            console.error('Errore durante l\'aggiornamento dell\'annuncio:', error)
+            alert('Si è verificato un errore. Riprova più tardi.')
+        }
     }
 
     if (loading) {
@@ -37,8 +104,20 @@ export default function EditAd({ initialData, onSubmit, loading }: EditAdProps) 
     return (
         <div className="p-8 bg-[#41978F] min-h-screen">
             <div className="max-w-3xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-                <h1 className="text-2xl font-semibold mb-6 text-center">Modifica Annuncio</h1>
-                <form onSubmit={(e) => handleSubmit(e, formData, onSubmit)} className="space-y-6">
+                <div className="flex items-center mb-6">
+                    <button
+                        onClick={() => router.back()}
+                        className="flex items-center text-[#C4333B] hover:text-[#A12D33] transition-colors"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        Torna Indietro
+                    </button>
+                    <h1 className="text-2xl font-semibold mx-auto text-center">Modifica Annuncio</h1>
+                </div>
+                <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Immagine */}
                     <div className="mb-6">
                         <div
@@ -56,17 +135,21 @@ export default function EditAd({ initialData, onSubmit, loading }: EditAdProps) 
                                     Clicca per aggiungere/modificare un&#39;immagine
                                 </div>
                             )}
+                            {/* Icona di modifica */}
                             <div className="absolute bottom-2 right-2 bg-white p-1 rounded-full shadow-md">
                                 🖍️
                             </div>
                         </div>
-                        <p className="text-sm text-center text-gray-500 mt-2">Clicca sull&#39;immagine per modificarla</p>
+                        {/* Testo esplicativo */}
+                        <p className="text-sm text-center text-gray-500 mt-2">
+                            Clicca sull&#39;immagine per modificarla
+                        </p>
                         <input
                             type="file"
                             accept="image/*"
                             ref={fileInputRef}
                             className="hidden"
-                            onChange={(e) => handleImageChange(e, setPreviewImage, setFormData)}
+                            onChange={handleImageChange}
                         />
                     </div>
 
@@ -75,8 +158,8 @@ export default function EditAd({ initialData, onSubmit, loading }: EditAdProps) 
                         <label className="block text-sm font-semibold text-gray-700">Titolo</label>
                         <input
                             type="text"
-                            name="name"
-                            value={formData.name}
+                            name="name" // Usa 'name' per allinearlo con la proprietà di formData
+                            value={formData.name} // Collega il valore a formData.name
                             onChange={handleChange}
                             placeholder="Titolo"
                             required

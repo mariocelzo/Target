@@ -15,13 +15,13 @@ describe('Edit Ad Page', () => {
         cy.get('input[name="name"]').clear().type('Nuovo Titolo');
         cy.get('textarea[name="description"]').clear().type('Nuova descrizione del prodotto');
         cy.get('input[name="price"]').clear().type('150');
-        cy.get('input[name="category"]').clear().type('Nuova Categoria');
+        cy.get('input[name="category"]').clear().type('Moda');
 
         // Verifica che i campi siano stati aggiornati
         cy.get('input[name="title"]').should('have.value', 'Nuovo Titolo');
         cy.get('textarea[name="description"]').should('have.value', 'Nuova descrizione del prodotto');
         cy.get('input[name="price"]').should('have.value', '150');
-        cy.get('input[name="category"]').should('have.value', 'Nuova Categoria');
+        cy.get('input[name="category"]').should('have.value', 'Moda');
 
         // Invia il modulo
         cy.get('a').contains("Aggiorna Annuncio").click();

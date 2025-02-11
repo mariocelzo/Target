@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
-import { useTeam } from '@/services/teamService'; // Importa logica dal BLL
+import { useTeam } from '@/services/Team/teamService'; // Importa logica dal BLL
 
 export default function About() {
     const teamMembers = useTeam(); // Ottieni i membri del team dal livello BLL

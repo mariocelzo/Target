@@ -79,7 +79,7 @@ const Header = () => {
                         <NavLink href="/" isActive={isActive('/')}>
                             Home
                         </NavLink>
-                        <NavLink href="/Sellpackage/sell" isActive={isActive('/sell')}>
+                        <NavLink href="/Inserzioni/sell" isActive={isActive('/sell')}>
                             Vendi
                         </NavLink>
 
@@ -103,10 +103,10 @@ const Header = () => {
                             </button>
                             <div className="absolute left-0 mt-2 w-48 bg-white text-gray-800 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                                 <div className="py-1">
-                                    <CategoryLink href="/Viewcategoryproduct/categories/Elettronica">Elettronica</CategoryLink>
-                                    <CategoryLink href="/Viewcategoryproduct/categories/Arredamento">Arredamento</CategoryLink>
-                                    <CategoryLink href="/Viewcategoryproduct/categories/Moda">Moda</CategoryLink>
-                                    <CategoryLink href="/Viewcategoryproduct/categories/Auto-e-Moto">Auto e Moto</CategoryLink>
+                                    <CategoryLink href="/Ordini/categories/Elettronica">Elettronica</CategoryLink>
+                                    <CategoryLink href="/Ordini/categories/Arredamento">Arredamento</CategoryLink>
+                                    <CategoryLink href="/Ordini/categories/Moda">Moda</CategoryLink>
+                                    <CategoryLink href="/Ordini/categories/Giocattoli">Auto e Moto</CategoryLink>
                                 </div>
                             </div>
                         </div>
@@ -151,7 +151,7 @@ const Header = () => {
                                 <div className="absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
                                     <div className="flex flex-col py-2">
                                         <Link
-                                            href="/user-area"
+                                            href="/Autenticazione/user-area"
                                             className="px-4 py-2 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
                                             onClick={() => setIsUserMenuOpen(false)}
                                         >
@@ -200,7 +200,7 @@ const Header = () => {
                             <MobileNavLink href="/" onClick={() => setIsMenuOpen(false)}>
                                 Home
                             </MobileNavLink>
-                            <MobileNavLink href="/Sellpackage/sell" onClick={() => setIsMenuOpen(false)}>
+                            <MobileNavLink href="/Inserzioni/sell" onClick={() => setIsMenuOpen(false)}>
                                 Vendi
                             </MobileNavLink>
                             <MobileNavLink href="/categories" onClick={() => setIsMenuOpen(false)}>

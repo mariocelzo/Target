@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Spin, Alert, Card, Typography, Tag, Divider } from 'antd';
 import { ShoppingOutlined, CalendarOutlined, DollarOutlined } from '@ant-design/icons';
-import { Order } from '@/data/order';
+import { Order } from '@/data/Autenticazione/order';
 
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { getUserOrders } from '@/services/orderService';
+import { getUserOrders } from '@/services/Autenticazione/orderService';
 
 const { Title, Text } = Typography;
 

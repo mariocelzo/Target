@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 
-import { signInWithGoogle, signInWithEmail,useFormValidation} from '@/services/authService'
+import { signInWithGoogle, signInWithEmail,useFormValidation} from '@/services/Autenticazione/authService'
 import { useRouter } from 'next/navigation'
 
 export default function LoginForm() {
