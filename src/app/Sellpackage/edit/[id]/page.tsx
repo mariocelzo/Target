@@ -90,7 +90,7 @@ export default function EditAd() {
             const adRef = doc(db, 'products', id as string)
             await updateDoc(adRef, { ...formData })
 
-            router.push('/user-active-ads')
+            router.push('/Autenticazione/user-active-ads')
         } catch (error) {
             console.error('Errore durante l\'aggiornamento dell\'annuncio:', error)
             alert('Si è verificato un errore. Riprova più tardi.')
