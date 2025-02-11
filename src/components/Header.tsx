@@ -120,8 +120,8 @@ const Header = () => {
                     <div className="flex items-center space-x-4">
                         {/* Icona Chat vicino all'utente */}
                         <NavLinkIcon
-                            href="/chat/${user.uid}"
-                            isActive={isActive('/chat/[id]/page')}
+                            href="/Messages/chat/${user.uid}"
+                            isActive={isActive('/Messages/chat/[id]/page')}
                         >
                             <MessageSquare size={22} />
                         </NavLinkIcon>
