@@ -8,6 +8,7 @@ import { User, Menu, MessageSquare } from 'lucide-react';
 import { auth, db } from '@/data/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
+import ThemeToggle from './ThemeToggle';
 
 /**
  * Header principale
@@ -61,7 +62,7 @@ const Header = () => {
     };
 
     return (
-        <header className="w-full bg-gradient-to-r from-[#C4333B] to-[#41978F] text-white py-4 shadow-lg">
+        <header className="w-full bg-gradient-to-r from-[#C4333B] to-[#41978F] dark:from-[#8B1A1A] dark:to-[#1A4342] text-white py-4 shadow-lg transition-colors duration-300">
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between">
                     {/* Logo */}
@@ -100,7 +101,7 @@ const Header = () => {
                                     />
                                 </svg>
                             </button>
-                            <div className="absolute left-0 mt-2 w-48 bg-white text-gray-800 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                            <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                                 <div className="py-1">
                                     <CategoryLink href="/Viewcategoryproduct/categories/Elettronica">Elettronica</CategoryLink>
                                     <CategoryLink href="/Viewcategoryproduct/categories/Arredamento">Arredamento</CategoryLink>
@@ -117,6 +118,9 @@ const Header = () => {
 
                     {/* Icons + Mobile Menu Button */}
                     <div className="flex items-center space-x-4">
+                        {/* Theme Toggle */}
+                        <ThemeToggle variant="header" />
+                        
                         {/* Icona Chat vicino all'utente */}
                         <NavLinkIcon
                             href="/Messages/chat/${user.uid}"
@@ -147,17 +151,17 @@ const Header = () => {
 
                             {/* Menu a tendina del profilo */}
                             {isUserMenuOpen && (
-                                <div className="absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
+                                <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-md shadow-lg z-50">
                                     <div className="flex flex-col py-2">
                                         <Link
                                             href="/Autenticazione/user-area"
-                                            className="px-4 py-2 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
+                                            className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
                                             onClick={() => setIsUserMenuOpen(false)}
                                         >
                                             Profilo
                                         </Link>
                                         <button
-                                            className="text-left px-4 py-2 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
+                                            className="text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
                                             onClick={() => {
                                                 setIsUserMenuOpen(false);
                                                 handleLogout();
@@ -184,7 +188,7 @@ const Header = () => {
                 <div
                     className={`
             md:hidden 
-            bg-[#2C6E68] bg-opacity-90
+            bg-[#2C6E68] dark:bg-[#1A4342] bg-opacity-90 dark:bg-opacity-90
             rounded-b
             shadow-lg
             mt-2
@@ -275,7 +279,7 @@ const CategoryLink = ({
 }) => (
     <Link
         href={href}
-        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
     >
         {children}
     </Link>
@@ -296,7 +300,7 @@ const MobileNavLink = ({
     <Link
         href={href}
         onClick={onClick}
-        className="block py-2 px-4 hover:bg-white hover:bg-opacity-10 rounded transition-colors duration-200"
+        className="block py-2 px-4 hover:bg-white hover:bg-opacity-10 dark:hover:bg-gray-700 dark:hover:bg-opacity-20 rounded transition-colors duration-200"
     >
         {children}
     </Link>
