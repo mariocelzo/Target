@@ -56,6 +56,7 @@ interface Notification {
   productName: string;
   buyerName: string;
   createdAt: string;
+  sellerId: string; // Added sellerId
 }
 
 export default function Home() {
@@ -112,6 +113,7 @@ export default function Home() {
         fetchUnreadMessages(currentUser.uid);
         fetchUserProducts(currentUser.uid);
         listenForOrders(currentUser.uid);
+        fetchExistingNotifications(currentUser.uid);
         
         // Load read notifications from localStorage
         const savedReadNotifications = localStorage.getItem(`readNotifications_${currentUser.uid}`);
@@ -155,6 +157,7 @@ export default function Home() {
             productName: productData.name,
             buyerName: buyerData.displayName || buyerData.email,
             createdAt: orderData.createdAt,
+            sellerId: sellerId, // Add sellerId for querying
           };
 
           // Salva la notifica nella collezione "notifications"
@@ -259,6 +262,42 @@ export default function Home() {
   const closeProductDetails = () => {
     setSelectedProduct(null);
     setIsModalOpen(false);
+  };
+
+  const fetchExistingNotifications = async (userId: string) => {
+    try {
+      const notificationsQuery = query(
+        collection(db, 'notifications'),
+        where('sellerId', '==', userId)
+      );
+      const querySnapshot = await getDocs(notificationsQuery);
+      const existingNotifications: Notification[] = [];
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        existingNotifications.push({
+          id: doc.id,
+          productId: data.productId,
+          productName: data.productName,
+          buyerName: data.buyerName,
+          createdAt: data.createdAt,
+          sellerId: data.sellerId, // Ensure sellerId is included
+        });
+      });
+      
+      setNotifications(existingNotifications);
+      
+      // Calculate unread count based on read notifications
+      const savedReadNotifications = localStorage.getItem(`readNotifications_${userId}`);
+      if (savedReadNotifications) {
+        const readIds = new Set(JSON.parse(savedReadNotifications) as string[]);
+        setReadNotifications(readIds);
+        const unreadCount = existingNotifications.filter(n => !readIds.has(n.id)).length;
+        setNewNotificationsCount(unreadCount);
+      }
+    } catch (error) {
+      console.error('Error fetching existing notifications:', error);
+    }
   };
 
   return (

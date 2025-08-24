@@ -22,6 +22,7 @@ import { Input } from '@/components/ui/input';
 import { UserCircle2, Send } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface Message {
     senderId: string;
@@ -47,6 +48,7 @@ interface User {
 }
 
 const ChatScreen = () => {
+    const { theme } = useTheme();
     const auth = getAuth();
     const router = useRouter();
 
@@ -374,14 +376,20 @@ const ChatScreen = () => {
     }
 
     return (
-        <div className="flex flex-col min-h-screen bg-gray-100">
+        <div className={`flex flex-col min-h-screen transition-colors duration-300 ${
+            theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'
+        }`}>
             <Header />
 
             <div className="flex-grow flex">
                 {/* Sidebar con la lista utenti */}
                 <div
                     ref={leftPanelRef}
-                    className="w-[300px] bg-white min-h-full border-r border-gray-200 shadow-md"
+                    className={`min-h-full border-r shadow-md transition-colors duration-300 ${
+                        theme === 'dark' 
+                            ? 'bg-gray-800 border-gray-600' 
+                            : 'bg-white border-gray-200'
+                    }`}
                     style={{width: leftPanelWidth}}
                 >
                     <div className="p-4">
@@ -400,7 +408,11 @@ const ChatScreen = () => {
                                         e.preventDefault();
                                         startChat(user.id, user.fullName, user.imageUrl || '');
                                     }}
-                                    className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 cursor-pointer transition duration-200"
+                                    className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition duration-200 ${
+                                        theme === 'dark' 
+                                            ? 'hover:bg-gray-700' 
+                                            : 'hover:bg-gray-100'
+                                    }`}
                                 >
                                     {user.imageUrl ? (
                                         <img
@@ -411,7 +423,9 @@ const ChatScreen = () => {
                                     ) : (
                                         <UserCircle2 className="w-10 h-10 text-gray-400"/>
                                     )}
-                                    <span className="font-medium">{user.fullName}</span>
+                                    <span className={`font-medium transition-colors duration-300 ${
+                                        theme === 'dark' ? 'text-gray-100' : 'text-gray-800'
+                                    }`}>{user.fullName}</span>
                                 </div>
                             ))}
                         </div>
@@ -419,7 +433,9 @@ const ChatScreen = () => {
                 </div>
 
                 {/* Area principale della chat */}
-                <div className="flex flex-col bg-white rounded-lg shadow-lg w-full h-[600px]">
+                <div className={`flex flex-col rounded-lg shadow-lg w-full h-[600px] transition-colors duration-300 ${
+                    theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+                }`}>
                     {chat ? (
                         <>
                             {/* Header della chat */}
@@ -452,7 +468,9 @@ const ChatScreen = () => {
                                             className={`max-w-[70%] p-3 rounded-lg ${
                                                 msg.senderId === currentUser.uid
                                                     ? 'bg-teal-500 text-white'
-                                                    : 'bg-gray-200 text-gray-800'
+                                                    : theme === 'dark'
+                                                        ? 'bg-gray-600 text-gray-100'
+                                                        : 'bg-gray-200 text-gray-800'
                                             }`}
                                         >
                                             {msg.text}
@@ -464,7 +482,9 @@ const ChatScreen = () => {
                             </div>
 
                             {/* Input di invio messaggi */}
-                            <div className="p-4 border-t border-gray-200">
+                            <div className={`p-4 border-t transition-colors duration-300 ${
+                                theme === 'dark' ? 'border-gray-600' : 'border-gray-200'
+                            }`}>
                                 <form className="flex items-center space-x-2" onSubmit={sendMessage}>
                                     <Input
                                         type="text"
@@ -485,7 +505,9 @@ const ChatScreen = () => {
                             </div>
                         </>
                     ) : (
-                        <div className="flex items-center justify-center h-full text-gray-500">
+                        <div className={`flex items-center justify-center h-full transition-colors duration-300 ${
+                            theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
                             Select a user to start chatting
                         </div>
                     )}

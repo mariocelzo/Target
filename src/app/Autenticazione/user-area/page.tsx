@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '@/contexts/ThemeContext';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,7 @@ import {
 } from '@/services/userServicearea';
 
 export default function UserProfile() {
+    const { theme } = useTheme();
     const [userData, setUserData] = useState<UserData>({
         fullName: '',
         email: '',
@@ -133,7 +135,11 @@ export default function UserProfile() {
 // Se lo stato `loading` è vero, mostra la rotella di caricamento
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-[#41978F] to-[#2c6964] p-8 flex items-center justify-center">
+            <div className={`min-h-screen p-8 flex items-center justify-center transition-colors duration-300 ${
+                theme === 'dark' 
+                    ? 'bg-gradient-to-br from-gray-900 to-gray-800' 
+                    : 'bg-gradient-to-br from-[#41978F] to-[#2c6964]'
+            }`}>
                 <LoadingSpinner /> {/* Rotella di caricamento */}
             </div>
         );
@@ -143,16 +149,24 @@ export default function UserProfile() {
         <AnimatePresence mode="wait">
             <motion.div
                 key="userProfilePage"
-                className="min-h-screen bg-gradient-to-br from-[#41978F] to-[#2c6964] p-8"
+                className={`min-h-screen p-8 transition-colors duration-300 ${
+                    theme === 'dark' 
+                        ? 'bg-gradient-to-br from-gray-900 to-gray-800' 
+                        : 'bg-gradient-to-br from-[#41978F] to-[#2c6964]'
+                }`}
                 variants={pageVariants}
                 initial="hidden"
                 animate="enter"
                 exit="exit"
                 transition={{ duration: 0.4, ease: 'easeInOut' }}
             >
-                <Card className="max-w-2xl mx-auto w-full shadow-2xl overflow-hidden">
+                <Card className={`max-w-2xl mx-auto w-full shadow-2xl overflow-hidden transition-colors duration-300 ${
+                    theme === 'dark' ? 'bg-gray-800 border-gray-600' : 'bg-white'
+                }`}>
                     {/* Header */}
-                    <CardHeader className="bg-[#C4333B] text-white rounded-b-xl">
+                    <CardHeader className={`text-white rounded-b-xl transition-colors duration-300 ${
+                        theme === 'dark' ? 'bg-[#8B1A1A]' : 'bg-[#C4333B]'
+                    }`}>
                         <div className="flex justify-between items-center">
                             <h1 className="text-3xl font-bold">Profilo Utente</h1>
                             <Button
@@ -170,7 +184,9 @@ export default function UserProfile() {
                     </CardHeader>
 
                     {/* Contenuto */}
-                    <CardContent className="p-6 bg-white">
+                    <CardContent className={`p-6 transition-colors duration-300 ${
+                        theme === 'dark' ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-800'
+                    }`}>
                         {/* Sezione Avatar */}
                         <div className="flex items-center space-x-4 mb-6">
                             <div className="relative group">

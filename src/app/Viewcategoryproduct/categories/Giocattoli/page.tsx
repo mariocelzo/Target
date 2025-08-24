@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { useTheme } from '@/contexts/ThemeContext';
 
 // Interfaccia per i dati utente
 interface User {
@@ -26,6 +27,7 @@ interface Product {
 }
 
 export default function GiocattoliPage() {
+    const { theme } = useTheme();
     const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -69,20 +71,27 @@ export default function GiocattoliPage() {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-100">
+            <div className={`flex items-center justify-center min-h-screen transition-colors duration-300 ${
+                theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'
+            }`}>
                 <LoadingSpinner />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className={`min-h-screen transition-colors duration-300 ${
+            theme === 'dark' ? 'bg-gray-900' : 'bg-white'
+        }`}>
             <Header />
-
-            {/* Sezione Hero / Titolo */}
-            <section className="bg-gradient-to-r from-teal-600 to-teal-400 text-white py-12">
+            <section className={`text-white py-12 transition-colors duration-300 ${
+                theme === 'dark' 
+                    ? 'bg-gradient-to-r from-gray-800 to-gray-700' 
+                    : 'bg-gradient-to-r from-teal-600 to-teal-400'
+            }`}>
                 <div className="container mx-auto text-center">
                     <h1 className="text-4xl font-extrabold mb-4">Auto e Moto</h1>
+                    <p className="text-lg">Scopri i migliori articoli di auto e moto disponibili</p>
                 </div>
             </section>
 
