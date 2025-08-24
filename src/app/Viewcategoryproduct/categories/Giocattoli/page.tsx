@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchProductsmoda } from '@/services/categoryService';
+import { fetchProductsauto } from '@/services/categoryService';
 import { getCurrentUserId } from '@/services/usservicecat';
 import Link from 'next/link';
 import Header from '@/components/Header';

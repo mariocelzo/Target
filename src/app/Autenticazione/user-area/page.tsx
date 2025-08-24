@@ -71,7 +71,6 @@ export default function UserProfile() {
 
     useEffect(() => {
         fetchUserData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Gestisce il cambiamento degli input

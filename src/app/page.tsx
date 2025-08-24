@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import {
   query,
   collection,
@@ -10,10 +9,7 @@ import {
   doc,
   getDoc,
   onSnapshot,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   deleteDoc,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updateDoc,
   setDoc
 } from 'firebase/firestore';
 import { db, auth } from '@/data/firebase';
@@ -77,7 +73,6 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isNightMode, setIsNightMode] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [newNotificationsCount, setNewNotificationsCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

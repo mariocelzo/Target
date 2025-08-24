@@ -20,10 +20,7 @@ import {
 } from 'firebase/firestore';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Transition } from '@headlessui/react';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { CheckCircleIcon, EyeIcon, ShoppingBagIcon } from 'lucide-react';
 
@@ -327,7 +324,7 @@ export default function UserActiveAdsPage() {
                     ...soldAds,
                     {
                         ...soldAd,
-                        price: offerData.amount.toString(),
+                        price: Number(offerData.amount),
                         offers: [],
                         orderDetails: {
                             id: orderRef.id,

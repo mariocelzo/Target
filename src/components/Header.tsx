@@ -26,7 +26,6 @@ const Header = () => {
     const isActive = (path: string) => pathname === path;
 
     // Router se vuoi fare redirect dopo logout
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const router = useRouter();
 
     /**
