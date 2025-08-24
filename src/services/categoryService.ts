@@ -21,7 +21,7 @@ interface Product {
     user?: User;
 }
 
-export const fetchProductsmoda = async (userId: string): Promise<Product[]> => {
+export const fetchProductsmoda = async (userId: string | null): Promise<Product[]> => {
     const products: Product[] = [];
     try {
         const q = query(
@@ -36,7 +36,8 @@ export const fetchProductsmoda = async (userId: string): Promise<Product[]> => {
             const productData = docSnap.data();
             const productId = docSnap.id;
 
-            if (productData.userId !== userId) {
+            // Only filter by userId if user is authenticated
+            if (!userId || productData.userId !== userId) {
                 const userDocRef = doc(db, 'users', productData.userId);
                 const userDoc = await getDoc(userDocRef);
                 const userData: User | undefined = userDoc.exists()
@@ -53,7 +54,7 @@ export const fetchProductsmoda = async (userId: string): Promise<Product[]> => {
     return products;
 };
 
-export const fetchProducts = async (userId: string): Promise<Product[]> => {
+export const fetchProducts = async (userId: string | null): Promise<Product[]> => {
     const products: Product[] = [];
     try {
         const q = query(
@@ -68,7 +69,8 @@ export const fetchProducts = async (userId: string): Promise<Product[]> => {
             const productData = docSnap.data();
             const productId = docSnap.id;
 
-            if (productData.userId !== userId) {
+            // Only filter by userId if user is authenticated
+            if (!userId || productData.userId !== userId) {
                 const userDocRef = doc(db, 'users', productData.userId);
                 const userDoc = await getDoc(userDocRef);
                 const userData: User | undefined = userDoc.exists()
@@ -84,7 +86,7 @@ export const fetchProducts = async (userId: string): Promise<Product[]> => {
     return products;
 };
 
-export const fetchProductsauto = async (userId: string): Promise<Product[]> => {
+export const fetchProductsauto = async (userId: string | null): Promise<Product[]> => {
     const products: Product[] = [];
     try {
         const q = query(
@@ -99,7 +101,8 @@ export const fetchProductsauto = async (userId: string): Promise<Product[]> => {
             const productData = docSnap.data();
             const productId = docSnap.id;
 
-            if (productData.userId !== userId) {
+            // Only filter by userId if user is authenticated
+            if (!userId || productData.userId !== userId) {
                 const userDocRef = doc(db, 'users', productData.userId);
                 const userDoc = await getDoc(userDocRef);
                 const userData: User | undefined = userDoc.exists()
@@ -116,7 +119,7 @@ export const fetchProductsauto = async (userId: string): Promise<Product[]> => {
     return products;
 };
 
-export const fetchProductsele = async (userId: string): Promise<Product[]> => {
+export const fetchProductsele = async (userId: string | null): Promise<Product[]> => {
     const products: Product[] = [];
     try {
         const q = query(
@@ -131,7 +134,8 @@ export const fetchProductsele = async (userId: string): Promise<Product[]> => {
             const productData = docSnap.data();
             const productId = docSnap.id;
 
-            if (productData.userId !== userId) {
+            // Only filter by userId if user is authenticated
+            if (!userId || productData.userId !== userId) {
                 const userDocRef = doc(db, 'users', productData.userId);
                 const userDoc = await getDoc(userDocRef);
                 const userData: User | undefined = userDoc.exists()

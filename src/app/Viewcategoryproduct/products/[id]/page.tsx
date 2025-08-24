@@ -87,6 +87,8 @@ export default function ProductDetailPage() {
 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
+                    console.log('Product data:', data); // Debug log
+                    
                     const productData: Product = {
                         id: docSnap.id,
                         name: data.name || '',
@@ -101,39 +103,53 @@ export default function ProductDetailPage() {
                     setError(null);
 
                     // Dati venditore
-                    const userDocRef = doc(db, 'users', data.userId);
-                    const userDocSnap = await getDoc(userDocRef);
-                    if (userDocSnap.exists()) {
-                        setSellerName(userDocSnap.data().fullName || 'Venditore sconosciuto');
-                        setSellerImage(userDocSnap.data().imageUrl || null);
+                    if (data.userId) {
+                        try {
+                            const userDocRef = doc(db, 'users', data.userId);
+                            const userDocSnap = await getDoc(userDocRef);
+                            if (userDocSnap.exists()) {
+                                const userData = userDocSnap.data();
+                                setSellerName(userData.fullName || 'Venditore sconosciuto');
+                                setSellerImage(userData.imageUrl || null);
+                            }
+                        } catch (userError) {
+                            console.error('Error fetching user data:', userError);
+                            setSellerName('Venditore sconosciuto');
+                        }
                     }
 
                     // Offerte
-                    const offersRef = collection(db, 'offers');
-                    const qOffers = query(offersRef, where('productId', '==', productData.id));
-                    const querySnapshot = await getDocs(qOffers);
+                    try {
+                        const offersRef = collection(db, 'offers');
+                        const qOffers = query(offersRef, where('productId', '==', productData.id));
+                        const querySnapshot = await getDocs(qOffers);
 
-                    let maxOfferAmount = 0;
-                    let userCurrentOffer = null;
+                        let maxOfferAmount = 0;
+                        let userCurrentOffer = null;
 
-                    querySnapshot.forEach((doc) => {
-                        const offerData = doc.data();
-                        const offerVal = offerData.amount;
-                        if (offerVal > maxOfferAmount) {
-                            maxOfferAmount = offerVal;
-                        }
-                        if (offerData.buyerId === user?.uid) {
-                            userCurrentOffer = offerVal;
-                        }
-                    });
+                        querySnapshot.forEach((doc) => {
+                            const offerData = doc.data();
+                            const offerVal = offerData.amount;
+                            if (offerVal > maxOfferAmount) {
+                                maxOfferAmount = offerVal;
+                            }
+                            if (offerData.buyerId === user?.uid) {
+                                userCurrentOffer = offerVal;
+                            }
+                        });
 
-                    setMaxOffer(maxOfferAmount);
-                    setUserOffer(userCurrentOffer || null);
+                        setMaxOffer(maxOfferAmount);
+                        setUserOffer(userCurrentOffer || null);
+                    } catch (offersError) {
+                        console.error('Error fetching offers:', offersError);
+                        setMaxOffer(0);
+                        setUserOffer(null);
+                    }
                 } else {
                     setError('Prodotto non trovato');
                 }
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
             } catch (error) {
+                console.error('Error fetching product details:', error);
                 setError('Errore nel recupero dei dettagli del prodotto');
             } finally {
                 setIsLoading(false);

@@ -43,12 +43,11 @@ export default function ModaPage() {
 
             // Se non ci sono dati in cache, procedi con la fetch dal server
             const userId = getCurrentUserId();
-            if (userId) {
-                const fetchedProducts = (await fetchProductsmoda(userId)) as Product[];
-                setProducts(fetchedProducts);
-                // Salva i prodotti nel localStorage per future consultazioni
-                localStorage.setItem('modaProducts', JSON.stringify(fetchedProducts));
-            }
+            // Pass userId even if it's null - the service will handle it
+            const fetchedProducts = (await fetchProductsmoda(userId)) as Product[];
+            setProducts(fetchedProducts);
+            // Salva i prodotti nel localStorage per future consultazioni
+            localStorage.setItem('modaProducts', JSON.stringify(fetchedProducts));
         } catch (error) {
             console.error('Errore durante il caricamento dei prodotti:', error);
         } finally {

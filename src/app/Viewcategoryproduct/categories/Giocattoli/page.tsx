@@ -48,15 +48,11 @@ export default function GiocattoliPage() {
 
             // 2. Se non ci sono dati in cache, procediamo con la fetch dal server
             const userId = getCurrentUserId();
-            if (userId) {
-                const fetchedProducts = (await fetchProductsmoda(userId)) as Product[];
-                // Salviamo in localStorage per evitare future fetch
-                localStorage.setItem('giocattoliProducts', JSON.stringify(fetchedProducts));
-                setProducts(fetchedProducts);
-            } else {
-                // Se per qualche motivo non c'è userId, non carichiamo nulla
-                setProducts([]);
-            }
+            // Pass userId even if it's null - the service will handle it
+            const fetchedProducts = (await fetchProductsauto(userId)) as Product[];
+            // Salviamo in localStorage per evitare future fetch
+            localStorage.setItem('giocattoliProducts', JSON.stringify(fetchedProducts));
+            setProducts(fetchedProducts);
         } catch (error) {
             console.error('Errore durante il caricamento dei prodotti:', error);
         } finally {

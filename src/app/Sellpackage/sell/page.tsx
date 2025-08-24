@@ -182,7 +182,7 @@ export default function Sell() {
                                 onRemoveImage={() => setImage(null)}
                             />
                             <p className="text-sm text-gray-500 mt-3 italic">
-                                Accetta immagini in formato PNG o JPG (max 5MB)
+                                Accetta immagini in formato PNG o JPG (max 2MB)
                             </p>
                         </div>
 

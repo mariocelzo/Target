@@ -42,12 +42,11 @@ export default function ElectronicsPage() {
             }
 
             const userId = getCurrentUserId();
-            if (userId) {
-                const fetchedProducts = await fetchProductsele(userId) as Product[];
-                setProducts(fetchedProducts);
-                // Salva i prodotti recuperati nel localStorage
-                localStorage.setItem('elettronicaProducts', JSON.stringify(fetchedProducts));
-            }
+            // Pass userId even if it's null - the service will handle it
+            const fetchedProducts = await fetchProductsele(userId) as Product[];
+            setProducts(fetchedProducts);
+            // Salva i prodotti recuperati nel localStorage
+            localStorage.setItem('elettronicaProducts', JSON.stringify(fetchedProducts));
         } catch (error) {
             console.error('Errore durante il caricamento dei prodotti:', error);
         } finally {

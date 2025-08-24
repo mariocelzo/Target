@@ -5,9 +5,9 @@ interface AdCardProps {
     ad: {
         id: string;
         image: string;
-        title: string;
+        name: string; // Changed from 'title'
         price: number;
-        productCategory: string;
+        category: string; // Changed from 'productCategory'
         sold: boolean;
     };
     onDelete?: (adId: string) => void;
@@ -26,9 +26,9 @@ export default function AdCard({ ad, onDelete, onViewOffers }: AdCardProps) {
             transition={{ duration: 0.3 }}
         >
             <div className="relative">
-                <img src={ad.image} alt={ad.title} className="w-full h-48 object-cover" />
+                <img src={ad.image} alt={ad.name} className="w-full h-48 object-cover" />
                 <div className="absolute top-0 right-0 bg-[#41978F] text-white px-2 py-1 m-2 rounded-md text-sm font-semibold">
-                    {ad.productCategory}
+                    {ad.category}
                 </div>
                 {ad.sold && (
                     <div className="absolute bottom-0 left-0 bg-red-500 text-white px-2 py-1 m-2 rounded-md text-sm font-semibold">
@@ -37,7 +37,7 @@ export default function AdCard({ ad, onDelete, onViewOffers }: AdCardProps) {
                 )}
             </div>
             <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2 text-gray-800">{ad.title}</h3>
+                <h3 className="text-xl font-semibold mb-2 text-gray-800">{ad.name}</h3>
                 <p className="text-2xl font-bold mb-4 text-[#41978F]">{ad.price} €</p>
                 <div className="mb-4">
                     <button

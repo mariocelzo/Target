@@ -42,12 +42,11 @@ export default function ElectronicsPage() {
 
                 // Se non ci sono dati in cache, effettua la fetch
                 const userId = getCurrentUserId();
-                if (userId) {
-                    const fetchedProducts = await fetchProducts(userId) as Product[];
-                    setProducts(fetchedProducts);
-                    // Salva i dati nel localStorage per utilizzi futuri
-                    localStorage.setItem('arredamentoProducts', JSON.stringify(fetchedProducts));
-                }
+                // Pass userId even if it's null - the service will handle it
+                const fetchedProducts = await fetchProducts(userId) as Product[];
+                setProducts(fetchedProducts);
+                // Salva i dati nel localStorage per utilizzi futuri
+                localStorage.setItem('arredamentoProducts', JSON.stringify(fetchedProducts));
             } catch (error) {
                 console.error('Errore durante il caricamento dei prodotti:', error);
             } finally {

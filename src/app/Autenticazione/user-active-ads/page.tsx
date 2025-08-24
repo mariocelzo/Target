@@ -53,11 +53,11 @@ export interface Offer {
 
 export interface Product {
     id: string;
-    title: string;
-    price: string;
+    name: string; // Changed from 'title'
+    price: number; // Changed from 'string'
     image: string;
     sold: boolean;
-    productCategory: string;
+    category: string; // Changed from 'productCategory'
     description: string;
     userId: string;
     offers: Offer[]; // array di offerte
@@ -439,18 +439,18 @@ export default function UserActiveAdsPage() {
                                             <div className="relative">
                                                 <img
                                                     src={ad.image}
-                                                    alt={ad.title}
+                                                    alt={ad.name}
                                                     className="w-full h-48 object-cover"
                                                 />
                                                 <div className="absolute top-0 right-0 bg-[#41978F] text-white px-2 py-1 m-2 rounded-md text-sm font-semibold">
-                                                    {ad.productCategory}
+                                                    {ad.category}
                                                 </div>
                                             </div>
 
                                             {/* Dettagli annuncio */}
                                             <div className="p-6">
                                                 <h3 className="text-xl font-semibold mb-2 text-gray-800">
-                                                    {ad.title}
+                                                    {ad.name}
                                                 </h3>
                                                 <p className="text-gray-600 mb-4 line-clamp-2">
                                                     {ad.description}
@@ -609,7 +609,7 @@ export default function UserActiveAdsPage() {
                                             <div className="relative">
                                                 <img
                                                     src={ad.image}
-                                                    alt={ad.title}
+                                                    alt={ad.name}
                                                     className="w-full h-48 object-cover filter brightness-75"
                                                 />
                                                 <div className="absolute top-0 left-0 bg-green-500 text-white px-2 py-1 m-2 rounded-md text-sm font-semibold">
@@ -620,7 +620,7 @@ export default function UserActiveAdsPage() {
                                             {/* Dettagli annuncio + ordine */}
                                             <div className="p-6">
                                                 <h3 className="text-xl font-semibold mb-2 text-gray-800">
-                                                    {ad.title}
+                                                    {ad.name}
                                                 </h3>
                                                 <p className="text-2xl font-bold mb-4 text-green-500">
                                                     {ad.price} €

@@ -1,18 +1,21 @@
 rules_version = '2';
-
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /orders/{orderId} {
-      // Consenti al venditore di leggere gli ordini in cui è coinvolto
-      allow read: if request.auth != null && resource.data.sellerId == request.auth.uid;
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow authenticated users to upload product images
+    match /product-images/{userId}/{fileName} {
+      allow read: if true; // Anyone can read product images
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
-    match /products/{productId} {
-      allow read: if request.auth != null;
+    
+    // Allow authenticated users to upload profile images
+    match /profile-images/{userId}/{fileName} {
+      allow read: if true; // Anyone can read profile images
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
-    // Aggiungi regole per la collezione notifications
-    match /notifications/{notificationId} {
-      // Consenti a utenti autenticati di leggere e scrivere notifiche
-      allow read, write: if request.auth != null;
+    
+    // Default rule - deny all other access
+    match /{allPaths=**} {
+      allow read, write: if false;
     }
   }
 }
